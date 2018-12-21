@@ -8,4 +8,4 @@
 /**
  *
  */
-package com.implemica.model;
+package com.implemica.CurrencyConverter.model;

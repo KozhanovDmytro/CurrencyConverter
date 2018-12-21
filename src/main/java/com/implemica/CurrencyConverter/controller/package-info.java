@@ -11,4 +11,4 @@
  *
  * @author Dmytro K.
  */
-package com.implemica.controller;
+package com.implemica.CurrencyConverter.controller;

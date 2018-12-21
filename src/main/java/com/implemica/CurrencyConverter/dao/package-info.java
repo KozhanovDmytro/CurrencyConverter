@@ -11,4 +11,4 @@
  *
  * @author Dmytro K.
  */
-package com.implemica.dao;
+package com.implemica.CurrencyConverter.dao;

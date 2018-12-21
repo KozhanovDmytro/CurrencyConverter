@@ -8,4 +8,4 @@
 /**
  *
  */
-package com.implemica.service;
+package com.implemica.CurrencyConverter.service;

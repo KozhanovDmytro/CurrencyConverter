@@ -9,4 +9,4 @@
  *
  * @author Dmytro K.
  */
-package com.implemica.validator;
+package com.implemica.CurrencyConverter.validator;
