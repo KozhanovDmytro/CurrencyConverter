@@ -15,13 +15,14 @@ public class BotValidator {
     * @return true, if value is a float initialized to the value represented by the specified String;
     * false - if the string does not contain a parsable float
     */
-   public static boolean isNumber(String value) {
+   public static boolean isCorrectNumber(String value) {
+      float number = 0.0f;
       try {
-         Float.parseFloat(value);
+         number = Float.parseFloat(value);
       } catch (NumberFormatException e) {
          return false;
       }
-      return true;
+      return number >= 0.0f;
    }
 
    /**

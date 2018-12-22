@@ -1,11 +1,14 @@
 package com.implemica.CurrencyConverter.controller;
 
+import com.implemica.CurrencyConverter.model.Converter;
 import com.implemica.CurrencyConverter.validator.BotValidator;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import javax.money.UnknownCurrencyException;
 
 /**
  * This class gets users input from telegram bot and processes it via Converter class
@@ -43,6 +46,7 @@ public class BotController extends TelegramLongPollingBot {
    private String firstCurrency;
    private String secondCurrency;
 
+   private Converter converter = new Converter();
 
    /**
     * Gets users input and processes it
@@ -77,12 +81,15 @@ public class BotController extends TelegramLongPollingBot {
       } else if (gotValue) {
          String value = update.getMessage().getText();
          String message;
-         if (BotValidator.isNumber(value)) {
-            //todo change "undefined" to call convert method from Converter
-            String convertedValue = "undefined";
-            message = value + " " + firstCurrency + " is " + convertedValue + " " + secondCurrency;
+         if (BotValidator.isCorrectNumber(value)) {
+            try {
+               Float convertedValue = converter.convert(firstCurrency, secondCurrency, Float.parseFloat(value));
+               message = value + " " + firstCurrency + " is " + convertedValue + " " + secondCurrency;
+            } catch (UnknownCurrencyException ex){
+               message = ex.getMessage();
+            }
          } else {
-            message = "Sorry, but \"" + value + "\" is not a number. Conversion is impossible.";
+            message = "Sorry, but \"" + value + "\" is not a valid number. Conversion is impossible.";
          }
          sendMessage(update, message);
          firstCurrency = "";
