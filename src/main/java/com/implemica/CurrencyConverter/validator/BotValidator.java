@@ -16,7 +16,7 @@ public class BotValidator {
     * false - if the string does not contain a parsable float
     */
    public static boolean isCorrectNumber(String value) {
-      float number = 0.0f;
+      float number;
       try {
          number = Float.parseFloat(value);
       } catch (NumberFormatException e) {

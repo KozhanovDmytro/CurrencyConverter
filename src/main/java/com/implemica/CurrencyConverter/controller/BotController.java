@@ -1,6 +1,7 @@
 package com.implemica.CurrencyConverter.controller;
 
 import com.implemica.CurrencyConverter.model.Converter;
+import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.validator.BotValidator;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -9,6 +10,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.money.UnknownCurrencyException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * This class gets users input from telegram bot and processes it via Converter class
@@ -46,6 +49,14 @@ public class BotController extends TelegramLongPollingBot {
    private String firstCurrency;
    private String secondCurrency;
 
+   /**
+    * Information about User
+    */
+   private User user;
+
+   /**Date format*/
+   SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss:SS");
+
    private Converter converter = new Converter();
 
    /**
@@ -54,54 +65,64 @@ public class BotController extends TelegramLongPollingBot {
    @Override
    public void onUpdateReceived(Update update) {
       String command = update.getMessage().getText();
+      String message;
 
+      //fixme change sout to writing to .csv file
+      //get information about user
+      getInformationAboutUser(update);
+      Date dateNow = new Date();
+      System.out.println(df.format(dateNow) + " " + user + ": " + command);
+
+      //dialog with user
       if (command.equals(START_COMMAND)) {
-         sendMessage(update, START_MESSAGE);
+         message = START_MESSAGE;
          gotFirstCurrency = false;
          gotSecondCurrency = false;
          gotValue = false;
       } else if (command.equals(STOP_COMMAND)) {
-         sendMessage(update, STOP_MESSAGE);
+         message = STOP_MESSAGE;
          gotFirstCurrency = false;
          gotSecondCurrency = false;
          gotValue = false;
       } else if (command.equals(CONVERT_COMMAND)) {
-         sendMessage(update, "Please, type in the currency to convert from (example: USD)");
+         message = "Please, type in the currency to convert from (example: USD)";
          gotFirstCurrency = true;
       } else if (gotFirstCurrency) {
          firstCurrency = BotValidator.toUpperCase(update.getMessage().getText());
-         sendMessage(update, "OK, you wish to convert from " + firstCurrency + " to what currency? (example: EUR)");
+         message = "OK, you wish to convert from " + firstCurrency + " to what currency? (example: EUR)";
          gotFirstCurrency = false;
          gotSecondCurrency = true;
       } else if (gotSecondCurrency) {
          secondCurrency = BotValidator.toUpperCase(update.getMessage().getText());
-         sendMessage(update, "Enter the amount to convert from " + firstCurrency + " to " + secondCurrency);
+         message = "Enter the amount to convert from " + firstCurrency + " to " + secondCurrency;
          gotSecondCurrency = false;
          gotValue = true;
       } else if (gotValue) {
          String value = update.getMessage().getText();
-         String message;
+         String amount = value.replace(',', '.');
          if (BotValidator.isCorrectNumber(value)) {
             try {
-               Float convertedValue = converter.convert(firstCurrency, secondCurrency, Float.parseFloat(value));
+               Float convertedValue = converter.convert(firstCurrency, secondCurrency, Float.parseFloat(amount));
                message = value + " " + firstCurrency + " is " + convertedValue + " " + secondCurrency;
-            } catch (UnknownCurrencyException ex){
+            } catch (UnknownCurrencyException ex) {
                message = ex.getMessage();
             }
          } else {
             message = "Sorry, but \"" + value + "\" is not a valid number. Conversion is impossible.";
          }
-         sendMessage(update, message);
          firstCurrency = "";
          secondCurrency = "";
          gotValue = false;
       } else {
          String word = update.getMessage().getText();
-         sendMessage(update, "Sorry, but I don't understand what does \"" + word + "\" mean.");
+         message = "Sorry, but I don't understand what does \"" + word + "\" mean.";
          gotFirstCurrency = false;
          gotSecondCurrency = false;
          gotValue = false;
       }
+      sendMessage(update, message);
+      dateNow = new Date();
+      System.out.println(df.format(dateNow) + " " + getBotUsername() + ": " + message);
 
    }
 
@@ -129,6 +150,24 @@ public class BotController extends TelegramLongPollingBot {
       }
    }
 
+   /**
+    * User initialisation: id, name, last name
+    */
+   private void getInformationAboutUser(Update update) {
+      int userId = update.getMessage().getFrom().getId();
+      String userFirstName = update.getMessage().getFrom().getFirstName();
+      String userLastName = update.getMessage().getFrom().getLastName();
+      String userName = update.getMessage().getFrom().getUserName();
+      if (userName == null) {
+         if (userLastName == null) {
+            user = new User(userId, userFirstName);
+         }
+         user = new User(userId, userFirstName, userLastName);
+      } else {
+         user = new User(userId, userFirstName, userLastName, userName);
+      }
+
+   }
 
 }
 
