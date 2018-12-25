@@ -12,14 +12,21 @@ import javax.money.MonetaryAmount;
 import javax.money.convert.CurrencyConversion;
 import javax.money.convert.MonetaryConversions;
 
-@Data
-public class Converter {
+/**
+ * Class for convert currencies.
+ *
+ * @author Dmytro K.
+ * @version 25.12.2018 18:00
+ */
+@Data public class Converter {
 
    private String usersCurrency;
 
    private String desiredCurrency;
 
    private Float value;
+
+   public Converter() {}
 
    public Float convert(String usersCurrency, String desiredCurrency, Float value) {
       this.usersCurrency = usersCurrency;
@@ -45,12 +52,12 @@ public class Converter {
    }
 
    private Float convertByJavaMoney() {
-      MonetaryAmount oneDollar = Monetary.getDefaultAmountFactory().setCurrency(usersCurrency)
-              .setNumber(value).create();
+      MonetaryAmount userMoney = Monetary .getDefaultAmountFactory()
+                                          .setCurrency(usersCurrency)
+                                          .setNumber(value).create();
 
-      CurrencyConversion conversionEUR = MonetaryConversions.getConversion(desiredCurrency);
-
-      MonetaryAmount convertedAmountUSDtoEUR = oneDollar.with(conversionEUR);
+      CurrencyConversion conversion = MonetaryConversions.getConversion(desiredCurrency);
+      MonetaryAmount convertedAmountUSDtoEUR = userMoney.with(conversion);
 
       return convertedAmountUSDtoEUR.getNumber().floatValue();
    }

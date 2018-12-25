@@ -5,15 +5,15 @@ import lombok.Data;
 @Data
 public class Transaction {
 
-   private Converter converter;
+   private String usersCurrency;
+
+   private String desiredCurrency;
 
    private User user;
 
    public Transaction(Converter converter, User user) {
-      this.converter = converter;
+      this.usersCurrency = converter.getUsersCurrency();
+      this.desiredCurrency = converter.getDesiredCurrency();
       this.user = user;
    }
-
-//   TODO write to .csv file
-
 }
