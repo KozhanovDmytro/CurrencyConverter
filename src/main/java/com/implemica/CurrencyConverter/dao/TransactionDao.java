@@ -2,6 +2,9 @@ package com.implemica.CurrencyConverter.dao;
 
 import com.implemica.CurrencyConverter.model.Transaction;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -22,20 +25,20 @@ public interface TransactionDao {
     *
     * @param transaction info
     */
-   void write(Transaction transaction);
+   void write(Transaction transaction) throws IOException;
 
    /**
     * Gets all {@link Transaction}s from storage
     *
     * @return list
     */
-   List<Transaction> getAll();
+   List<Transaction> getAll() throws IOException, ParseException;
 
    /**
-    * Gets desired {@link Transaction} by date
+    * Gets desired {@link Transaction} by one day.
     *
     * @param date date
     * @return instance
     */
-   Transaction getByDate(Date date);
+   List<Transaction> getByDate(Date date) throws IOException,ParseException;
 }

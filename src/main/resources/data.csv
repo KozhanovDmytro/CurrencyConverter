@@ -1,0 +1,7 @@
+26.12.2018 06:22:43:877;370811814;Daria;Solodkova;x_imka;/convert;Please, type in the currency to convert from (example: USD);
+26.12.2018 06:22:47:161;370811814;Daria;Solodkova;x_imka;uah;OK, you wish to convert from UAH to what currency? (example: EUR);
+26.12.2018 06:22:49:372;370811814;Daria;Solodkova;x_imka;usd;Enter the amount to convert from UAH to USD;
+26.12.2018 06:22:52:470;370811814;Daria;Solodkova;x_imka;500;500 UAH is 18.34 USD;
+26.12.2018 06:22:56:30;370811814;Daria;Solodkova;x_imka;hi;Sorry, but I don't understand what does "hi" mean.;
+26.12.2018 06:23:00:61;370811814;Daria;Solodkova;x_imka;/stop;OK. You can use /convert to make me convert currencies;
+26.12.2018 06:23:02:691;370811814;Daria;Solodkova;x_imka;/start;Hello! Could I help you?;
