@@ -1,8 +1,11 @@
 package com.implemica.CurrencyConverter.controller;
 
+import com.implemica.CurrencyConverter.dao.impl.TransactionDaoImpl;
 import com.implemica.CurrencyConverter.model.Converter;
+import com.implemica.CurrencyConverter.model.Transaction;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.validator.BotValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -10,8 +13,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.money.UnknownCurrencyException;
+import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 
 /**
  * This class gets users input from telegram bot and processes it via Converter class
@@ -54,24 +61,25 @@ public class BotController extends TelegramLongPollingBot {
     */
    private User user;
 
-   /**Date format*/
-   SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss:SS");
+   /**
+    * Data, which has to be added to .csv file
+    */
+   TransactionDaoImpl transaction;
 
-   private Converter converter = new Converter();
+   @Autowired
+   private Converter converter;
 
    /**
-    * Gets users input and processes it
+    * Gets users input and processes it. Writes conversation to .csv file.
     */
    @Override
    public void onUpdateReceived(Update update) {
       String command = update.getMessage().getText();
       String message;
 
-      //fixme change sout to writing to .csv file
       //get information about user
       getInformationAboutUser(update);
       Date dateNow = new Date();
-      System.out.println(df.format(dateNow) + " " + user + ": " + command);
 
       //dialog with user
       if (command.equals(START_COMMAND)) {
@@ -122,7 +130,13 @@ public class BotController extends TelegramLongPollingBot {
       }
       sendMessage(update, message);
       dateNow = new Date();
-      System.out.println(df.format(dateNow) + " " + getBotUsername() + ": " + message);
+
+      try {
+         transaction = new TransactionDaoImpl();
+         transaction.write(new Transaction(dateNow, user, command, message));
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
 
    }
 
@@ -158,11 +172,15 @@ public class BotController extends TelegramLongPollingBot {
       String userFirstName = update.getMessage().getFrom().getFirstName();
       String userLastName = update.getMessage().getFrom().getLastName();
       String userName = update.getMessage().getFrom().getUserName();
-      if (userName == null) {
-         if (userLastName == null) {
-            user = new User(userId, userFirstName);
+
+      if (userName == null || userLastName == null) {
+         user = new User(userId, userFirstName);
+         if (userName != null) {
+            user.setUserName(userName);
          }
-         user = new User(userId, userFirstName, userLastName);
+         if(userLastName!=null){
+            user.setUserLastName(userLastName);
+         }
       } else {
          user = new User(userId, userFirstName, userLastName, userName);
       }
