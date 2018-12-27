@@ -4,7 +4,7 @@ package com.implemica.CurrencyConverter.validator;
 /**
  * This class change user's currency value to upper case and skip spaces in it.
  *
- * @author daria solodkova
+ * @author Daria S.
  */
 public class BotValidator {
 

@@ -25,14 +25,14 @@ public interface TransactionDao {
     *
     * @param transaction info
     */
-   void write(Transaction transaction) throws IOException;
+   void write(Transaction transaction);
 
    /**
     * Gets all {@link Transaction}s from storage
     *
     * @return list
     */
-   List<Transaction> getAll() throws IOException, ParseException;
+   List<Transaction> getAll();
 
    /**
     * Gets desired {@link Transaction} by one day.
@@ -40,5 +40,5 @@ public interface TransactionDao {
     * @param date date
     * @return instance
     */
-   List<Transaction> getByDate(Date date) throws IOException,ParseException;
+   List<Transaction> getByDate(Date date);
 }

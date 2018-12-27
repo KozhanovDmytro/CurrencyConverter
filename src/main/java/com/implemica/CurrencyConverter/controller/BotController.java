@@ -1,6 +1,6 @@
 package com.implemica.CurrencyConverter.controller;
 
-import com.implemica.CurrencyConverter.dao.impl.TransactionDaoImpl;
+import com.implemica.CurrencyConverter.dao.TransactionDao;
 import com.implemica.CurrencyConverter.model.Converter;
 import com.implemica.CurrencyConverter.model.Transaction;
 import com.implemica.CurrencyConverter.model.User;
@@ -14,16 +14,13 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.money.UnknownCurrencyException;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 
 /**
  * This class gets users input from telegram bot and processes it via Converter class
  *
- * @author daria solodkova
+ * @author Daria S.
+ * @version 27.12.2018 12:27
  */
 @Component
 public class BotController extends TelegramLongPollingBot {
@@ -51,8 +48,6 @@ public class BotController extends TelegramLongPollingBot {
    private static final String STOP_COMMAND = "/stop";
 
    private boolean gotFirstCurrency = false;
-   private boolean gotSecondCurrency = false;
-   private boolean gotValue = false;
    private String firstCurrency;
    private String secondCurrency;
 
@@ -64,7 +59,8 @@ public class BotController extends TelegramLongPollingBot {
    /**
     * Data, which has to be added to .csv file
     */
-   TransactionDaoImpl transaction;
+   @Autowired
+   private TransactionDao transaction;
 
    @Autowired
    private Converter converter;
@@ -79,33 +75,32 @@ public class BotController extends TelegramLongPollingBot {
 
       //get information about user
       getInformationAboutUser(update);
-      Date dateNow = new Date();
+
 
       //dialog with user
       if (command.equals(START_COMMAND)) {
          message = START_MESSAGE;
          gotFirstCurrency = false;
-         gotSecondCurrency = false;
-         gotValue = false;
+         firstCurrency = "";
+         secondCurrency = "";
       } else if (command.equals(STOP_COMMAND)) {
          message = STOP_MESSAGE;
          gotFirstCurrency = false;
-         gotSecondCurrency = false;
-         gotValue = false;
+         firstCurrency = "";
+         secondCurrency = "";
       } else if (command.equals(CONVERT_COMMAND)) {
          message = "Please, type in the currency to convert from (example: USD)";
          gotFirstCurrency = true;
+         secondCurrency = "";
       } else if (gotFirstCurrency) {
          firstCurrency = BotValidator.toUpperCase(update.getMessage().getText());
          message = "OK, you wish to convert from " + firstCurrency + " to what currency? (example: EUR)";
          gotFirstCurrency = false;
-         gotSecondCurrency = true;
-      } else if (gotSecondCurrency) {
+         secondCurrency = "";
+      } else if (!firstCurrency.isEmpty() && secondCurrency.isEmpty()) {
          secondCurrency = BotValidator.toUpperCase(update.getMessage().getText());
          message = "Enter the amount to convert from " + firstCurrency + " to " + secondCurrency;
-         gotSecondCurrency = false;
-         gotValue = true;
-      } else if (gotValue) {
+      } else if (!secondCurrency.isEmpty()) {
          String value = update.getMessage().getText();
          String amount = value.replace(',', '.');
          if (BotValidator.isCorrectNumber(value)) {
@@ -120,23 +115,17 @@ public class BotController extends TelegramLongPollingBot {
          }
          firstCurrency = "";
          secondCurrency = "";
-         gotValue = false;
       } else {
          String word = update.getMessage().getText();
          message = "Sorry, but I don't understand what does \"" + word + "\" mean.";
          gotFirstCurrency = false;
-         gotSecondCurrency = false;
-         gotValue = false;
+         firstCurrency = "";
       }
       sendMessage(update, message);
-      dateNow = new Date();
+      Date dateNow = new Date();
 
-      try {
-         transaction = new TransactionDaoImpl();
-         transaction.write(new Transaction(dateNow, user, command, message));
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
+      transaction.write(new Transaction(dateNow, user, command, message));
+
 
    }
 
@@ -178,7 +167,7 @@ public class BotController extends TelegramLongPollingBot {
          if (userName != null) {
             user.setUserName(userName);
          }
-         if(userLastName!=null){
+         if (userLastName != null) {
             user.setUserLastName(userLastName);
          }
       } else {

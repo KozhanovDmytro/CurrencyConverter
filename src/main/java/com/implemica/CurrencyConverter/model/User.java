@@ -5,7 +5,7 @@ import lombok.Data;
 
 /**
  * Information about user
- * @author daria solodkova
+ * @author Daria S.
  */
 @Data
 public class User {

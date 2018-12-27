@@ -3,12 +3,15 @@ package com.implemica.CurrencyConverter.dao.impl;
 import com.implemica.CurrencyConverter.dao.TransactionDao;
 import com.implemica.CurrencyConverter.model.Transaction;
 import com.implemica.CurrencyConverter.model.User;
+import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class writes and reads history of users conversations.
@@ -28,6 +31,7 @@ public class TransactionDaoImpl implements TransactionDao {
    private File data = new File("src/main/resources/data.csv");
    private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
+   private Logger log = Logger.getLogger(TransactionDao.class.getName());
 
    /**
     * Writes all user's requests and bot's responses to file
@@ -35,44 +39,55 @@ public class TransactionDaoImpl implements TransactionDao {
     * @param transaction date, information about user, user's request and bot's response
     */
    @Override
-   public void write(Transaction transaction) throws IOException {
+   public void write(Transaction transaction) {
+      // create FileWriter object with file as parameter
+      FileWriter outputFile;
+      try {
+         //if file doesn't exist, create it
+         if (!data.exists()) {
+            data.createNewFile();
+         }
 
-      //if file doesn't exist, create it
-      if (!data.exists()) {
-         data.createNewFile();
+         outputFile = new FileWriter(data, true);
+         // create CSVWriter object fileWriter object as parameter
+         CSVWriter writer = new CSVWriter(outputFile, SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.NO_ESCAPE_CHARACTER, LINE_END);
+
+         // add data to csv
+         writer.writeNext(transaction.toCsv());
+
+         // closing writer connection
+         writer.close();
+      } catch (IOException e) {
+         log.log(Level.SEVERE, "The changes were not recorded", e);
       }
 
-      // create FileWriter object with file as parameter
-      FileWriter outputFile = new FileWriter(data, true);
 
-      // create CSVWriter object fileWriter object as parameter
-      CSVWriter writer = new CSVWriter(outputFile, SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.NO_ESCAPE_CHARACTER, LINE_END);
-
-      // add data to csv
-      writer.writeNext(transaction.toCsv());
-
-      // closing writer connection
-      writer.close();
    }
 
    /**
     * Returns List of information from .csv file
     */
    @Override
-   public List<Transaction> getAll() throws IOException, ParseException {
-      FileReader fileReader = new FileReader(data);
-      BufferedReader reader = new BufferedReader(fileReader);
+   public List<Transaction> getAll() {
+      FileReader fileReader;
+      BufferedReader reader;
 
       String line;
       ArrayList<Transaction> result = new ArrayList<>();
-      while ((line = reader.readLine()) != null) {
-         String[] element = line.split(ELEMENTS_SEPARATOR);
-         User user = new User(Integer.parseInt(element[1]), element[2], element[3], element[4]);
-         Transaction transaction = new Transaction(getDate(element[0]), user, element[5], element[6]);
-         result.add(transaction);
+      try {
+         fileReader = new FileReader(data);
+         reader = new BufferedReader(fileReader);
+         while ((line = reader.readLine()) != null) {
+            String[] element = line.split(ELEMENTS_SEPARATOR);
+            User user = new User(Integer.parseInt(element[1]), element[2], element[3], element[4]);
+            Transaction transaction = new Transaction(getDate(element[0]), user, element[5], element[6]);
+            result.add(transaction);
+         }
+         fileReader.close();
+         reader.close();
+      } catch (IOException ex) {
+         result = null;
       }
-
-      reader.close();
       return result;
    }
 
@@ -81,23 +96,30 @@ public class TransactionDaoImpl implements TransactionDao {
     */
 
    @Override
-   public List<Transaction> getByDate(Date date) throws ParseException, IOException {
-      FileReader fileReader = new FileReader(data);
-      BufferedReader reader = new BufferedReader(fileReader);
+   public List<Transaction> getByDate(Date date) {
+      FileReader fileReader;
+      BufferedReader reader;
 
       String line;
       ArrayList<Transaction> result = new ArrayList<>();
-      while ((line = reader.readLine()) != null) {
-         String[] element = line.split(ELEMENTS_SEPARATOR);
-         Date localDate = getDate(element[0]);
-         if (isSameDate(date, localDate)) {
-            User user = new User(Integer.parseInt(element[1]), element[2], element[3], element[4]);
-            Transaction transaction = new Transaction(localDate, user, element[5], element[6]);
-            result.add(transaction);
+      try {
+         fileReader = new FileReader(data);
+         reader = new BufferedReader(fileReader);
+         while ((line = reader.readLine()) != null) {
+            String[] element = line.split(ELEMENTS_SEPARATOR);
+            Date localDate = getDate(element[0]);
+            if (isSameDate(date, localDate)) {
+               User user = new User(Integer.parseInt(element[1]), element[2], element[3], element[4]);
+               Transaction transaction = new Transaction(localDate, user, element[5], element[6]);
+               result.add(transaction);
+            }
          }
+         fileReader.close();
+         reader.close();
+      } catch (IOException ex) {
+         result = null;
       }
 
-      reader.close();
       return result;
    }
 
@@ -130,7 +152,15 @@ public class TransactionDaoImpl implements TransactionDao {
    /**
     * Parse string to date
     */
-   private Date getDate(String string) throws ParseException {
-      return df.parse(string);
+   private Date getDate(String string) {
+      Date date = null;
+
+      try {
+         date = df.parse(string);
+      } catch (ParseException e) {
+         e.printStackTrace();
+      }
+
+      return date;
    }
 }
