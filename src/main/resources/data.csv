@@ -2,6 +2,14 @@
 26.12.2018 06:22:47:161;370811814;Daria;Solodkova;x_imka;uah;OK, you wish to convert from UAH to what currency? (example: EUR);
 26.12.2018 06:22:49:372;370811814;Daria;Solodkova;x_imka;usd;Enter the amount to convert from UAH to USD;
 26.12.2018 06:22:52:470;370811814;Daria;Solodkova;x_imka;500;500 UAH is 18.34 USD;
-26.12.2018 06:22:56:30;370811814;Daria;Solodkova;x_imka;hi;Sorry, but I don't understand what does "hi" mean.;
+26.12.2018 06:22:56:30;370811814;Daria;Solodkova;x_imka;hi;Sorry, but I don't understand what does hi mean.;
 26.12.2018 06:23:00:61;370811814;Daria;Solodkova;x_imka;/stop;OK. You can use /convert to make me convert currencies;
 26.12.2018 06:23:02:691;370811814;Daria;Solodkova;x_imka;/start;Hello! Could I help you?;
+26.12.2018 06:39:47:29;370534916;Dmytro;Kozhanov;;/convert;Please, type in the currency to convert from (example: USD);
+26.12.2018 06:39:50:04;370534916;Dmytro;Kozhanov;;Usd;OK, you wish to convert from USD to what currency? (example: EUR);
+26.12.2018 06:39:53:260;370534916;Dmytro;Kozhanov;;Eur;Enter the amount to convert from USD to EUR;
+26.12.2018 06:39:56:97;370534916;Dmytro;Kozhanov;;5;5 USD is 4.38 EUR;
+26.12.2018 06:44:46:922;370534916;Dmytro;Kozhanov;;/convert;Please, type in the currency to convert from (example: USD);
+26.12.2018 06:44:51:817;370534916;Dmytro;Kozhanov;;Usd;OK, you wish to convert from USD to what currency? (example: EUR);
+26.12.2018 06:44:55:752;370534916;Dmytro;Kozhanov;;Eur;Enter the amount to convert from USD to EUR;
+26.12.2018 06:45:00:25;370534916;Dmytro;Kozhanov;;5;5 USD is 4.38 EUR;

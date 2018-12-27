@@ -22,12 +22,12 @@
         </tr>
         <tr th:each="t : ${transactions}">
             <td th:text="${t.getDate()}"></td>
-            <td th:text="${t.getId()}"></td>
-            <td th:text="${t.getFirstName()}"></td>
-            <td th:text="${t.getLastName()}"></td>
-            <td th:text="${t.getUserName()}"></td>
-            <td th:text="${t.getRequest()}"></td>
-            <td th:text="${t.getResponse()}"></td>
+            <td th:text="${t.getUser().getUserId()}"></td>
+            <td th:text="${t.getUser().getUserFirstName()}"></td>
+            <td th:text="${t.getUser().getUserLastName()}"></td>
+            <td th:text="${t.getUser().getUserName()}"></td>
+            <td th:text="${t.getUsersRequest()}"></td>
+            <td th:text="${t.getBotsResponse()}"></td>
         </tr>
     </table>
     <noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. Please enable
