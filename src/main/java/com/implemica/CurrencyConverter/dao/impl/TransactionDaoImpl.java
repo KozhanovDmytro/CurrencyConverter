@@ -3,7 +3,6 @@ package com.implemica.CurrencyConverter.dao.impl;
 import com.implemica.CurrencyConverter.dao.TransactionDao;
 import com.implemica.CurrencyConverter.model.Transaction;
 import com.implemica.CurrencyConverter.model.User;
-import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 import java.io.*;
@@ -28,10 +27,20 @@ public class TransactionDaoImpl implements TransactionDao {
    /**
     * Stores history
     */
-   private File data = new File("src/main/resources/data.csv");
+   private File data;
    private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
    private Logger log = Logger.getLogger(TransactionDao.class.getName());
+
+
+   public TransactionDaoImpl(){
+     this(new File("src/main/resources/data.csv"));
+   }
+
+   TransactionDaoImpl(File data){
+     this.data = data;
+   }
+
 
    /**
     * Writes all user's requests and bot's responses to file
@@ -43,11 +52,6 @@ public class TransactionDaoImpl implements TransactionDao {
       // create FileWriter object with file as parameter
       FileWriter outputFile;
       try {
-         //if file doesn't exist, create it
-         if (!data.exists()) {
-            data.createNewFile();
-         }
-
          outputFile = new FileWriter(data, true);
          // create CSVWriter object fileWriter object as parameter
          CSVWriter writer = new CSVWriter(outputFile, SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.NO_ESCAPE_CHARACTER, LINE_END);
@@ -56,6 +60,7 @@ public class TransactionDaoImpl implements TransactionDao {
          writer.writeNext(transaction.toCsv());
 
          // closing writer connection
+         writer.flush();
          writer.close();
       } catch (IOException e) {
          log.log(Level.SEVERE, "The changes were not recorded", e);

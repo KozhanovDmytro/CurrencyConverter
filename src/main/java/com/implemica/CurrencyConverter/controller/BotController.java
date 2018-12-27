@@ -29,10 +29,13 @@ public class BotController extends TelegramLongPollingBot {
     * Greeting message to user
     */
    private static final String START_MESSAGE = "Hello! Could I help you?";
+
+
+   private static final String CONVERT_MESSAGE = "You can use /convert to make me new convert currencies";
    /**
     * Stop message to user
     */
-   private static final String STOP_MESSAGE = "OK. You can use /convert to make me convert currencies";
+   private static final String STOP_MESSAGE = "OK. " + CONVERT_MESSAGE;
 
    /**
     * Bot's command to start conversation
@@ -46,10 +49,14 @@ public class BotController extends TelegramLongPollingBot {
     * Bot's command to stop conversation
     */
    private static final String STOP_COMMAND = "/stop";
+   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
+   private static final String SECOND_CONVERT_MESSAGE_1 = "OK, you wish to convert from ";
+   private static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
+   private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
 
    private boolean gotFirstCurrency = false;
-   private String firstCurrency;
-   private String secondCurrency;
+   private String firstCurrency = "";
+   private String secondCurrency = "";
 
    /**
     * Information about User
@@ -79,7 +86,6 @@ public class BotController extends TelegramLongPollingBot {
       //get information about user
       getInformationAboutUser(update);
 
-
       //dialog with user
       if (command.equals(START_COMMAND)) {
          message = START_MESSAGE;
@@ -92,17 +98,17 @@ public class BotController extends TelegramLongPollingBot {
          firstCurrency = "";
          secondCurrency = "";
       } else if (command.equals(CONVERT_COMMAND)) {
-         message = "Please, type in the currency to convert from (example: USD)";
+         message = FIRST_CONVERT_MESSAGE;
          gotFirstCurrency = true;
          secondCurrency = "";
       } else if (gotFirstCurrency) {
          firstCurrency = BotValidator.toUpperCase(update.getMessage().getText());
-         message = "OK, you wish to convert from " + firstCurrency + " to what currency? (example: EUR)";
+         message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
          gotFirstCurrency = false;
          secondCurrency = "";
       } else if (!firstCurrency.isEmpty() && secondCurrency.isEmpty()) {
          secondCurrency = BotValidator.toUpperCase(update.getMessage().getText());
-         message = "Enter the amount to convert from " + firstCurrency + " to " + secondCurrency;
+         message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
       } else if (!secondCurrency.isEmpty()) {
          String value = update.getMessage().getText();
          String amount = value.replace(',', '.');
@@ -114,15 +120,16 @@ public class BotController extends TelegramLongPollingBot {
                message = ex.getMessage();
             }
          } else {
-            message = "Sorry, but \"" + value + "\" is not a valid number. Conversion is impossible.";
+            message = "Sorry, but \"" + value + "\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE;
          }
          firstCurrency = "";
          secondCurrency = "";
       } else {
          String word = update.getMessage().getText();
-         message = "Sorry, but I don't understand what does \"" + word + "\" mean.";
+         message = "Sorry, but I don't understand what does \"" + word + "\" mean. " + CONVERT_MESSAGE;
          gotFirstCurrency = false;
          firstCurrency = "";
+         secondCurrency = "";
       }
       sendMessage(update, message);
       Date dateNow = new Date();

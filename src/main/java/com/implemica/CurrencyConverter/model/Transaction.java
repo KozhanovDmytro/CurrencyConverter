@@ -22,7 +22,7 @@ public class Transaction {
    /**
     * Date format
     */
-   SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss:SS");
+   SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
    public Transaction(Date date, User user, String usersRequest, String botsResponse) {
       this.usersRequest = usersRequest;
@@ -35,5 +35,20 @@ public class Transaction {
    public String[] toCsv() {
       return new String[]{df.format(date), Integer.toString(user.getUserId()), user.getUserFirstName(), user.getUserLastName()
               , user.getUserName(), usersRequest, botsResponse};
+   }
+
+
+   @Override
+   public boolean equals(Object tr) {
+      if (this == tr) {
+         return true;
+      }
+      if (tr instanceof Transaction) {
+         return this.date.equals(((Transaction) tr).date) && this.user.equals(((Transaction) tr).user) &&
+                 this.usersRequest.equals(((Transaction) tr).usersRequest) &&
+                 this.botsResponse.equals(((Transaction) tr).botsResponse);
+      }
+      return false;
+
    }
 }
