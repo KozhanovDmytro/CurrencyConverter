@@ -19,6 +19,6 @@ public class WebSocketConfiguration extends AbstractWebSocketMessageBrokerConfig
 
    @Override
    public void registerStompEndpoints(StompEndpointRegistry stompEndpointRegistry) {
-      stompEndpointRegistry.addEndpoint("/hello").withSockJS();
+      stompEndpointRegistry.addEndpoint("/gs-guide-websocket").withSockJS();
    }
 }

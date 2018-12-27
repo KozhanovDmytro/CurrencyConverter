@@ -2,20 +2,12 @@ package com.implemica.CurrencyConverter.controller;
 
 import com.implemica.CurrencyConverter.dao.TransactionDao;
 import com.implemica.CurrencyConverter.model.Transaction;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * Controller for show bot's log.
@@ -30,10 +22,15 @@ public class WebController {
    private TransactionDao transactionDao;
 
    @GetMapping("/log")
-   public String greeting(Model model) throws IOException, ParseException {
+   public String log(Model model) {
       model.addAttribute("transactions", transactionDao.getAll());
 
       return "log";
+   }
+
+   @GetMapping("/test")
+   public String testWS(Model model) {
+      return "testWS";
    }
 
    @MessageMapping("/hello")

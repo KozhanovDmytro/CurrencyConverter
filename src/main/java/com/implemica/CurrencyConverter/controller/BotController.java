@@ -6,6 +6,7 @@ import com.implemica.CurrencyConverter.model.Transaction;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.validator.BotValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -13,7 +14,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.money.UnknownCurrencyException;
-import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -60,10 +60,13 @@ public class BotController extends TelegramLongPollingBot {
     * Data, which has to be added to .csv file
     */
    @Autowired
-   private TransactionDao transaction;
+   private TransactionDao transactionDao;
 
    @Autowired
    private Converter converter;
+
+   @Autowired
+   private SimpMessagingTemplate template;
 
    /**
     * Gets users input and processes it. Writes conversation to .csv file.
@@ -124,9 +127,10 @@ public class BotController extends TelegramLongPollingBot {
       sendMessage(update, message);
       Date dateNow = new Date();
 
-      transaction.write(new Transaction(dateNow, user, command, message));
+      Transaction transaction = new Transaction(dateNow, user, command, message);
 
-
+      transactionDao.write(transaction);
+      template.convertAndSend("/topic/greetings", transaction);
    }
 
    @Override
