@@ -33,12 +33,12 @@ public class TransactionDaoImpl implements TransactionDao {
    private Logger log = Logger.getLogger(TransactionDao.class.getName());
 
 
-   public TransactionDaoImpl(){
-     this(new File("src/main/resources/data.csv"));
+   public TransactionDaoImpl() {
+      this(new File("src/main/resources/data.csv"));
    }
 
-   TransactionDaoImpl(File data){
-     this.data = data;
+   TransactionDaoImpl(File data) {
+      this.data = data;
    }
 
 
@@ -91,7 +91,7 @@ public class TransactionDaoImpl implements TransactionDao {
          fileReader.close();
          reader.close();
       } catch (IOException ex) {
-         result = null;
+         result = new ArrayList<>();
       }
       return result;
    }
@@ -102,28 +102,14 @@ public class TransactionDaoImpl implements TransactionDao {
 
    @Override
    public List<Transaction> getByDate(Date date) {
-      FileReader fileReader;
-      BufferedReader reader;
-
-      String line;
       ArrayList<Transaction> result = new ArrayList<>();
-      try {
-         fileReader = new FileReader(data);
-         reader = new BufferedReader(fileReader);
-         while ((line = reader.readLine()) != null) {
-            String[] element = line.split(ELEMENTS_SEPARATOR);
-            Date localDate = getDate(element[0]);
-            if (isSameDate(date, localDate)) {
-               User user = new User(Integer.parseInt(element[1]), element[2], element[3], element[4]);
-               Transaction transaction = new Transaction(localDate, user, element[5], element[6]);
-               result.add(transaction);
-            }
+      ArrayList<Transaction> all = (ArrayList<Transaction>) getAll();
+      for(Transaction t: all){
+         if(isSameDate(t.getDate(),date)){
+            result.add(t);
          }
-         fileReader.close();
-         reader.close();
-      } catch (IOException ex) {
-         result = null;
       }
+
 
       return result;
    }
