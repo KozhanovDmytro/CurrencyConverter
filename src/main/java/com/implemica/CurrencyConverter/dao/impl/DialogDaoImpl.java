@@ -1,7 +1,7 @@
 package com.implemica.CurrencyConverter.dao.impl;
 
-import com.implemica.CurrencyConverter.dao.TransactionDao;
-import com.implemica.CurrencyConverter.model.Transaction;
+import com.implemica.CurrencyConverter.dao.DialogDao;
+import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
 import com.opencsv.CSVWriter;
 
@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * @version 26.12.2018 18:24
  */
 
-public class TransactionDaoImpl implements TransactionDao {
+public class DialogDaoImpl implements DialogDao {
 
    private static final String LINE_END = ";\n";
    private static final char SEPARATOR = ';';
@@ -30,14 +30,14 @@ public class TransactionDaoImpl implements TransactionDao {
    private File data;
    private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
-   private Logger log = Logger.getLogger(TransactionDao.class.getName());
+   private Logger log = Logger.getLogger(DialogDao.class.getName());
 
 
-   public TransactionDaoImpl() {
+   public DialogDaoImpl() {
       this(new File("src/main/resources/data.csv"));
    }
 
-   TransactionDaoImpl(File data) {
+   DialogDaoImpl(File data) {
       this.data = data;
    }
 
@@ -45,10 +45,10 @@ public class TransactionDaoImpl implements TransactionDao {
    /**
     * Writes all user's requests and bot's responses to file
     *
-    * @param transaction date, information about user, user's request and bot's response
+    * @param dialog date, information about user, user's request and bot's response
     */
    @Override
-   public void write(Transaction transaction) {
+   public void write(Dialog dialog) {
       // create FileWriter object with file as parameter
       FileWriter outputFile;
       try {
@@ -57,7 +57,7 @@ public class TransactionDaoImpl implements TransactionDao {
          CSVWriter writer = new CSVWriter(outputFile, SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER, CSVWriter.NO_ESCAPE_CHARACTER, LINE_END);
 
          // add data to csv
-         writer.writeNext(transaction.toCsv());
+         writer.writeNext(dialog.toCsv());
 
          // closing writer connection
          writer.flush();
@@ -73,20 +73,20 @@ public class TransactionDaoImpl implements TransactionDao {
     * Returns List of information from .csv file
     */
    @Override
-   public List<Transaction> getAll() {
+   public List<Dialog> getAll() {
       FileReader fileReader;
       BufferedReader reader;
 
       String line;
-      ArrayList<Transaction> result = new ArrayList<>();
+      ArrayList<Dialog> result = new ArrayList<>();
       try {
          fileReader = new FileReader(data);
          reader = new BufferedReader(fileReader);
          while ((line = reader.readLine()) != null) {
             String[] element = line.split(ELEMENTS_SEPARATOR);
             User user = new User(Integer.parseInt(element[1]), element[2], element[3], element[4]);
-            Transaction transaction = new Transaction(getDate(element[0]), user, element[5], element[6]);
-            result.add(transaction);
+            Dialog dialog = new Dialog(getDate(element[0]), user, element[5], element[6]);
+            result.add(dialog);
          }
          fileReader.close();
          reader.close();
@@ -101,10 +101,10 @@ public class TransactionDaoImpl implements TransactionDao {
     */
 
    @Override
-   public List<Transaction> getByDate(Date date) {
-      ArrayList<Transaction> result = new ArrayList<>();
-      ArrayList<Transaction> all = (ArrayList<Transaction>) getAll();
-      for(Transaction t: all){
+   public List<Dialog> getByDate(Date date) {
+      ArrayList<Dialog> result = new ArrayList<>();
+      ArrayList<Dialog> all = (ArrayList<Dialog>) getAll();
+      for(Dialog t: all){
          if(isSameDate(t.getDate(),date)){
             result.add(t);
          }

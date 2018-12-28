@@ -1,5 +1,6 @@
 package com.implemica.CurrencyConverter.model;
 
+import com.implemica.CurrencyConverter.service.ConverterService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ConverterTest {
 
-   private static Converter converter;
+   private static ConverterService converterService;
 
    /**
     * Array of existing currency got by ISO 4217
@@ -22,7 +23,7 @@ public class ConverterTest {
 
    @BeforeAll
    public static void setUp() {
-      converter = new Converter();
+      converterService = new ConverterService();
       existingCurrency = Currency.getAvailableCurrencies();
    }
 
@@ -54,7 +55,7 @@ public class ConverterTest {
       int count = 0;
       for (Currency userCurrency : existingCurrency) {
          try {
-            converter.convert("USD", userCurrency.toString(), 1f);
+            converterService.convert(new Converter("USD", userCurrency.toString(), 1f));
             count++;
          } catch (Exception ignored) {}
       }
@@ -62,7 +63,7 @@ public class ConverterTest {
    }
 
    private void checkConvert(String userCurrency, String desiredCurrency) {
-      Float value = converter.convert(userCurrency, desiredCurrency, 1f);
+      Float value = converterService.convert(new Converter(userCurrency, desiredCurrency, 1f));
       assertNotNull(value);
       System.out.println(userCurrency + " to " + desiredCurrency + " " + value);
    }

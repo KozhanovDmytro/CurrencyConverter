@@ -1,6 +1,6 @@
 package com.implemica.CurrencyConverter.controller;
 
-import com.implemica.CurrencyConverter.dao.TransactionDao;
+import com.implemica.CurrencyConverter.dao.DialogDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class WebController {
 
    @Autowired
-   private TransactionDao transactionDao;
+   private DialogDao dialogDao;
 
    @GetMapping("/log")
    public String log(Model model) {
-      model.addAttribute("transactions", transactionDao.getAll());
+      model.addAttribute("transactions", dialogDao.getAll());
 
       return "log";
    }

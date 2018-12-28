@@ -1,6 +1,6 @@
 package com.implemica.CurrencyConverter.dao.impl;
 
-import com.implemica.CurrencyConverter.model.Transaction;
+import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,7 +17,7 @@ import static com.sun.deploy.util.SystemUtils.deleteRecursive;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-class TransactionDaoImplTest {
+class DialogDaoImplTest {
 
    /**
     * Greeting message to user
@@ -50,14 +50,14 @@ class TransactionDaoImplTest {
 
 
    private static File tempFile;
-   private static TransactionDaoImpl tr;
+   private static DialogDaoImpl tr;
    private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
 
    @BeforeAll
    static void beforeClass() {
       tempFile = new File("testData.csv");
-      tr = new TransactionDaoImpl(tempFile);
+      tr = new DialogDaoImpl(tempFile);
    }
 
 
@@ -65,17 +65,17 @@ class TransactionDaoImplTest {
    void writeAndReadTest() throws ParseException {
       int size = tr.getAll().size();
 
-      Transaction tr10 = createTransaction("27.12.2018 04:22:47", 13, "Vasiliy", "Ivanov", "", START_COMMAND, START_MESSAGE);
-      Transaction tr11 = createTransaction("27.12.2018 04:23:04", 13, "Vasiliy", "Ivanov", "", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
-      Transaction tr12 = createTransaction("27.12.2018 04:23:35", 13, "Vasiliy", "Ivanov", "", "usd", SECOND_CONVERT_MESSAGE_1 + "USD" + SECOND_CONVERT_MESSAGE_2);
-      Transaction tr13 = createTransaction("27.12.2018 04:23:58", 13, "Vasiliy", "Ivanov", "", "uah", THIRD_CONVERT_MESSAGE + "USD to UAH");
-      Transaction tr14 = createTransaction("27.12.2018 04:24:15", 13, "Vasiliy", "Ivanov", "", "10", "274");
+      Dialog tr10 = createTransaction("27.12.2018 04:22:47", 13, "Vasiliy", "Ivanov", "", START_COMMAND, START_MESSAGE);
+      Dialog tr11 = createTransaction("27.12.2018 04:23:04", 13, "Vasiliy", "Ivanov", "", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
+      Dialog tr12 = createTransaction("27.12.2018 04:23:35", 13, "Vasiliy", "Ivanov", "", "usd", SECOND_CONVERT_MESSAGE_1 + "USD" + SECOND_CONVERT_MESSAGE_2);
+      Dialog tr13 = createTransaction("27.12.2018 04:23:58", 13, "Vasiliy", "Ivanov", "", "uah", THIRD_CONVERT_MESSAGE + "USD to UAH");
+      Dialog tr14 = createTransaction("27.12.2018 04:24:15", 13, "Vasiliy", "Ivanov", "", "10", "274");
 
-      Transaction tr20 = createTransaction("27.12.2018 12:24:47", 67, "Natalia", "Nikitina", "flower", START_COMMAND, START_MESSAGE);
-      Transaction tr21 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "hello", "Sorry, but I don't understand what does \"hello\" mean. " + CONVERT_MESSAGE);
-      Transaction tr22 = createTransaction("27.12.2018 12:26:56", 67, "Natalia", "Nikitina", "flower", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
-      Transaction tr23 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
-      Transaction tr24 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
+      Dialog tr20 = createTransaction("27.12.2018 12:24:47", 67, "Natalia", "Nikitina", "flower", START_COMMAND, START_MESSAGE);
+      Dialog tr21 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "hello", "Sorry, but I don't understand what does \"hello\" mean. " + CONVERT_MESSAGE);
+      Dialog tr22 = createTransaction("27.12.2018 12:26:56", 67, "Natalia", "Nikitina", "flower", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
+      Dialog tr23 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
+      Dialog tr24 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
 
       writeToFile(tr10);
       writeToFile(tr11);
@@ -88,7 +88,7 @@ class TransactionDaoImplTest {
       writeToFile(tr23);
       writeToFile(tr24);
 
-      List<Transaction> list = tr.getAll();
+      List<Dialog> list = tr.getAll();
       assertEquals(10 + size, list.size());
 
       assertEquals(tr10, list.get(size));
@@ -109,17 +109,17 @@ class TransactionDaoImplTest {
       Date date = df.parse("25.12.2018 00:00:00");
       int size = tr.getByDate(date).size();
 
-      Transaction tr10 = createTransaction("25.12.2018 02:22:47", 547, "Fedor", "Makeeev", "", START_COMMAND, START_MESSAGE);
-      Transaction tr11 = createTransaction("25.12.2018 02:23:04", 547, "Fedor", "Makeeev", "", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
-      Transaction tr12 = createTransaction("25.12.2018 02:23:35", 547, "Fedor", "Makeeev", "", "usd", SECOND_CONVERT_MESSAGE_1 + "USD" + SECOND_CONVERT_MESSAGE_2);
-      Transaction tr13 = createTransaction("25.12.2018 02:23:58", 547, "Fedor", "Makeeev", "", "uah", THIRD_CONVERT_MESSAGE + "USD to UAH");
-      Transaction tr14 = createTransaction("27.12.2018 02:24:15", 547, "Fedor", "Makeeev", "", "10", "274");
+      Dialog tr10 = createTransaction("25.12.2018 02:22:47", 547, "Fedor", "Makeeev", "", START_COMMAND, START_MESSAGE);
+      Dialog tr11 = createTransaction("25.12.2018 02:23:04", 547, "Fedor", "Makeeev", "", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
+      Dialog tr12 = createTransaction("25.12.2018 02:23:35", 547, "Fedor", "Makeeev", "", "usd", SECOND_CONVERT_MESSAGE_1 + "USD" + SECOND_CONVERT_MESSAGE_2);
+      Dialog tr13 = createTransaction("25.12.2018 02:23:58", 547, "Fedor", "Makeeev", "", "uah", THIRD_CONVERT_MESSAGE + "USD to UAH");
+      Dialog tr14 = createTransaction("27.12.2018 02:24:15", 547, "Fedor", "Makeeev", "", "10", "274");
 
-      Transaction tr20 = createTransaction("25.12.2018 12:24:47", 8888, "Alice", "Alice", "fairy", START_COMMAND, START_MESSAGE);
-      Transaction tr21 = createTransaction("25.12.2018 04:08:13", 1345, "JD", "", "jd", "hello", "Sorry, but I don't understand what does \"hello\" mean. " + CONVERT_MESSAGE);
-      Transaction tr22 = createTransaction("27.12.2018 05:26:56", 1345, "JD", "", "jd", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
-      Transaction tr23 = createTransaction("27.12.2018 05:26:01", 1345, "JD", "", "jd", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
-      Transaction tr24 = createTransaction("27.12.2018 05:26:01", 1345, "JD", "", "jd", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
+      Dialog tr20 = createTransaction("25.12.2018 12:24:47", 8888, "Alice", "Alice", "fairy", START_COMMAND, START_MESSAGE);
+      Dialog tr21 = createTransaction("25.12.2018 04:08:13", 1345, "JD", "", "jd", "hello", "Sorry, but I don't understand what does \"hello\" mean. " + CONVERT_MESSAGE);
+      Dialog tr22 = createTransaction("27.12.2018 05:26:56", 1345, "JD", "", "jd", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
+      Dialog tr23 = createTransaction("27.12.2018 05:26:01", 1345, "JD", "", "jd", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
+      Dialog tr24 = createTransaction("27.12.2018 05:26:01", 1345, "JD", "", "jd", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
 
       writeToFile(tr10);
       writeToFile(tr11);
@@ -132,7 +132,7 @@ class TransactionDaoImplTest {
       writeToFile(tr23);
       writeToFile(tr24);
 
-      List<Transaction> list = tr.getByDate(date);
+      List<Dialog> list = tr.getByDate(date);
       assertEquals(size + 6, list.size());
       assertEquals(tr10, list.get(size));
       assertEquals(tr11, list.get(1 + size));
@@ -145,14 +145,14 @@ class TransactionDaoImplTest {
    }
 
 
-   private void writeToFile(Transaction transaction) {
-      tr.write(transaction);
+   private void writeToFile(Dialog dialog) {
+      tr.write(dialog);
    }
 
-   private Transaction createTransaction(String date, int userId, String userFirstName, String userLastName, String userName, String usersRequest, String botsResponse) throws ParseException {
+   private Dialog createTransaction(String date, int userId, String userFirstName, String userLastName, String userName, String usersRequest, String botsResponse) throws ParseException {
       Date parseDate = df.parse(date);
       User user = new User(userId, userFirstName, userLastName, userName);
-      return new Transaction(parseDate, user, usersRequest, botsResponse);
+      return new Dialog(parseDate, user, usersRequest, botsResponse);
    }
 
    @AfterAll

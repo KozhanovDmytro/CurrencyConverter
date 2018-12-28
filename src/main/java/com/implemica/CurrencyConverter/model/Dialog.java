@@ -9,7 +9,7 @@ import java.util.Date;
  * This class is part of user's conversation with bot. Stores date, information about user, their request and bot's response
  */
 @Data
-public class Transaction {
+public class Dialog {
 
    private String usersRequest;
 
@@ -24,7 +24,7 @@ public class Transaction {
     */
    SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
-   public Transaction(Date date, User user, String usersRequest, String botsResponse) {
+   public Dialog(Date date, User user, String usersRequest, String botsResponse) {
       this.usersRequest = usersRequest;
       this.botsResponse = botsResponse;
       this.user = user;
@@ -43,10 +43,10 @@ public class Transaction {
       if (this == tr) {
          return true;
       }
-      if (tr instanceof Transaction) {
-         return this.date.equals(((Transaction) tr).date) && this.user.equals(((Transaction) tr).user) &&
-                 this.usersRequest.equals(((Transaction) tr).usersRequest) &&
-                 this.botsResponse.equals(((Transaction) tr).botsResponse);
+      if (tr instanceof Dialog) {
+         return this.date.equals(((Dialog) tr).date) && this.user.equals(((Dialog) tr).user) &&
+                 this.usersRequest.equals(((Dialog) tr).usersRequest) &&
+                 this.botsResponse.equals(((Dialog) tr).botsResponse);
       }
       return false;
 

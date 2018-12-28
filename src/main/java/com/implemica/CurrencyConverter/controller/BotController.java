@@ -1,9 +1,10 @@
 package com.implemica.CurrencyConverter.controller;
 
-import com.implemica.CurrencyConverter.dao.TransactionDao;
+import com.implemica.CurrencyConverter.dao.DialogDao;
 import com.implemica.CurrencyConverter.model.Converter;
-import com.implemica.CurrencyConverter.model.Transaction;
+import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
+import com.implemica.CurrencyConverter.service.ConverterService;
 import com.implemica.CurrencyConverter.validator.BotValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -70,10 +71,10 @@ public class BotController extends TelegramLongPollingBot {
     * Data, which has to be added to .csv file
     */
    @Autowired
-   private TransactionDao transactionDao;
+   private DialogDao dialogDao;
 
    @Autowired
-   private Converter converter;
+   private ConverterService converterService;
 
    @Autowired
    private SimpMessagingTemplate template;
@@ -122,10 +123,10 @@ public class BotController extends TelegramLongPollingBot {
       sendMessage(update, message);
       Date dateNow = new Date();
 
-      Transaction transaction = new Transaction(dateNow, user, command, message);
+      Dialog dialog = new Dialog(dateNow, user, command, message);
 
-      transactionDao.write(transaction);
-      template.convertAndSend("/topic/greetings", transaction);
+      dialogDao.write(dialog);
+      sendToWebSocketFollowers(dialog);
    }
 
    @Override
@@ -183,7 +184,7 @@ public class BotController extends TelegramLongPollingBot {
       String message;
       if (BotValidator.isCorrectNumber(value)) {
          try {
-            Float convertedValue = converter.convert(firstCurrency, secondCurrency, Float.parseFloat(value));
+            Float convertedValue = converterService.convert(new Converter(firstCurrency, secondCurrency, Float.parseFloat(value)));
             message = value + " " + firstCurrency + " is " + convertedValue + " " + secondCurrency;
          } catch (UnknownCurrencyException ex) {
             message = ex.getMessage();
@@ -196,5 +197,14 @@ public class BotController extends TelegramLongPollingBot {
       return message;
    }
 
+   /**
+    * Function sends an instance {@link Dialog} to WebSocket chanel followers.
+    *
+    * @author Dmytro K.
+    * @param dialog dialog
+    */
+   private void sendToWebSocketFollowers(Dialog dialog) {
+      template.convertAndSend("/topic/greetings", dialog);
+   }
 }
 
