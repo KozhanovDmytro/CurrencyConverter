@@ -50,21 +50,12 @@ public class ConverterTest {
       checkConvert("USD", "USD");
    }
 
-   @Test
-   public void supportedCurrency() {
-      int count = 0;
-      for (Currency userCurrency : existingCurrency) {
-         try {
-            converterService.convert(new Converter("USD", userCurrency.toString(), 1f));
-            count++;
-         } catch (Exception ignored) {}
-      }
-      System.out.println(count);
-   }
-
    private void checkConvert(String userCurrency, String desiredCurrency) {
-      Float value = converterService.convert(new Converter(userCurrency, desiredCurrency, 1f));
+      Converter converter = new Converter(Currency.getInstance(userCurrency),
+                                          Currency.getInstance(desiredCurrency),
+                                          1f);
+
+      Float value = converterService.convert(converter);
       assertNotNull(value);
-      System.out.println(userCurrency + " to " + desiredCurrency + " " + value);
    }
 }

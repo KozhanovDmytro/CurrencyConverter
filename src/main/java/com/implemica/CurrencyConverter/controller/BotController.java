@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.money.UnknownCurrencyException;
 import javax.money.convert.CurrencyConversionException;
+import java.util.Currency;
 import java.util.Date;
 
 /**
@@ -184,7 +185,12 @@ public class BotController extends TelegramLongPollingBot {
       String message;
       if (BotValidator.isCorrectNumber(value)) {
          try {
-            Float convertedValue = converterService.convert(new Converter(firstCurrency, secondCurrency, Float.parseFloat(value)));
+            Currency usersCurrency = Currency.getInstance(firstCurrency);
+            Currency desiredCurrency = Currency.getInstance(secondCurrency);
+
+            Converter converter = new Converter(usersCurrency, desiredCurrency, Float.parseFloat(value));
+
+            Float convertedValue = converterService.convert(converter);
             message = value + " " + firstCurrency + " is " + convertedValue + " " + secondCurrency;
          } catch (UnknownCurrencyException ex) {
             message = ex.getMessage();

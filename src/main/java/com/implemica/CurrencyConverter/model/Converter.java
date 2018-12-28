@@ -4,6 +4,8 @@ package com.implemica.CurrencyConverter.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.Currency;
+
 /**
  * Class for convert currencies.
  *
@@ -13,9 +15,9 @@ import lombok.Data;
 @Data @AllArgsConstructor
 public class Converter {
 
-   private String usersCurrency;
+   private Currency usersCurrency;
 
-   private String desiredCurrency;
+   private Currency desiredCurrency;
 
    private Float value;
 
