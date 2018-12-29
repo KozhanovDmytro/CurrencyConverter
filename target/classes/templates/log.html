@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Log</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.0.3/sockjs.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+</head>
+<body>
+<div class="header">
+
+</div>
+<div class="content">
+    <table th:object="${transactions}" border="1" class="makeCenterByFlex table">
+        <tr class="thead-dark">
+            <th>Date</th>
+            <th>ID</th>
+            <th>First name</th>
+            <th>Last name</th>
+            <th>User name</th>
+            <th>Request</th>
+            <th>Response</th>
+        </tr>
+        <tr th:each="t : ${transactions}">
+            <td th:text="${t.getDate()}"></td>
+            <td th:text="${t.getUser().getUserId()}"></td>
+            <td th:text="${t.getUser().getUserFirstName()}"></td>
+            <td th:text="${t.getUser().getUserLastName()}"></td>
+            <td th:text="${t.getUser().getUserName()}"></td>
+            <td th:text="${t.getUsersRequest()}"></td>
+            <td th:text="${t.getBotsResponse()}"></td>
+        </tr>
+    </table>
+</div>
+<div class="footer">
+
+</div>
+</body>
+</html>

@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import static com.sun.deploy.util.SystemUtils.deleteRecursive;
+//import static com.sun.deploy.util.SystemUtils.deleteRecursive;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -160,7 +160,7 @@ class DialogDaoImplTest {
       if (tempFile == null) {
          return;
       }
-      deleteRecursive(tempFile);
+      tempFile.delete();
       assertTrue(!tempFile.exists());
    }
 }
