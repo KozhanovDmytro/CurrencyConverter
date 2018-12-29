@@ -1,5 +1,6 @@
 package com.implemica.CurrencyConverter.controller;
 
+
 import com.implemica.CurrencyConverter.dao.DialogDao;
 import com.implemica.CurrencyConverter.model.Converter;
 import com.implemica.CurrencyConverter.model.Dialog;
@@ -132,14 +133,14 @@ public class BotController extends TelegramLongPollingBot {
 
    @Override
    public String getBotUsername() {
-      return BOT_NAME;
-//      return "daras_bot";
+//      return BOT_NAME;
+      return "daras_bot";
    }
 
    @Override
    public String getBotToken() {
-      return BOT_TOKEN;
-//      return "717479855:AAHstabH8JLkZ3oM7cXtleuGd_I1W38Z1Jg";
+//      return BOT_TOKEN;
+      return "717479855:AAHstabH8JLkZ3oM7cXtleuGd_I1W38Z1Jg";
    }
 
    /**
