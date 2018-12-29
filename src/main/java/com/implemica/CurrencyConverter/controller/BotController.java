@@ -6,6 +6,7 @@ import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.service.ConverterService;
 import com.implemica.CurrencyConverter.validator.BotValidator;
+import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -61,7 +62,7 @@ public class BotController extends TelegramLongPollingBot {
 
    private String firstCurrency;
    private String secondCurrency;
-   private int convertStep;
+   private int convertStep = 0;
 
    /**
     * Information about User
@@ -192,10 +193,8 @@ public class BotController extends TelegramLongPollingBot {
 
             Float convertedValue = converterService.convert(converter);
             message = value + " " + firstCurrency + " is " + convertedValue + " " + secondCurrency;
-         } catch (UnknownCurrencyException ex) {
-            message = ex.getMessage();
-         } catch (CurrencyConversionException ex) {
-            message = "Sorry, I can't convert from " + firstCurrency + " to " + secondCurrency;
+         } catch (CurrencyConverterException e) {
+            message = e.getMessage();
          }
       } else {
          message = "Sorry, but \"" + value + "\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE;
