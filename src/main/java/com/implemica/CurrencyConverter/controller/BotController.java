@@ -134,11 +134,13 @@ public class BotController extends TelegramLongPollingBot {
    @Override
    public String getBotUsername() {
       return BOT_NAME;
+//      return "daras_bot";
    }
 
    @Override
    public String getBotToken() {
       return BOT_TOKEN;
+//      return "717479855:AAHstabH8JLkZ3oM7cXtleuGd_I1W38Z1Jg";
    }
 
    /**
