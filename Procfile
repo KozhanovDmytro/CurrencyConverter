@@ -1,1 +1,1 @@
-worker: java -jar target/currencyconverter-0.0.1-SNAPSHOT.jar
+worker: sh target/currencyconverter-0.0.1-SNAPSHOT
