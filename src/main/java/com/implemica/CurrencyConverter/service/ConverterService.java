@@ -8,47 +8,57 @@ import com.tunyk.currencyconverter.api.Currency;
 import com.tunyk.currencyconverter.api.CurrencyConverter;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import com.tunyk.currencyconverter.api.CurrencyNotSupportedException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import javax.money.convert.CurrencyConversion;
 import javax.money.convert.MonetaryConversions;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  *
  * @author Dmytro K.
- * @version 02.01.2019 10:00
+ * @version 02.01.2019 20:00
  */
 public class ConverterService {
 
    private final Logger log = Logger.getLogger(this.getClass().getName());
 
-   private Float convertedValue = 0.0f;
+   private float convertedValue = 0.0f;
 
    private List<Exception> exceptions = new ArrayList<>();
 
    private List<OptionSupplier> options = new ArrayList<>();
 
+   /* constants */
+
+   private static final String URL_FREE_CURRENCY_CONVERTER_API_COM = "http://free.currencyconverterapi.com/api/v5/convert?q=%s_%s&compact=y";
+   private static final String URL_CURRENCY_LAYER_COM = "http://apilayer.net/api/live?access_key=f91895130d9f009b167cd5299cdd923c&source=%s&currencies=%s&format=1";
+   private static final String URL_FLOAT_RATES_COM = "http://www.floatrates.com/daily/%s.json";
+
    {
-      options.add(this::convertByBankUaCom);
-      options.add(this::convertByURL);
-      options.add(this::convertByJavaMoney);
+      options.add(this::convertByBankUaCom);                      // unlimited
+//      options.add(this::convertByFloatRatesCom);                  // unlimited
+      options.add(this::convertByJavaMoney);                      // unlimited, but so slow
+
+      options.add(this::convertByFreeCurrencyConverterApiCom);    // has a limit - 100  requests per hour
+      options.add(this::convertByCurrencyLayerCom);               // has a limit - 1000 requests per month
    }
 
    private interface OptionSupplier {
       void execute(Converter converter) throws Exception;
    }
 
-   public Float convert(Converter converter) throws CurrencyConverterException {
+   public float convert(Converter converter) throws CurrencyConverterException {
       for (OptionSupplier option : options) {
          if(handleException(option, converter)) {
             return convertedValue;
@@ -87,20 +97,59 @@ public class ConverterService {
       convertedValue = convertedAmountUSDtoEUR.getNumber().floatValue();
    }
 
-   private void convertByURL(Converter converter) throws IOException {
-      String url = String.format("http://free.currencyconverterapi.com/api/v5/convert?q=%s_%s&compact=y",
-              converter.getUsersCurrency(), converter.getDesiredCurrency());
+   private void convertByFreeCurrencyConverterApiCom(Converter converter) throws IOException {
+      URL url = buildURL(URL_FREE_CURRENCY_CONVERTER_API_COM, converter);
 
-      JsonParser jsonParser = new JsonFactory().createParser(new URL(url));
+      JsonParser jsonParser = new JsonFactory().createParser(url);
 
       jsonParser.nextToken();
       jsonParser.nextFieldName();
       jsonParser.nextToken();
       jsonParser.nextFieldName();
       jsonParser.nextToken();
+
       float value = jsonParser.getFloatValue();
 
       convertedValue = converter.getValue() * value;
+   }
+
+   private void convertByCurrencyLayerCom(Converter converter) throws IOException {
+      URL url = buildURL(URL_CURRENCY_LAYER_COM, converter);
+      JsonParser jsonParser = new JsonFactory().createParser(url);
+
+      jsonParser.nextToken();
+      jsonParser.nextFieldName();
+      jsonParser.nextToken();
+      jsonParser.nextFieldName();
+      jsonParser.nextToken();
+      jsonParser.nextFieldName();
+      jsonParser.nextToken();
+      jsonParser.nextFieldName();
+      jsonParser.nextToken();
+      jsonParser.nextFieldName();
+      jsonParser.nextToken();
+      jsonParser.nextFieldName();
+      jsonParser.nextToken();
+      jsonParser.nextFieldName();
+      jsonParser.nextToken();
+
+      float value = jsonParser.getFloatValue();
+
+      convertedValue = value * converter.getValue();
+   }
+
+   private void convertByFloatRatesCom(Converter converter) throws IOException {
+      URL url = buildURL(URL_FLOAT_RATES_COM, converter.getUsersCurrency());
+
+      JSONTokener tokener = new JSONTokener(url.openStream());
+
+      JSONObject object = new JSONObject(tokener);
+
+      String desiredCurrency = converter.getDesiredCurrency().getCurrencyCode();
+
+      double rate = object.getJSONObject(desiredCurrency.toLowerCase()).getDouble("rate");
+
+      convertedValue = (float) rate * converter.getValue();
    }
 
    private boolean handleException(OptionSupplier optionSupplier, Converter converter) {
@@ -113,5 +162,15 @@ public class ConverterService {
       }
 
       return result;
+   }
+
+   private static URL buildURL(String path, Converter converter) throws MalformedURLException {
+      String url = String.format(path, converter.getUsersCurrency(), converter.getDesiredCurrency());
+      return new URL(url);
+   }
+
+   private static URL buildURL(String path, java.util.Currency currency) throws MalformedURLException {
+      String url = String.format(path, currency);
+      return new URL(url);
    }
 }

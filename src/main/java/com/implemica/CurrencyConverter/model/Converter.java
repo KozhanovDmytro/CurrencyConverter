@@ -19,6 +19,6 @@ public class Converter {
 
    private Currency desiredCurrency;
 
-   private Float value;
+   private float value;
 
 }

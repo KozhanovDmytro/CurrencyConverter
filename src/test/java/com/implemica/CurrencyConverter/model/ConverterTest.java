@@ -8,9 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ConverterTest {
+class ConverterTest {
 
    private static ConverterService converterService;
 
