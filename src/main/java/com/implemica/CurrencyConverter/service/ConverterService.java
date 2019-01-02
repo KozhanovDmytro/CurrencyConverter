@@ -16,11 +16,23 @@ import javax.money.convert.MonetaryConversions;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+/**
+ *
+ * @author Dmytro K.
+ * @version 02.01.2019 10:00
+ */
 public class ConverterService {
 
-   private Float convertedValue;
+   private final Logger log = Logger.getLogger(this.getClass().getName());
+
+   private Float convertedValue = 0.0f;
 
    private List<Exception> exceptions = new ArrayList<>();
 
@@ -28,20 +40,21 @@ public class ConverterService {
 
    {
       options.add(this::convertByBankUaCom);
-      options.add(this::convertByJavaMoney);
       options.add(this::convertByURL);
+      options.add(this::convertByJavaMoney);
    }
 
    private interface OptionSupplier {
-      boolean execute(Converter converter);
+      void execute(Converter converter) throws Exception;
    }
 
    public Float convert(Converter converter) throws CurrencyConverterException {
       for (OptionSupplier option : options) {
-         if(option.execute(converter)) {
+         if(handleException(option, converter)) {
             return convertedValue;
          }
       }
+      log.log(Level.SEVERE, "exception was thrown: " + Arrays.toString(exceptions.toArray()));
       throw new CurrencyConverterException(analyzeException());
    }
 
@@ -55,61 +68,50 @@ public class ConverterService {
       return result;
    }
 
-   private boolean convertByBankUaCom(Converter converter) {
-      boolean result = true;
-      try {
-         Currency usersCurrency = Currency.fromString(converter.getUsersCurrency().getCurrencyCode());
-         Currency desiredCurrency = Currency.fromString(converter.getDesiredCurrency().getCurrencyCode());
+   private void convertByBankUaCom(Converter converter) throws CurrencyConverterException {
+      Currency usersCurrency = Currency.fromString(converter.getUsersCurrency().getCurrencyCode());
+      Currency desiredCurrency = Currency.fromString(converter.getDesiredCurrency().getCurrencyCode());
 
-         CurrencyConverter currencyConverter = new BankUaCom(usersCurrency, desiredCurrency);
-         convertedValue = currencyConverter.convertCurrency(converter.getValue());
-      } catch (CurrencyConverterException e) {
-         exceptions.add(e);
-         result = false;
-      }
-
-      return result;
+      CurrencyConverter currencyConverter = new BankUaCom(usersCurrency, desiredCurrency);
+      convertedValue = currencyConverter.convertCurrency(converter.getValue());
    }
 
-   private boolean convertByJavaMoney(Converter converter) {
-      boolean result = true;
-      try {
-         MonetaryAmount userMoney = Monetary.getDefaultAmountFactory()
-                 .setCurrency(converter.getUsersCurrency().getCurrencyCode())
-                 .setNumber(converter.getValue()).create();
+   private void convertByJavaMoney(Converter converter) {
+      MonetaryAmount userMoney = Monetary.getDefaultAmountFactory()
+              .setCurrency(converter.getUsersCurrency().getCurrencyCode())
+              .setNumber(converter.getValue()).create();
 
-         CurrencyConversion conversion = MonetaryConversions.getConversion(converter.getDesiredCurrency().getCurrencyCode());
-         MonetaryAmount convertedAmountUSDtoEUR = userMoney.with(conversion);
+      CurrencyConversion conversion = MonetaryConversions.getConversion(converter.getDesiredCurrency().getCurrencyCode());
+      MonetaryAmount convertedAmountUSDtoEUR = userMoney.with(conversion);
 
-         convertedValue = convertedAmountUSDtoEUR.getNumber().floatValue();
-      } catch (Exception e) {
-         exceptions.add(e);
-         result = false;
-      }
-
-      return result;
+      convertedValue = convertedAmountUSDtoEUR.getNumber().floatValue();
    }
 
-   private boolean convertByURL(Converter converter) {
+   private void convertByURL(Converter converter) throws IOException {
+      String url = String.format("http://free.currencyconverterapi.com/api/v5/convert?q=%s_%s&compact=y",
+              converter.getUsersCurrency(), converter.getDesiredCurrency());
+
+      JsonParser jsonParser = new JsonFactory().createParser(new URL(url));
+
+      jsonParser.nextToken();
+      jsonParser.nextFieldName();
+      jsonParser.nextToken();
+      jsonParser.nextFieldName();
+      jsonParser.nextToken();
+      float value = jsonParser.getFloatValue();
+
+      convertedValue = converter.getValue() * value;
+   }
+
+   private boolean handleException(OptionSupplier optionSupplier, Converter converter) {
       boolean result = true;
       try {
-         String url = String.format("http://free.currencyconverterapi.com/api/v5/convert?q=%s_%s&compact=y",
-                 converter.getUsersCurrency(), converter.getDesiredCurrency());
-
-         JsonParser jsonParser = new JsonFactory().createParser(new URL(url));
-
-         jsonParser.nextToken();
-         jsonParser.nextFieldName();
-         jsonParser.nextToken();
-         jsonParser.nextFieldName();
-         jsonParser.nextToken();
-         float value = jsonParser.getFloatValue();
-
-         convertedValue = converter.getValue() * value;
-      } catch (IOException e) {
+         optionSupplier.execute(converter);
+      } catch(Exception e) {
          exceptions.add(e);
          result = false;
       }
+
       return result;
    }
 }

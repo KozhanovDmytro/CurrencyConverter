@@ -14,21 +14,15 @@ public class ConverterTest {
 
    private static ConverterService converterService;
 
-   /**
-    * Array of existing currency got by ISO 4217
-    *
-    * link: https://ru.wikipedia.org/wiki/ISO_4217
-    */
-   private static Set<Currency> existingCurrency;
+   private static String[] existingCurrency = new String[] {"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB", "BAM", "SZL", "ITL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "ZMK", "BBD", "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "CUC", "BTN", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "MXV", "DJF", "HTG", "PKR", "SHP", "KYD", "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO", "AOA", "XAF", "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "LVL", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP", "SDG", "MUR", "VND", "FRF", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "ZWL", "LRD", "JPY", "NAD", "CLF", "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "KPW", "IRR", "GYD", "TWD", "FKP", "ZMW", "XOF", "MWK", "KMF", "KRW", "TZS", "LTL", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS", "BMD", "XAU", "NGN", "SBD", "LKR", "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC", "SGD", "XDR", "PYG", "JOD", "AFN", "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "XPD", "UYU", "MZN", "BRL"};
 
    @BeforeAll
-   public static void setUp() {
+   static void setUp() {
       converterService = new ConverterService();
-      existingCurrency = Currency.getAvailableCurrencies();
    }
 
    @Test
-   public void convert() throws CurrencyConverterException {
+   void convert() throws CurrencyConverterException {
       checkConvert("UAH", "RUB");
       checkConvert("UAH", "UAH");
       checkConvert("UAH", "EUR");
@@ -51,9 +45,9 @@ public class ConverterTest {
    }
 
    @Test
-   void checkConversionToUSD() throws CurrencyConverterException {
+   void checkCurrencyTransferToUSD() throws CurrencyConverterException {
       checkConvert("SEK", "USD");
-      checkConvert("XCD", "EUR");
+      checkConvert("XCD", "USD");
       checkConvert("DKK", "USD");
       checkConvert("GTQ", "USD");
       checkConvert("MRO", "USD");
@@ -206,6 +200,30 @@ public class ConverterTest {
       checkConvert("CHF", "USD");
       checkConvert("TZS", "USD");
       checkConvert("IRR", "USD");
+   }
+
+   @Test
+   void convertWith() throws CurrencyConverterException {
+      for (String curr1 : existingCurrency) {
+         for (String curr2 : existingCurrency) {
+            checkConvert(curr1, curr2);
+         }
+      }
+   }
+
+   @Test
+   void checkSupport() {
+      ArrayList<Currency> arrayList = new ArrayList<>();
+      for (Currency currency : Currency.getAvailableCurrencies()) {
+         try {
+            checkConvert(currency.getCurrencyCode(), "USD");
+            arrayList.add(currency);
+         } catch (CurrencyConverterException e) {
+
+         }
+      }
+      System.out.println(arrayList.size());
+      System.out.println(Arrays.toString(arrayList.toArray()));
    }
 
    private void checkConvert(String userCurrency, String desiredCurrency) throws CurrencyConverterException {

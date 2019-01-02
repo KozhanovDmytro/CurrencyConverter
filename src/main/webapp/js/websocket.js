@@ -7,14 +7,14 @@ function setConnected(connected) {
 }
 
 function connect() {
-    var socket = new SockJS('/gs-guide-websocket');
+    var socket = new SockJS('/monitor-bot');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/greetings', function (greeting) {
-            console.log(greeting);
-            showGreeting(JSON.parse(greeting.body));
+        stompClient.subscribe('/listen/bot', function (response) {
+            console.log(response);
+            showResponse(JSON.parse(response.body));
         });
     });
 }
@@ -27,7 +27,7 @@ function disconnect() {
     console.log("Disconnected");
 }
 
-function showGreeting(object) {
+function showResponse(object) {
     var table = document.getElementById('response');
     var tr = document.createElement('tr');
 

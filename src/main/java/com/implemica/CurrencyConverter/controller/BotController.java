@@ -208,10 +208,11 @@ public class BotController extends TelegramLongPollingBot {
     * Function sends an instance {@link Dialog} to WebSocket chanel followers.
     *
     * @author Dmytro K.
+    * @version 02.01.2019 10:00
     * @param dialog dialog
     */
    private void sendToWebSocketFollowers(Dialog dialog) {
-      template.convertAndSend("/topic/greetings", dialog);
+      template.convertAndSend("/listen/bot", dialog);
    }
 }
 

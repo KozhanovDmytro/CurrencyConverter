@@ -10,13 +10,17 @@ import org.springframework.web.bind.annotation.GetMapping;
  * Controller for show bot's log.
  *
  * @author Dmytro K.
- * @version 25.12.2018 18:00
+ * @version 29.12.2018 17:00
  */
 @Controller
 public class WebController {
 
+   private final DialogDao dialogDao;
+
    @Autowired
-   private DialogDao dialogDao;
+   public WebController(DialogDao dialogDao) {
+      this.dialogDao = dialogDao;
+   }
 
    @GetMapping("/log")
    public String log(Model model) {

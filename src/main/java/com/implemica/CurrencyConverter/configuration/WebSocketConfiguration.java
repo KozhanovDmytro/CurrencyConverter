@@ -6,19 +6,21 @@ import org.springframework.web.socket.config.annotation.AbstractWebSocketMessage
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 
-@Configuration
-@EnableWebSocketMessageBroker
+/**
+ * @author Dmytro K.
+ * @version 02.01.2019 10:00
+ */
+@Configuration @EnableWebSocketMessageBroker
 public class WebSocketConfiguration extends AbstractWebSocketMessageBrokerConfigurer {
 
    @Override
    public void configureMessageBroker(MessageBrokerRegistry registry) {
-      registry.enableSimpleBroker("/topic");
-      registry.setApplicationDestinationPrefixes("/app");
-
+      registry.enableSimpleBroker("/listen");
+      registry.setApplicationDestinationPrefixes("/");
    }
 
    @Override
    public void registerStompEndpoints(StompEndpointRegistry stompEndpointRegistry) {
-      stompEndpointRegistry.addEndpoint("/gs-guide-websocket").withSockJS();
+      stompEndpointRegistry.addEndpoint("/monitor-bot").withSockJS();
    }
 }
