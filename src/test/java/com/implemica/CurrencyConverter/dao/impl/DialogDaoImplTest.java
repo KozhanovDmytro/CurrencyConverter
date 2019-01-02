@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,6 +15,11 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * Tests DialogDaoImpl class.
+ *
+ * @author Daria S.
+ */
 class DialogDaoImplTest {
 
    /**
@@ -155,7 +159,7 @@ class DialogDaoImplTest {
    }
 
    @AfterAll
-   static void afterClass() throws IOException {
+   static void afterClass() {
       if (tempFile == null) {
          return;
       }

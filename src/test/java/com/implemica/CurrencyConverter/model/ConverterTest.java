@@ -14,7 +14,17 @@ public class ConverterTest {
 
    private static ConverterService converterService;
 
-   private static String[] existingCurrency = new String[] {"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB", "BAM", "SZL", "ITL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "ZMK", "BBD", "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "CUC", "BTN", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "MXV", "DJF", "HTG", "PKR", "SHP", "KYD", "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO", "AOA", "XAF", "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "LVL", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP", "SDG", "MUR", "VND", "FRF", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "ZWL", "LRD", "JPY", "NAD", "CLF", "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "KPW", "IRR", "GYD", "TWD", "FKP", "ZMW", "XOF", "MWK", "KMF", "KRW", "TZS", "LTL", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS", "BMD", "XAU", "NGN", "SBD", "LKR", "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC", "SGD", "XDR", "PYG", "JOD", "AFN", "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "XPD", "UYU", "MZN", "BRL"};
+   private static String[] existingCurrency = new String[] {"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
+           "BAM", "SZL", "ITL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "ZMK", "BBD",
+           "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "CUC", "BTN", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "MXV", "DJF",
+           "HTG", "PKR", "SHP", "KYD", "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB",
+           "FJD", "MRO", "AOA", "XAF", "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "LVL", "OMR", "MYR", "VUV", "KES", "XCD",
+           "ARS", "GBP", "SDG", "MUR", "VND", "FRF", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP",
+           "IDR", "ZWL", "LRD", "JPY", "NAD", "CLF", "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "KPW", "IRR", "GYD",
+           "TWD", "FKP", "ZMW", "XOF", "MWK", "KMF", "KRW", "TZS", "LTL", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY",
+           "LBP", "INR", "CLP", "GHS", "BMD", "XAU", "NGN", "SBD", "LKR", "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK",
+           "MXN", "WST", "UGX", "SVC", "SGD", "XDR", "PYG", "JOD", "AFN", "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP",
+           "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "XPD", "UYU", "MZN", "BRL"};
 
    @BeforeAll
    static void setUp() {

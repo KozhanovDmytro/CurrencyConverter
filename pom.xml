@@ -106,6 +106,7 @@
             <artifactId>jstl</artifactId>
         </dependency>
 
+        <!--has repeats and may be not used -->
         <!-- For working with JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -145,6 +146,29 @@
                         <phase>package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>1.1.1</version>
+                <configuration>
+                    <assembleDirectory>target</assembleDirectory>
+                    <programs>
+                        <program>
+                            <mainClass>com.implemica.CurrencyConverter.controller.BotController</mainClass>
+                            <name>currencyconverter</name>
+                        </program>
+                    </programs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assemble</goal>
                         </goals>
                     </execution>
                 </executions>

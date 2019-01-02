@@ -1,6 +1,12 @@
 package com.implemica.CurrencyConverter.validator;
 
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * This class change user's currency value to upper case and skip spaces in it.
  *
@@ -9,21 +15,13 @@ package com.implemica.CurrencyConverter.validator;
 public class BotValidator {
 
    /**
-    * Check, that given string is float value
-    *
-    * @param value String, which is needed to check
-    * @return true, if value is a float initialized to the value represented by the specified String;
-    * false - if the string does not contain a parsable float
+    * These values are needed for parsing Float number
     */
-   public static boolean isCorrectNumber(String value) {
-      float number;
-      try {
-         number = Float.parseFloat(value);
-      } catch (NumberFormatException e) {
-         return false;
-      }
-      return number >= 0.0f;
-   }
+   private static final DecimalFormat DF = new DecimalFormat("#.##");
+   private static final char COMMA = ',';
+   private static final char POINT = '.';
+   private static final Pattern hasComma = Pattern.compile(".*,.*");
+
 
    /**
     * Converts all of the characters in given String to upper case
@@ -38,5 +36,33 @@ public class BotValidator {
     */
    private static String skipSpaces(String string) {
       return string.replaceAll("\\s+", "");
+   }
+
+   /**
+    * Parses given number to Float value
+    *
+    * @param value value, which has to be converted to Float value
+    * @throws ParseException if value is not a number
+    */
+   public static Float parseNumber(String value) throws ParseException {
+      Matcher matcher = hasComma.matcher(value);
+      char separator;
+      if (matcher.matches()) {
+         separator = COMMA;
+      } else {
+         separator = POINT;
+      }
+      DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+      symbols.setDecimalSeparator(separator);
+      DF.setDecimalFormatSymbols(symbols);
+      return DF.parse(value).floatValue();
+   }
+
+
+   public static String formatNumber(Float number) {
+      DecimalFormatSymbols s = new DecimalFormatSymbols();
+      s.setDecimalSeparator(POINT);
+      DF.setDecimalFormatSymbols(s);
+      return DF.format(number);
    }
 }
