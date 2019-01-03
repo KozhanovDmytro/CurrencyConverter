@@ -21,4 +21,10 @@ public class Converter {
 
    private float value;
 
+   @Override
+   public String toString() {
+      return   usersCurrency.getCurrencyCode() + " -> " +
+               desiredCurrency.getCurrencyCode() + " value: " +
+               value;
+   }
 }

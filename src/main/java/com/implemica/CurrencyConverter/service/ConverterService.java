@@ -1,7 +1,5 @@
 package com.implemica.CurrencyConverter.service;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.implemica.CurrencyConverter.model.Converter;
 import com.tunyk.currencyconverter.BankUaCom;
 import com.tunyk.currencyconverter.api.Currency;
@@ -35,19 +33,18 @@ public class ConverterService {
 
    private float convertedValue = 0.0f;
 
-   private List<Exception> exceptions = new ArrayList<>();
+   private List<Throwable> exceptions = new ArrayList<>();
 
    private List<OptionSupplier> options = new ArrayList<>();
 
    /* constants */
-
    private static final String URL_FREE_CURRENCY_CONVERTER_API_COM = "http://free.currencyconverterapi.com/api/v5/convert?q=%s_%s&compact=y";
    private static final String URL_CURRENCY_LAYER_COM = "http://apilayer.net/api/live?access_key=f91895130d9f009b167cd5299cdd923c&source=%s&currencies=%s&format=1";
    private static final String URL_FLOAT_RATES_COM = "http://www.floatrates.com/daily/%s.json";
 
    {
       options.add(this::convertByBankUaCom);                      // unlimited
-//      options.add(this::convertByFloatRatesCom);                  // unlimited
+      options.add(this::convertByFloatRatesCom);                  // unlimited
       options.add(this::convertByJavaMoney);                      // unlimited, but so slow
 
       options.add(this::convertByFreeCurrencyConverterApiCom);    // has a limit - 100  requests per hour
@@ -69,21 +66,31 @@ public class ConverterService {
    }
 
    private String analyzeException() {
-      String result = "Fatal error!";
-      for (Exception e : exceptions) {
-         if (e instanceof CurrencyNotSupportedException) {
+      String result = "Unknown error!";
+      for (Throwable e : exceptions) {
+         if (e instanceof IOException) {
+            log.log(Level.SEVERE, e.getMessage());
+            result = "Server not responding";
+         } else if (e instanceof CurrencyNotSupportedException) {
+            log.log(Level.SEVERE, e.getMessage());
             result = e.getMessage();
          }
       }
+
       return result;
    }
 
    private void convertByBankUaCom(Converter converter) throws CurrencyConverterException {
-      Currency usersCurrency = Currency.fromString(converter.getUsersCurrency().getCurrencyCode());
-      Currency desiredCurrency = Currency.fromString(converter.getDesiredCurrency().getCurrencyCode());
+      Currency usersCurrency = getCurrencyByUtilCurrency(converter.getUsersCurrency());
+      Currency desiredCurrency = getCurrencyByUtilCurrency(converter.getDesiredCurrency());
 
       CurrencyConverter currencyConverter = new BankUaCom(usersCurrency, desiredCurrency);
       convertedValue = currencyConverter.convertCurrency(converter.getValue());
+      log.log(Level.INFO, "converted by bank.ua : " + converter.toString());
+   }
+
+   private Currency getCurrencyByUtilCurrency(java.util.Currency currency) throws CurrencyNotSupportedException {
+      return Currency.fromString(currency.getCurrencyCode());
    }
 
    private void convertByJavaMoney(Converter converter) {
@@ -92,71 +99,60 @@ public class ConverterService {
               .setNumber(converter.getValue()).create();
 
       CurrencyConversion conversion = MonetaryConversions.getConversion(converter.getDesiredCurrency().getCurrencyCode());
-      MonetaryAmount convertedAmountUSDtoEUR = userMoney.with(conversion);
+      MonetaryAmount converted = userMoney.with(conversion);
 
-      convertedValue = convertedAmountUSDtoEUR.getNumber().floatValue();
+      convertedValue = converted.getNumber().floatValue();
+      log.log(Level.INFO, "converted by java money : " + converter.toString());
    }
 
    private void convertByFreeCurrencyConverterApiCom(Converter converter) throws IOException {
       URL url = buildURL(URL_FREE_CURRENCY_CONVERTER_API_COM, converter);
 
-      JsonParser jsonParser = new JsonFactory().createParser(url);
+      JSONObject object = getJsonObjectByURL(url);
 
-      jsonParser.nextToken();
-      jsonParser.nextFieldName();
-      jsonParser.nextToken();
-      jsonParser.nextFieldName();
-      jsonParser.nextToken();
+      double value = object.getJSONObject(converter.getUsersCurrency() + "_" + converter.getDesiredCurrency())
+                     .getDouble("val");
 
-      float value = jsonParser.getFloatValue();
-
-      convertedValue = converter.getValue() * value;
+      convertedValue = converter.getValue() * (float) value;
+      log.log(Level.INFO, "converted by free.currencyapi.com : " + converter.toString());
    }
 
    private void convertByCurrencyLayerCom(Converter converter) throws IOException {
       URL url = buildURL(URL_CURRENCY_LAYER_COM, converter);
-      JsonParser jsonParser = new JsonFactory().createParser(url);
 
-      jsonParser.nextToken();
-      jsonParser.nextFieldName();
-      jsonParser.nextToken();
-      jsonParser.nextFieldName();
-      jsonParser.nextToken();
-      jsonParser.nextFieldName();
-      jsonParser.nextToken();
-      jsonParser.nextFieldName();
-      jsonParser.nextToken();
-      jsonParser.nextFieldName();
-      jsonParser.nextToken();
-      jsonParser.nextFieldName();
-      jsonParser.nextToken();
-      jsonParser.nextFieldName();
-      jsonParser.nextToken();
+      JSONObject object = getJsonObjectByURL(url);
 
-      float value = jsonParser.getFloatValue();
+      double value = object.getJSONObject("quotes")
+                           .getDouble(converter.getUsersCurrency() + "" + converter.getDesiredCurrency());
 
-      convertedValue = value * converter.getValue();
+      convertedValue = converter.getValue() * (float) value;
+      log.log(Level.INFO, "converted by currencylayer.com : " + converter.toString());
    }
 
    private void convertByFloatRatesCom(Converter converter) throws IOException {
       URL url = buildURL(URL_FLOAT_RATES_COM, converter.getUsersCurrency());
 
-      JSONTokener tokener = new JSONTokener(url.openStream());
-
-      JSONObject object = new JSONObject(tokener);
+      JSONObject object = getJsonObjectByURL(url);
 
       String desiredCurrency = converter.getDesiredCurrency().getCurrencyCode();
 
       double rate = object.getJSONObject(desiredCurrency.toLowerCase()).getDouble("rate");
 
       convertedValue = (float) rate * converter.getValue();
+      log.log(Level.INFO, "converted by floatrates.com : " + converter.toString());
+   }
+
+   private JSONObject getJsonObjectByURL(URL url) throws IOException {
+      JSONTokener tokener = new JSONTokener(url.openStream());
+
+      return new JSONObject(tokener);
    }
 
    private boolean handleException(OptionSupplier optionSupplier, Converter converter) {
       boolean result = true;
       try {
          optionSupplier.execute(converter);
-      } catch(Exception e) {
+      } catch(Throwable e) {
          exceptions.add(e);
          result = false;
       }
