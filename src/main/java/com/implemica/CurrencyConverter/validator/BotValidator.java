@@ -21,6 +21,7 @@ public class BotValidator {
    private static final char COMMA = ',';
    private static final char POINT = '.';
    private static final Pattern hasComma = Pattern.compile(".*,.*");
+   private static final Pattern isPositiveNumber = Pattern.compile("^\\d+(\\.|,)?\\d*$");
 
 
    /**
@@ -45,7 +46,11 @@ public class BotValidator {
     * @throws ParseException if value is not a number
     */
    public static Float parseNumber(String value) throws ParseException {
-      Matcher matcher = hasComma.matcher(value);
+      Matcher matcher = isPositiveNumber.matcher(value);
+      if (!matcher.matches()) {
+         throw new ParseException("Invalid number: " + value, 0);
+      }
+      matcher = hasComma.matcher(value);
       char separator;
       if (matcher.matches()) {
          separator = COMMA;

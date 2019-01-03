@@ -28,11 +28,11 @@ public class Bot {
    private static final String START_MESSAGE = "Hello! Could I help you?";
 
 
-   private static final String CONVERT_MESSAGE = "You can use /convert to make me new convert currencies";
+   private static final String CONVERT_MESSAGE = ". You can use /convert to make me new convert currencies";
    /**
     * Stop message to user
     */
-   private static final String STOP_MESSAGE = "OK. " + CONVERT_MESSAGE;
+   private static final String STOP_MESSAGE = "OK" + CONVERT_MESSAGE;
 
    /**
     * Bot's command to start conversation
@@ -51,11 +51,9 @@ public class Bot {
    private static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
    private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
 
-   private String firstCurrency;
-   private String secondCurrency;
+   private String firstCurrency = "";
+   private String secondCurrency = "";
    private int convertStep = 0;
-
-
 
 
    /**
@@ -73,7 +71,6 @@ public class Bot {
     */
    String onUpdateReceived(String command) {
       String message;
-
       if (command.equals(START)) {
          message = START_MESSAGE;
          convertStep = 0;
@@ -95,7 +92,7 @@ public class Bot {
          message = convertValue(command);
          convertStep = 0;
       } else {
-         message = "Sorry, but I don't understand what \"" + command + "\" means. " + CONVERT_MESSAGE;
+         message = "Sorry, but I don't understand what \"" + command + "\" means" + CONVERT_MESSAGE;
          convertStep = 0;
       }
 
@@ -115,7 +112,6 @@ public class Bot {
          Converter converter = new Converter(usersCurrency, desiredCurrency, parseNumber(value));
 
          Float convertedValue = converterService.convert(converter);
-
          message = value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
       } catch (CurrencyConverterException e) {
          message = e.getMessage() + CONVERT_MESSAGE;
