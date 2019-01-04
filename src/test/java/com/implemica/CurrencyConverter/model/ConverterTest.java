@@ -2,14 +2,15 @@ package com.implemica.CurrencyConverter.model;
 
 import com.implemica.CurrencyConverter.service.ConverterService;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.*;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConverterTest {
 
@@ -217,34 +218,87 @@ class ConverterTest {
    }
 
    @Test
-   @Ignore("this test takes 3 hours 25 min. ")
-   void checkConversionsWithAllPossibleCurrencies() {
+   void checkUnsupportedCurrency() {
+      checkNonConvertibility("GWP", "USD");
+      checkNonConvertibility("SKK", "USD");
+      checkNonConvertibility("SIT", "USD");
+      checkNonConvertibility("MZM", "USD");
+      checkNonConvertibility("IEP", "USD");
+      checkNonConvertibility("NLG", "USD");
+      checkNonConvertibility("ZWN", "USD");
+      checkNonConvertibility("GHC", "USD");
+      checkNonConvertibility("MGF", "USD");
+      checkNonConvertibility("ESP", "USD");
+      checkNonConvertibility("ZWR", "USD");
+      checkNonConvertibility("EEK", "USD");
+      checkNonConvertibility("USN", "USD");
+      checkNonConvertibility("TRL", "USD");
+      checkNonConvertibility("XBD", "USD");
+      checkNonConvertibility("CYP", "USD");
+      checkNonConvertibility("LUF", "USD");
+      checkNonConvertibility("SRG", "USD");
+      checkNonConvertibility("XPT", "USD");
+      checkNonConvertibility("ADP", "USD");
+      checkNonConvertibility("TPE", "USD");
+      checkNonConvertibility("COU", "USD");
+      checkNonConvertibility("BEF", "USD");
+      checkNonConvertibility("AFA", "USD");
+      checkNonConvertibility("ROL", "USD");
+      checkNonConvertibility("DEM", "USD");
+      checkNonConvertibility("BOV", "USD");
+      checkNonConvertibility("ATS", "USD");
+      checkNonConvertibility("XUA", "USD");
+      checkNonConvertibility("CHE", "USD");
+      checkNonConvertibility("PTE", "USD");
+      checkNonConvertibility("VEB", "USD");
+      checkNonConvertibility("AYM", "USD");
+      checkNonConvertibility("ZWD", "USD");
+      checkNonConvertibility("USS", "USD");
+      checkNonConvertibility("CSD", "USD");
+      checkNonConvertibility("XTS", "USD");
+      checkNonConvertibility("BYB", "USD");
+      checkNonConvertibility("XFU", "USD");
+      checkNonConvertibility("XSU", "USD");
+      checkNonConvertibility("TMM", "USD");
+      checkNonConvertibility("AZM", "USD");
+      checkNonConvertibility("XFO", "USD");
+      checkNonConvertibility("SDD", "USD");
+      checkNonConvertibility("YUM", "USD");
+      checkNonConvertibility("MTL", "USD");
+      checkNonConvertibility("FIM", "USD");
+      checkNonConvertibility("CHW", "USD");
+      checkNonConvertibility("XBA", "USD");
+      checkNonConvertibility("XXX", "USD");
+      checkNonConvertibility("UYI", "USD");
+      checkNonConvertibility("XBC", "USD");
+      checkNonConvertibility("GRD", "USD");
+      checkNonConvertibility("RUR", "USD");
+      checkNonConvertibility("XBB", "USD");
+      checkNonConvertibility("BGL", "USD");
+   }
+
+   @Test
+   @Disabled("this test takes 2 hours 25 min. ")
+   void checkConversionsWithAllPossibleCurrencies() throws IOException, CurrencyConverterException {
       ArrayList<CurrencyConverterException> list = new ArrayList<>();
       for (int i = 0; i < existingCurrency.length; i++) {
          for (int j = i; j < existingCurrency.length; j++) {
-            try {
-               checkConvert(existingCurrency[i], existingCurrency[j]);
-            } catch (CurrencyConverterException e) {
-
-            } catch (IOException e) {
-
-            }
+            checkConvert(existingCurrency[i], existingCurrency[j]);
          }
       }
       System.out.println(Arrays.toString(list.toArray()));
    }
 
    @Test
+   @Disabled
    void checkSupport() {
       ArrayList<Currency> arrayList = new ArrayList<>();
       for (Currency currency : Currency.getAvailableCurrencies()) {
          try {
             checkConvert(currency.getCurrencyCode(), "USD");
             arrayList.add(currency);
-         } catch (CurrencyConverterException e) {
+         } catch (CurrencyConverterException | IOException e) {
 
-         } catch (IOException e) {
-            e.printStackTrace();
          }
       }
       System.out.println(arrayList.size());
@@ -258,5 +312,9 @@ class ConverterTest {
 
       Float value = converterService.convert(converter);
       assertNotNull(value);
+   }
+
+   private void checkNonConvertibility(String userCurrency, String desiredCurrency) {
+      assertThrows(CurrencyConverterException.class, () -> checkConvert(userCurrency, desiredCurrency));
    }
 }
