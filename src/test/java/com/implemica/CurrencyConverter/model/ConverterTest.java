@@ -2,9 +2,11 @@ package com.implemica.CurrencyConverter.model;
 
 import com.implemica.CurrencyConverter.service.ConverterService;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
@@ -13,25 +15,28 @@ class ConverterTest {
 
    private static ConverterService converterService;
 
+   private static Converter testData;
+
    private static String[] existingCurrency = new String[] {"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
-           "BAM", "SZL", "ITL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "ZMK", "BBD",
-           "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "CUC", "BTN", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "MXV", "DJF",
-           "HTG", "PKR", "SHP", "KYD", "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB",
-           "FJD", "MRO", "AOA", "XAF", "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "LVL", "OMR", "MYR", "VUV", "KES", "XCD",
-           "ARS", "GBP", "SDG", "MUR", "VND", "FRF", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP",
-           "IDR", "ZWL", "LRD", "JPY", "NAD", "CLF", "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "KPW", "IRR", "GYD",
-           "TWD", "FKP", "ZMW", "XOF", "MWK", "KMF", "KRW", "TZS", "LTL", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY",
-           "LBP", "INR", "CLP", "GHS", "BMD", "XAU", "NGN", "SBD", "LKR", "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK",
-           "MXN", "WST", "UGX", "SVC", "SGD", "XDR", "PYG", "JOD", "AFN", "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP",
-           "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "XPD", "UYU", "MZN", "BRL"};
+           "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD", "CDF",
+           "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
+           "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO",
+           "AOA", "XAF", "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "LVL", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP",
+           "SDG", "MUR", "VND", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "LRD",
+           "JPY", "NAD", "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "IRR", "GYD", "TWD", "ZMW", "XOF",
+           "MWK", "KMF", "KRW", "TZS", "LTL", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS",
+           "NGN", "SBD", "LKR", "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC",
+           "SGD", "PYG", "JOD", "AFN", "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD",
+           "UZS", "EUR", "AED", "UYU", "MZN", "BRL"};
 
    @BeforeAll
    static void setUp() {
       converterService = new ConverterService();
+      testData = new Converter(Currency.getInstance("USD"), Currency.getInstance("EUR"), 1.0f);
    }
 
    @Test
-   void convert() throws CurrencyConverterException {
+   void convert() throws CurrencyConverterException, IOException {
       checkConvert("UAH", "RUB");
       checkConvert("UAH", "UAH");
       checkConvert("UAH", "EUR");
@@ -54,7 +59,7 @@ class ConverterTest {
    }
 
    @Test
-   void checkCurrencyTransferToUSD() throws CurrencyConverterException {
+   void checkCurrencyTransferToUSD() throws CurrencyConverterException, IOException {
       checkConvert("SEK", "USD");
       checkConvert("XCD", "USD");
       checkConvert("DKK", "USD");
@@ -212,12 +217,21 @@ class ConverterTest {
    }
 
    @Test
-   void convertWith() throws CurrencyConverterException {
-      for (String curr1 : existingCurrency) {
-         for (String curr2 : existingCurrency) {
-            checkConvert(curr1, curr2);
+   @Ignore("this test takes 3 hours 25 min. ")
+   void checkConversionsWithAllPossibleCurrencies() {
+      ArrayList<CurrencyConverterException> list = new ArrayList<>();
+      for (int i = 0; i < existingCurrency.length; i++) {
+         for (int j = i; j < existingCurrency.length; j++) {
+            try {
+               checkConvert(existingCurrency[i], existingCurrency[j]);
+            } catch (CurrencyConverterException e) {
+
+            } catch (IOException e) {
+
+            }
          }
       }
+      System.out.println(Arrays.toString(list.toArray()));
    }
 
    @Test
@@ -229,13 +243,15 @@ class ConverterTest {
             arrayList.add(currency);
          } catch (CurrencyConverterException e) {
 
+         } catch (IOException e) {
+            e.printStackTrace();
          }
       }
       System.out.println(arrayList.size());
       System.out.println(Arrays.toString(arrayList.toArray()));
    }
 
-   private void checkConvert(String userCurrency, String desiredCurrency) throws CurrencyConverterException {
+   private void checkConvert(String userCurrency, String desiredCurrency) throws CurrencyConverterException, IOException {
       Converter converter = new Converter(Currency.getInstance(userCurrency),
                                           Currency.getInstance(desiredCurrency),
                                           1f);

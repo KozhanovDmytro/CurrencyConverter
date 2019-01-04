@@ -14,6 +14,7 @@ import javax.money.MonetaryAmount;
 import javax.money.convert.CurrencyConversion;
 import javax.money.convert.MonetaryConversions;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -55,12 +56,15 @@ public class ConverterService {
       void execute(Converter converter) throws Exception;
    }
 
-   public float convert(Converter converter) throws CurrencyConverterException {
+   public float convert(Converter converter) throws CurrencyConverterException, IOException {
+      checkConnection();
+
       for (OptionSupplier option : options) {
          if(handleException(option, converter)) {
             return convertedValue;
          }
       }
+
       log.log(Level.SEVERE, "exception was thrown: " + Arrays.toString(exceptions.toArray()));
       throw new CurrencyConverterException(analyzeException());
    }
@@ -70,7 +74,7 @@ public class ConverterService {
       for (Throwable e : exceptions) {
          if (e instanceof IOException) {
             log.log(Level.SEVERE, e.getMessage());
-            result = "Server not responding";
+            result = "One or two currencies not supported.";
          } else if (e instanceof CurrencyNotSupportedException) {
             log.log(Level.SEVERE, e.getMessage());
             result = e.getMessage();
@@ -130,9 +134,9 @@ public class ConverterService {
    }
 
    private void convertByFloatRatesCom(Converter converter) throws IOException {
-      URL url = buildURL(URL_FLOAT_RATES_COM, converter.getUsersCurrency());
+      String url = String.format(URL_FLOAT_RATES_COM, converter.getUsersCurrency());
 
-      JSONObject object = getJsonObjectByURL(url);
+      JSONObject object = getJsonObjectByURL(new URL(url));
 
       String desiredCurrency = converter.getDesiredCurrency().getCurrencyCode();
 
@@ -160,13 +164,13 @@ public class ConverterService {
       return result;
    }
 
-   private static URL buildURL(String path, Converter converter) throws MalformedURLException {
-      String url = String.format(path, converter.getUsersCurrency(), converter.getDesiredCurrency());
-      return new URL(url);
+   private boolean checkConnection() throws IOException {
+      InetAddress connection = InetAddress.getByName("www.google.com");
+      return connection.isReachable(3000);
    }
 
-   private static URL buildURL(String path, java.util.Currency currency) throws MalformedURLException {
-      String url = String.format(path, currency);
+   private static URL buildURL(String path, Converter converter) throws MalformedURLException {
+      String url = String.format(path, converter.getUsersCurrency(), converter.getDesiredCurrency());
       return new URL(url);
    }
 }
