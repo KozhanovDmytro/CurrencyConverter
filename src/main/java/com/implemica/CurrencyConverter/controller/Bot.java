@@ -8,8 +8,11 @@ import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Currency;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.implemica.CurrencyConverter.validator.BotValidator.formatNumber;
 import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber;
@@ -28,11 +31,11 @@ public class Bot {
    private static final String START_MESSAGE = "Hello! Could I help you?";
 
 
-   private static final String CONVERT_MESSAGE = ". You can use /convert to make me new convert currencies";
+   private static final String CONVERT_MESSAGE = " You can use /convert to make me new convert currencies";
    /**
     * Stop message to user
     */
-   private static final String STOP_MESSAGE = "OK" + CONVERT_MESSAGE;
+   private static final String STOP_MESSAGE = "OK." + CONVERT_MESSAGE;
 
    /**
     * Bot's command to start conversation
@@ -56,6 +59,7 @@ public class Bot {
    private int convertStep = 0;
 
 
+   private final Logger log = Logger.getLogger(this.getClass().getName());
    /**
     * Data, which has to be added to .csv file
     */
@@ -79,20 +83,20 @@ public class Bot {
          convertStep = 0;
       } else if (command.equals(CONVERT)) {
          message = FIRST_CONVERT_MESSAGE;
-         convertStep++;
+         convertStep = 1;
       } else if (convertStep == 1) {
          firstCurrency = BotValidator.toUpperCase(command);
          message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
-         convertStep++;
+         convertStep = 2;
       } else if (convertStep == 2) {
          secondCurrency = BotValidator.toUpperCase(command);
          message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
-         convertStep++;
+         convertStep = 3;
       } else if (convertStep == 3) {
          message = convertValue(command);
          convertStep = 0;
       } else {
-         message = "Sorry, but I don't understand what \"" + command + "\" means" + CONVERT_MESSAGE;
+         message = "Sorry, but I don't understand what \"" + command + "\" means." + CONVERT_MESSAGE;
          convertStep = 0;
       }
 
@@ -102,6 +106,7 @@ public class Bot {
    /**
     * Returns result of conversion from first currency to second currency
     */
+
    private String convertValue(String value) {
       String message;
       int count = 0;
@@ -114,7 +119,7 @@ public class Bot {
          Float convertedValue = converterService.convert(converter);
          message = value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
       } catch (CurrencyConverterException e) {
-         message = e.getMessage() + CONVERT_MESSAGE;
+         message = "One or two currencies not supported." + CONVERT_MESSAGE;
       } catch (ParseException e) {
          message = "Sorry, but \"" + value + "\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE;
       } catch (IllegalArgumentException e) {
@@ -125,7 +130,12 @@ public class Bot {
             wrongCurrency = secondCurrency;
          }
          message = "Sorry, but currency is not valid: " + wrongCurrency + CONVERT_MESSAGE;
+      } catch (IOException e) {
+         log.log(Level.SEVERE, e.getMessage()+ " is not responding.");
+         message = "Server is not responding." + CONVERT_MESSAGE;
       }
       return message;
    }
+
+
 }
