@@ -1,5 +1,6 @@
-package com.implemica.CurrencyConverter.model;
+package com.implemica.CurrencyConverter.service;
 
+import com.implemica.CurrencyConverter.model.Converter;
 import com.implemica.CurrencyConverter.service.ConverterService;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -18,7 +20,7 @@ class ConverterTest {
 
    private static Converter testData;
 
-   private static String[] existingCurrency = new String[] {"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
+   private static String[] existingCurrency = new String[] {/*"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",*/
            "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD", "CDF",
            "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
            "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO",
@@ -278,10 +280,21 @@ class ConverterTest {
    }
 
    @Test
+   void checkIdenticalCurrency() throws IOException, CurrencyConverterException {
+      for (Currency currency : Currency.getAvailableCurrencies()) {
+         float randomValue = new Random().nextFloat();
+         checkConvertForIdenticalCurrencies(currency.getCurrencyCode(), randomValue);
+      }
+   }
+
+   @Test
    @Disabled("this test takes 2 hours 25 min. ")
    void checkConversionsWithAllPossibleCurrencies() throws IOException, CurrencyConverterException {
       ArrayList<CurrencyConverterException> list = new ArrayList<>();
       for (int i = 0; i < existingCurrency.length; i++) {
+         if(existingCurrency[i].equals("CDF")) {
+            break;
+         }
          for (int j = i; j < existingCurrency.length; j++) {
             checkConvert(existingCurrency[i], existingCurrency[j]);
          }
@@ -316,5 +329,13 @@ class ConverterTest {
 
    private void checkNonConvertibility(String userCurrency, String desiredCurrency) {
       assertThrows(CurrencyConverterException.class, () -> checkConvert(userCurrency, desiredCurrency));
+   }
+
+   private void checkConvertForIdenticalCurrencies(String userCurrency, float expectedValue) throws CurrencyConverterException, IOException {
+      Converter converter = new Converter(Currency.getInstance(userCurrency),
+              Currency.getInstance(userCurrency),
+              expectedValue);
+
+      assertEquals(expectedValue, converterService.convert(converter));
    }
 }
