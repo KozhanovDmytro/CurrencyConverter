@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Daria S.
  * @version 01.02.2019 14:42
  */
-class BotTest {
+public class BotTest {
 
    private final ConverterService converterService = new ConverterService();
    private Bot testBot = new Bot(converterService);

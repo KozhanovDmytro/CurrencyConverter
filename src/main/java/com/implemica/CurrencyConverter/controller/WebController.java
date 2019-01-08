@@ -9,28 +9,46 @@ import org.springframework.web.bind.annotation.GetMapping;
 /**
  * Controller for show bot's log.
  *
+ * @see DialogDao
+ *
  * @author Dmytro K.
- * @version 29.12.2018 17:00
+ * @version 08.01.2019 5:12
  */
-@Controller
-public class WebController {
+@Controller public final class WebController {
 
+   /** The instance of {@link DialogDao} needed for getting all data from storage. */
    private final DialogDao dialogDao;
 
-   @Autowired
-   public WebController(DialogDao dialogDao) {
+   @Autowired public WebController(DialogDao dialogDao) {
       this.dialogDao = dialogDao;
    }
 
-   @GetMapping("/log")
-   public String log(Model model) {
+   /**
+    * Mapping shows all data to web page which got from storage.
+    *
+    * @param model object which put data to show on page.
+    * @return template page.
+    */
+   @GetMapping("/log") public String log(Model model) {
       model.addAttribute("transactions", dialogDao.getAll());
-
-      return "log";
+      return "log_page";
    }
 
-   @GetMapping("/monitor")
-   public String monitor() {
-      return "monitor";
+   /**
+    * Mapping gets page with websocket listener
+    *
+    * @return template page.
+    */
+   @GetMapping("/monitor") public String monitor() {
+      return "monitor_page";
+   }
+
+   /**
+    * Starting page.
+    *
+    * @return template page.
+    */
+   @GetMapping("/") public String main() {
+      return "index";
    }
 }

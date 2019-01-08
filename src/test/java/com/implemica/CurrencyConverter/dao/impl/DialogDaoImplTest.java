@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Daria S.
  */
-class DialogDaoImplTest {
+public class DialogDaoImplTest {
 
    /**
     * Greeting message to user

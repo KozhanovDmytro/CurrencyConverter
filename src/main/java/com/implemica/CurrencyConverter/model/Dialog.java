@@ -1,5 +1,7 @@
 package com.implemica.CurrencyConverter.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.text.SimpleDateFormat;
@@ -17,12 +19,14 @@ public class Dialog {
 
    private User user;
 
+   @JsonFormat( shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy hh:mm:ss")
    private Date date;
 
    /**
     * Date format
     */
-   SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+   @JsonIgnore
+   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
    public Dialog(Date date, User user, String usersRequest, String botsResponse) {
       this.usersRequest = usersRequest;

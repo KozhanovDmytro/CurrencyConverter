@@ -10,19 +10,22 @@ import java.util.Currency;
  * Class for convert currencies.
  *
  * @author Dmytro K.
- * @version 25.12.2018 18:00
+ * @version 08.01.2019 05:03
  */
-@Data @AllArgsConstructor
+@Data
+@AllArgsConstructor
 public class Converter {
 
+   /** User's money which will be converted. */
    private Currency usersCurrency;
 
+   /** Desired currency in which the conversion will be made */
    private Currency desiredCurrency;
 
+   /** Amount of {@link this#usersCurrency}*/
    private float value;
 
-   @Override
-   public String toString() {
+   @Override public String toString() {
       return   usersCurrency.getCurrencyCode() + " -> " +
                desiredCurrency.getCurrencyCode() + " value: " +
                value;

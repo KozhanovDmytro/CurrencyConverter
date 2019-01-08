@@ -14,11 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ConverterTest {
+public class ConverterTest {
 
    private static ConverterService converterService;
-
-   private static Converter testData;
 
    private static String[] existingCurrency = new String[] {/*"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",*/
            "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD", "CDF",
@@ -35,7 +33,6 @@ class ConverterTest {
    @BeforeAll
    static void setUp() {
       converterService = new ConverterService();
-      testData = new Converter(Currency.getInstance("USD"), Currency.getInstance("EUR"), 1.0f);
    }
 
    @Test
@@ -266,6 +263,7 @@ class ConverterTest {
       checkNonConvertibility("XFO", "USD");
       checkNonConvertibility("SDD", "USD");
       checkNonConvertibility("YUM", "USD");
+      checkNonConvertibility("XTS", "UAH");
       checkNonConvertibility("MTL", "USD");
       checkNonConvertibility("FIM", "USD");
       checkNonConvertibility("CHW", "USD");
@@ -282,40 +280,18 @@ class ConverterTest {
    @Test
    void checkIdenticalCurrency() throws IOException, CurrencyConverterException {
       for (Currency currency : Currency.getAvailableCurrencies()) {
-         float randomValue = new Random().nextFloat();
-         checkConvertForIdenticalCurrencies(currency.getCurrencyCode(), randomValue);
+         checkConvertForIdenticalCurrencies(currency.getCurrencyCode(), new Random().nextFloat());
       }
    }
 
    @Test
    @Disabled("this test takes 2 hours 25 min. ")
    void checkConversionsWithAllPossibleCurrencies() throws IOException, CurrencyConverterException {
-      ArrayList<CurrencyConverterException> list = new ArrayList<>();
       for (int i = 0; i < existingCurrency.length; i++) {
-         if(existingCurrency[i].equals("CDF")) {
-            break;
-         }
          for (int j = i; j < existingCurrency.length; j++) {
             checkConvert(existingCurrency[i], existingCurrency[j]);
          }
       }
-      System.out.println(Arrays.toString(list.toArray()));
-   }
-
-   @Test
-   @Disabled
-   void checkSupport() {
-      ArrayList<Currency> arrayList = new ArrayList<>();
-      for (Currency currency : Currency.getAvailableCurrencies()) {
-         try {
-            checkConvert(currency.getCurrencyCode(), "USD");
-            arrayList.add(currency);
-         } catch (CurrencyConverterException | IOException e) {
-
-         }
-      }
-      System.out.println(arrayList.size());
-      System.out.println(Arrays.toString(arrayList.toArray()));
    }
 
    private void checkConvert(String userCurrency, String desiredCurrency) throws CurrencyConverterException, IOException {
@@ -331,7 +307,7 @@ class ConverterTest {
       assertThrows(CurrencyConverterException.class, () -> checkConvert(userCurrency, desiredCurrency));
    }
 
-   private void checkConvertForIdenticalCurrencies(String userCurrency, float expectedValue) throws CurrencyConverterException, IOException {
+   private void checkConvertForIdenticalCurrencies(String userCurrency, Float expectedValue) throws CurrencyConverterException, IOException {
       Converter converter = new Converter(Currency.getInstance(userCurrency),
               Currency.getInstance(userCurrency),
               expectedValue);
