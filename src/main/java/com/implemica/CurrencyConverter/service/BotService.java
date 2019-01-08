@@ -1,16 +1,20 @@
-package com.implemica.CurrencyConverter.controller;
+package com.implemica.CurrencyConverter.service;
 
 
+import com.implemica.CurrencyConverter.dao.DialogDao;
 import com.implemica.CurrencyConverter.model.Converter;
-import com.implemica.CurrencyConverter.service.ConverterService;
+import com.implemica.CurrencyConverter.model.Dialog;
+import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.validator.BotValidator;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Currency;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,10 +25,16 @@ import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber
  * This class contains Bot's logic
  *
  * @author Daria S.
- * @version 02.01.19 12:39
+ * @version 08.01.19 14:32
  */
-@Component
-public class Bot {
+@Service
+public class BotService {
+   /**
+    * Data, which has to be added to .csv file
+    */
+   private final DialogDao dialogDao ;
+
+   private final SimpMessagingTemplate template;
    /**
     * Greeting message to user
     */
@@ -66,14 +76,16 @@ public class Bot {
    private final ConverterService converterService;
 
    @Autowired
-   public Bot(ConverterService converterService) {
+   public BotService(ConverterService converterService, DialogDao dialogDao, SimpMessagingTemplate template) {
       this.converterService = converterService;
+      this.dialogDao = dialogDao;
+      this.template = template;
    }
 
    /**
     * Gets users input and processes it. Writes conversation to .csv file.
     */
-   String onUpdateReceived(String command) {
+   public String onUpdateReceived(String command, User user) {
       String message;
       if (command.equals(START)) {
          message = START_MESSAGE;
@@ -99,6 +111,13 @@ public class Bot {
          message = "Sorry, but I don't understand what \"" + command + "\" means." + CONVERT_MESSAGE;
          convertStep = 0;
       }
+
+      Date dateNow = new Date();
+
+      Dialog dialog = new Dialog(dateNow, user, command, message);
+
+      dialogDao.write(dialog);
+      sendToWebSocketFollowers(dialog);
 
       return message;
    }
@@ -137,5 +156,16 @@ public class Bot {
       return message;
    }
 
+
+   /**
+    * Function sends an instance {@link Dialog} to WebSocket chanel followers.
+    *
+    * @param dialog dialog
+    * @author Dmytro K.
+    * @version 02.01.2019 10:00
+    */
+   private void sendToWebSocketFollowers(Dialog dialog) {
+      template.convertAndSend("/listen/bot", dialog);
+   }
 
 }

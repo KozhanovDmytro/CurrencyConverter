@@ -1,17 +1,13 @@
 package com.implemica.CurrencyConverter.controller;
 
-import com.implemica.CurrencyConverter.dao.DialogDao;
-import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
+import com.implemica.CurrencyConverter.service.BotService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.Date;
 
 /**
  * This class gets users input from telegram bot and processes it via Converter class
@@ -28,24 +24,10 @@ public class BotController extends TelegramLongPollingBot {
    private static final String BOT_TOKEN = "736932538:AAFW981ptLJ4g1lbsVTn7HebaojMKLClEDg";
 
    /**
-    * Information about User
-    */
-   private User user;
-
-   /**
     * Bot's logic
     */
    @Autowired
-   private Bot bot;
-
-   /**
-    * Data, which has to be added to .csv file
-    */
-   @Autowired
-   private DialogDao dialogDao;
-
-   @Autowired
-   private SimpMessagingTemplate template;
+   private BotService bot;
 
    /**
     * Gets users input and processes it. Writes conversation to .csv file.
@@ -57,22 +39,16 @@ public class BotController extends TelegramLongPollingBot {
       String message;
 
       //get information about user
-      getInformationAboutUser(update);
+      User user = getInformationAboutUser(update);
 
       //dialog with user
       if (!update.getMessage().hasText()) {
          message = "Sorry, but this message contains incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
          command = "Users message has incorrect content.";
       } else {
-         message = bot.onUpdateReceived(command);
+         message = bot.onUpdateReceived(command, user);
       }
       sendMessage(update, message);
-      Date dateNow = new Date();
-
-      Dialog dialog = new Dialog(dateNow, user, command, message);
-
-      dialogDao.write(dialog);
-      sendToWebSocketFollowers(dialog);
    }
 
    @Override
@@ -104,9 +80,10 @@ public class BotController extends TelegramLongPollingBot {
    /**
     * User initialisation: id, name, last name
     */
-   private void getInformationAboutUser(Update update) {
+   private User getInformationAboutUser(Update update) {
       org.telegram.telegrambots.meta.api.objects.User botUser = update.getMessage().getFrom();
       int userId = botUser.getId();
+      User user;
       String userFirstName = botUser.getFirstName();
       String userLastName = botUser.getLastName();
       String userName = botUser.getUserName();
@@ -123,18 +100,8 @@ public class BotController extends TelegramLongPollingBot {
          user = new User(userId, userFirstName, userLastName, userName);
       }
 
+      return user;
    }
 
-
-   /**
-    * Function sends an instance {@link Dialog} to WebSocket chanel followers.
-    *
-    * @param dialog dialog
-    * @author Dmytro K.
-    * @version 02.01.2019 10:00
-    */
-   private void sendToWebSocketFollowers(Dialog dialog) {
-      template.convertAndSend("/listen/bot", dialog);
-   }
 }
 

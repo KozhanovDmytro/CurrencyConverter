@@ -1,7 +1,13 @@
-package com.implemica.CurrencyConverter.controller;
+package com.implemica.CurrencyConverter.service;
 
+import com.implemica.CurrencyConverter.configuration.SpringConfiguration;
+import com.implemica.CurrencyConverter.configuration.WebSocketConfiguration;
+import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.service.ConverterService;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,15 +15,19 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * This class tests
+ * This class tests BotService class
  *
  * @author Daria S.
- * @version 01.02.2019 14:42
+ * @version 08.02.2019 14:32
  */
-public class BotTest {
+@SpringBootTest(classes = {BotService.class, ConverterService.class})
+@Import({SpringConfiguration.class, WebSocketConfiguration.class})
+public class BotServiceTest {
 
-   private final ConverterService converterService = new ConverterService();
-   private Bot testBot = new Bot(converterService);
+   @Autowired
+   private BotService testBotService;
+
+   private User testUser = new User(12, "user");
 
    /**
     * Greeting message to user
@@ -116,19 +126,19 @@ public class BotTest {
       interruptConvertOnSecondStep("uah", "UAH", START, START_MESSAGE);
       interruptConvertOnSecondStep("Rub", "RUB", STOP, STOP_MESSAGE);
       interruptConvertOnSecondStep("EUR", "EUR", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //wrong currency
       interruptConvertOnSecondStep("123", "123", START, START_MESSAGE);
       interruptConvertOnSecondStep("ZZZ", "ZZZ", STOP, STOP_MESSAGE);
       interruptConvertOnSecondStep("Bot", "BOT", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //unsupported currency
       interruptConvertOnSecondStep("tmm", "TMM", START, START_MESSAGE);
       interruptConvertOnSecondStep("zwd", "ZWD", STOP, STOP_MESSAGE);
       interruptConvertOnSecondStep("xua", "XUA", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
    }
 
    @Test
@@ -137,57 +147,55 @@ public class BotTest {
       interruptConvertOnThirdStep("Pln", "PLN", "Eur", "EUR", START, START_MESSAGE);
       interruptConvertOnThirdStep("BgN", "BGN", "TRy", "TRY", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("All", "ALL", "PHP", "PHP", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //first correct, second unsupported
       interruptConvertOnThirdStep("Cad", "CAD", "iep", "IEP", START, START_MESSAGE);
       interruptConvertOnThirdStep("CZk", "CZK", "xbb", "XBB", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("IQD", "IQD", "N L G", "NLG", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //first correct, second wrong
       interruptConvertOnThirdStep("mxn", "MXN", "sun", "SUN", START, START_MESSAGE);
       interruptConvertOnThirdStep("Uzs", "UZS", "java", "JAVA", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("MOP", "MOP", "Telegram", "TELEGRAM", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
 
 
       //first unsupported, second correct
       interruptConvertOnThirdStep("Mtl", "MTL", "bif", "BIF", START, START_MESSAGE);
       interruptConvertOnThirdStep("Eec", "EEC", "cop", "COP", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("Mgf", "MGF", "Ars", "ARS", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //both unsupported
       interruptConvertOnThirdStep("Usn", "USN", "byb", "BYB", START, START_MESSAGE);
       interruptConvertOnThirdStep("Fim", "FIM", "Trl", "TRL", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("CHW", "CHW", "USS", "USS", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //first unsupported, second wrong
       interruptConvertOnThirdStep("Sit", "SIT", "rus", "RUS", START, START_MESSAGE);
       interruptConvertOnThirdStep("Luf", "LUF", "eng", "ENG", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("A ZM", "AZM", "ua", "UA", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
 
 
       //first wrong, second correct
       interruptConvertOnThirdStep("shift", "SHIFT", "Uah", "UAH", START, START_MESSAGE);
       interruptConvertOnThirdStep("10 usd", "10USD", "Usd", "USD", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("bought", "BOUGHT", "PLN", "PLN", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //first wrong, second unsupported
       interruptConvertOnThirdStep("hi", "HI", "Rur", "RUR", START, START_MESSAGE);
       interruptConvertOnThirdStep("bye", "BYE", "Uyi", "UYI", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("111", "111", "Grd", "GRD", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //both wrong
       interruptConvertOnThirdStep("lets", "LETS", "oh", "OH", START, START_MESSAGE);
       interruptConvertOnThirdStep("speak", "SPEAK", "no", "NO", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("english", "ENGLISH", "hurrah", "HURRAH", CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
    }
 
@@ -197,253 +205,243 @@ public class BotTest {
       //with right currencies and right amount
       rightScript("Shp", "SHP", "Usd", "USD", "30.6");
       compute(START, START_MESSAGE);
-      stop();
+
 
       rightScript("EUr", "EUR", "UAh", "UAH", "150,50");
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       rightScript("RUB", "RUB", "CAD", "CAD", "542");
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //with right currencies and wrong amount
       withWrongAmount("Myr", "MYR", "KhR", "KHR", "-67");
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongAmount("Mxv", "MXV", "XAU", "XAU", "one");
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongAmount("LTL", "LTL", "QAR", "QAR", "167f");
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
 
 
       //first currency correct, second unsupported, right amount
       withUnsupportedCurrency("PLN", "PLN", "ITL", "ITL", "0.1", true);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withUnsupportedCurrency("EUr", "EUR", "Bov", "BOV", "150,50", true);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withUnsupportedCurrency("UAH", "UAH", "XUA", "XUA", "542", true);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //first currency correct, second unsupported, wrong amount
       withWrongAmount("Gel", "GEL", "ITL", "ITL", "0.11,");
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongAmount("Cny", "CNY", "Che", "CHE", "-98");
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongAmount("USD", "USD", "SRG", "SRG", "87$");
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
 
 
       //first currency correct, second wrong, right amount
       withWrongCurrency("UAH", "UAH", "rubli", "RUBLI", "2000", true);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongCurrency("bgn", "BGN", "uusd", "UUSD", "12000", true);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongCurrency("Try", "TRY", "euro", "EURO", "10", true);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //first currency correct, second wrong, wrong amount
       withWrongCurrency("Xof", "XOF", "hi", "HI", "abc", true);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongCurrency("SYP", "SYP", "big", "BIG", "-12", true);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongCurrency("USD", "USD", "from", "FROM", "12.5%", true);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
 
 
       //first currency unsupported, second correct, right amount
       withUnsupportedCurrency("xts", "XTS", "dop", "DOP", "301", false);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withUnsupportedCurrency("SRG", "SRG", "UYU", "UYU", "7", false);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withUnsupportedCurrency("zWR", "ZWR", "INR", "INR", "800", false);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //first currency unsupported, second correct, wrong amount
       withWrongAmount("cou", "COU", "ern", "ERN", "-17");
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongAmount("esp", "ESP", "lvl", "LVL", "a");
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongAmount("zWR", "ZWR", "INR", "INR", "111..");
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
 
 
       //both currencies unsupported, right amount
       withUnsupportedCurrency("xts", "XTS", "csd", "CSD", "804", false);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withUnsupportedCurrency("SRG", "SRG", "aym", "AYM", "90.7", false);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withUnsupportedCurrency("zWR", "ZWR", "Iep", "IEP", "505,5", false);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //both currencies unsupported, wrong amount
       withWrongAmount("mtl", "MTL", "USS", "USS", "-10000");
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongAmount("rol", "ROL", "RUr", "RUR", "12 6");
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongAmount("sKK", "SKK", "Xbb", "XBB", "08,,1");
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
 
 
       //first currency unsupported, second wrong, right amount
       withWrongCurrency("xxx", "XXX", "val", "VAL", "13.3", true);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongCurrency("Fim", "FIM", "little", "LITTLE", "444", true);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongCurrency("CSD", "CSD", "sad", "SAD", "222222222222", true);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //first currency unsupported, second wrong, wrong amount
       withWrongCurrency("xua", "XUA", "I", "I", "0 01", true);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongCurrency("Gwp", "GWP", "find", "FIND", "-10", true);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongCurrency("Nlg", "NLG", "you", "YOU", "16p", true);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
 
 
       //first currency wrong, second correct, right amount
       withWrongCurrency("russian", "RUSSIAN", "uah", "UAH", "300", false);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongCurrency("spanish", "SPANISH", "usd", "USD", "10.5", false);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongCurrency("canadian", "CANADIAN", "eur", "EUR", "600", false);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //first currency wrong, second correct, wrong amount
       withWrongCurrency("tttttttt", "TTTTTTTT", "isk", "ISK", "-34", false);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongCurrency("aaaa", "AAAA", "tmt", "TMT", "7.7.", false);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongCurrency("Poln", "POLN", "pyg", "PYG", "9pln", false);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
-
 
 
       //first currency wrong, second unsupported, right amount
       withWrongCurrency("lalala", "LALALA", "tMM", "TMM", "21", false);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongCurrency("tururu", "TURURU", "luf", "LUF", "18,40", false);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongCurrency("bah", "BAH", "azm", "AZM", "0.52", false);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //first currency wrong, second unsupported, wrong amount
       withWrongCurrency("go", "GO", "xts", "XTS", "-0.1", false);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongCurrency("wait", "WAIT", "veb", "VEB", "veb", false);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongCurrency("stop", "STOP", "eec", "EEC", "9 9", false);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
-
 
 
       //both currencies wrong, right amount
       withWrongCurrency("dog", "DOG", "bird", "BIRD", "100000", false);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongCurrency("snow", "SNOW", "water", "WATER", "30", false);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongCurrency("part", "PART", "whole", "WHOLE", "58", false);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
 
       //both currencies wrong, wrong amount
       withWrongCurrency("spoon", "SPOON", "plate", "PLATE", "4 cups", false);
       compute(START, START_MESSAGE);
-      stop();
+
 
       withWrongCurrency("child", "CHILD", "man", "MAN", "-2", false);
       compute(STOP, STOP_MESSAGE);
-      stop();
+
 
       withWrongCurrency("notes", "NOTES", "book", "BOOK", "4000f", false);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      stop();
+
    }
 
    @Test
-   void fewConvertCommand(){
-      compute(CONVERT,FIRST_CONVERT_MESSAGE);
-      compute(CONVERT,FIRST_CONVERT_MESSAGE);
-      compute(CONVERT,FIRST_CONVERT_MESSAGE);
+   void fewConvertCommand() {
+      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      compute(CONVERT, FIRST_CONVERT_MESSAGE);
       rightScript("usd", "USD", "uah", "UAH", "10");
    }
 
@@ -682,12 +680,12 @@ public class BotTest {
    }
 
    private void compute(String usersMessage, String botsResponse) {
-      assertEquals(botsResponse, testBot.onUpdateReceived(usersMessage));
+      assertEquals(botsResponse, testBotService.onUpdateReceived(usersMessage, testUser));
    }
 
    private void checkResult(String amount, String firstCurrency, String secondCurrency) {
       String start = amount + " " + firstCurrency + " is ";
-      String botsResponse = testBot.onUpdateReceived(amount);
+      String botsResponse = testBotService.onUpdateReceived(amount, testUser);
       assertTrue(botsResponse.startsWith(start));
       assertTrue(botsResponse.endsWith(secondCurrency));
       String value = botsResponse.replace(start, "").replace(" " + secondCurrency, "");
@@ -695,7 +693,4 @@ public class BotTest {
       assertTrue(matcher.matches());
    }
 
-   private void stop() {
-      testBot = new Bot(converterService);
-   }
 }

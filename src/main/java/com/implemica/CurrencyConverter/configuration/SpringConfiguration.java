@@ -13,10 +13,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration public class SpringConfiguration {
 
-   @Bean public ConverterService converterService() {
-      return new ConverterService();
-   }
-
    @Bean public DialogDao transactionDao() {
       return new DialogDaoImpl();
    }
