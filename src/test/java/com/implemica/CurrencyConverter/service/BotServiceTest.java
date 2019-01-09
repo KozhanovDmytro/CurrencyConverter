@@ -23,11 +23,20 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({SpringConfiguration.class, WebSocketConfiguration.class})
 public class BotServiceTest {
 
+   /**
+    * Test bot instance
+    */
    @Autowired
    private BotService testBotService;
-   private static final String BOT_TOKEN = "736932538:AAFW981ptLJ4g1lbsVTn7HebaojMKLClEDg";
 
-   private User testUser = new User(12, "user");
+   /**
+    * Test user instance
+    */
+   private User testUser = new User(12, "testUser");
+   /**
+    * Unique string, which uses for messages, which has non text content.
+    */
+   private static final String UNIQUE = BotService.UNIQUE;
 
    /**
     * Greeting message to user
@@ -35,16 +44,11 @@ public class BotServiceTest {
    private static final String START_MESSAGE = "Hello! Could I help you?";
 
    /**
-    * Converting messages
+    * Message to the user with the suggestion of a new conversion
     */
    private static final String CONVERT_MESSAGE = " You can use /convert to make me new convert currencies";
-   private static final String UNREADABLE_CONTENT_MESSAGE = "Sorry, but this message contains incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
-   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
-   private static final String SECOND_CONVERT_MESSAGE_1 = "OK, you wish to convert from ";
-   private static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
-   private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
    /**
-    * Stop message to user
+    * Stop message to the user
     */
    private static final String STOP_MESSAGE = "OK." + CONVERT_MESSAGE;
 
@@ -60,20 +64,55 @@ public class BotServiceTest {
     * Bot's command to stop conversation
     */
    private static final String STOP = "/stop";
+   /**
+    * Bot's response for /convert command
+    */
+   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
+   /**
+    * Start of bot's response after entering first currency
+    */
+   private static final String SECOND_CONVERT_MESSAGE_1 = "OK, you wish to convert from ";
+   /**
+    * End of bot's response after entering first currency
+    */
+   private static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
+   /**
+    * Bot's response after entering second currency
+    */
+   private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
 
+   /**
+    * Bot's response for not-text requests
+    */
+   private static final String UNREADABLE_CONTENT_MESSAGE = "Sorry, but this message contains incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
+   /**
+    * Regular expression, which matches, that string contains only the positive number
+    */
+   private static final String POSITIVE_NUMBER_REGEX = "^\\d+([.,])?\\d*$";
+   /**
+    * Defines the regular expression, which is needed to check that string is positive number
+    */
+   private static final Pattern isPositiveNumber = Pattern.compile(POSITIVE_NUMBER_REGEX);
 
-   private static final Pattern isPositiveNumber = Pattern.compile("^\\d+(\\.\\d+)?$");
-
+   /**
+    * Tests, that bot's response to /start command is correct
+    */
    @Test
    void startCommand() {
       compute(START, START_MESSAGE);
    }
 
+   /**
+    * Tests, that bot's response to /stop command is correct
+    */
    @Test
    void stopCommand() {
       compute(STOP, STOP_MESSAGE);
    }
 
+   /**
+    * Tests, that bot's response to text, which is not command is correct
+    */
    @Test
    void notCommandTest() {
       enterOtherWords("hello");
@@ -88,97 +127,103 @@ public class BotServiceTest {
       enterOtherWords("/clear");
    }
 
+   /**
+    * Tests, that bot's response to incorrect content is correct, no matter what time it was sent
+    */
    @Test
    void unreadableContent() {
       //wrong content
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       //wrong content after command
       compute(START, START_MESSAGE);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       compute(STOP, STOP_MESSAGE);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       //wrong content after second conversion step
-      interruptConvertOnSecondStep("usd", "USD", BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnSecondStep("xxx", "XXX", BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnSecondStep("hello", "HELLO", BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnSecondStep("usd", "USD", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnSecondStep("xxx", "XXX", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnSecondStep("hello", "HELLO", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       //wrong content after third conversion step
-      interruptConvertOnThirdStep("pln","PLN", "uah","UAH",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("cad","CAD", "uss","USS",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("mop","MOP", "say","SAY",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("pln", "PLN", "uah", "UAH", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("cad", "CAD", "uss", "USS", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("mop", "MOP", "say", "SAY", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
-      interruptConvertOnThirdStep("sit","SIT", "eur","EUR",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("trl","TRL", "xbb","XBB",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("xbc","XBC", "come","COME",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("sit", "SIT", "eur", "EUR", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("trl", "TRL", "xbb", "XBB", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("xbc", "XBC", "come", "COME", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
-      interruptConvertOnThirdStep("how","HOW", "rub","RUB",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("are","ARE", "afa","AFA",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("you","YOU", "talk","TALK",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("how", "HOW", "rub", "RUB", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("are", "ARE", "afa", "AFA", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("you", "YOU", "talk", "TALK", UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       //wrong content after conversion
       rightScript("Shp", "SHP", "Usd", "USD", "30.6");
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongAmount("Myr", "MYR", "KhR", "KHR", "-67");
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withUnsupportedCurrency("PLN", "PLN", "ITL", "ITL", "0.1", true);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongAmount("Gel", "GEL", "ITL", "ITL", "0.11,");
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongCurrency("UAH", "UAH", "rubli", "RUBLI", "2000", true);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongCurrency("Xof", "XOF", "hi", "HI", "abc", true);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withUnsupportedCurrency("xts", "XTS", "dop", "DOP", "301", false);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongAmount("cou", "COU", "ern", "ERN", "-17");
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withUnsupportedCurrency("xts", "XTS", "csd", "CSD", "804", false);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongAmount("mtl", "MTL", "USS", "USS", "-10000");
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongCurrency("xxx", "XXX", "val", "VAL", "13.3", true);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongCurrency("xua", "XUA", "I", "I", "0 01", true);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongCurrency("russian", "RUSSIAN", "uah", "UAH", "300", false);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongCurrency("tttttttt", "TTTTTTTT", "isk", "ISK", "-34", false);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongCurrency("lalala", "LALALA", "tMM", "TMM", "21", false);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongCurrency("go", "GO", "xts", "XTS", "-0.1", false);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongCurrency("dog", "DOG", "bird", "BIRD", "100000", false);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongCurrency("spoon", "SPOON", "plate", "PLATE", "4 cups", false);
-      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      compute(UNIQUE, UNREADABLE_CONTENT_MESSAGE);
 
    }
 
 
+   /**
+    * Tests, that bot reaction for two consecutive commands is correct
+    */
    @Test
    void twoCommandsTest() {
 
@@ -211,9 +256,13 @@ public class BotServiceTest {
 
    }
 
-   //we can interrupt conversion only if we give new command
+   /**
+    * Tests, that bot reaction for interruption conversion on second step by some command is correct
+    */
    @Test
    void interruptConvertOnSecondStepTest() {
+      //we can interrupt conversion only if we give new command
+
       //correct currency
       interruptConvertOnSecondStep("uah", "UAH", START, START_MESSAGE);
       interruptConvertOnSecondStep("Rub", "RUB", STOP, STOP_MESSAGE);
@@ -230,9 +279,11 @@ public class BotServiceTest {
       interruptConvertOnSecondStep("tmm", "TMM", START, START_MESSAGE);
       interruptConvertOnSecondStep("zwd", "ZWD", STOP, STOP_MESSAGE);
       interruptConvertOnSecondStep("xua", "XUA", CONVERT, FIRST_CONVERT_MESSAGE);
-
    }
 
+   /**
+    * Tests, that bot reaction for interruption conversion on third step by some command is correct
+    */
    @Test
    void interruptConvertOnThirdStepTest() {
       //both correct currency
@@ -291,7 +342,9 @@ public class BotServiceTest {
 
    }
 
-
+   /**
+    * Tests, that bot reaction for command after all steps of conversion is correct
+    */
    @Test
    void commandAfterConversionTest() {
       //with right currencies and right amount
@@ -529,14 +582,27 @@ public class BotServiceTest {
 
    }
 
+   /**
+    * Tests, that bot's reaction for few /convert command is equal to expected
+    */
    @Test
    void fewConvertCommand() {
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
       rightScript("usd", "USD", "uah", "UAH", "10");
+
+
+      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      rightScript("rub", "RUB", "EUR", "EUR", "4");
    }
 
+   /**
+    * Tests, that if both currencies and amount are correct, that bot's response is equal to expected
+    */
    @Test
    void rightScriptTest() {
       rightScript("usd", "USD", "uah", "UAH", "1");
@@ -551,7 +617,9 @@ public class BotServiceTest {
       rightScript("i  n   R", "INR", "e U r", "EUR", "811");
    }
 
-
+   /**
+    * Tests, that if both currencies are correct and amount is wrong, that bot's response is equal to expected
+    */
    @Test
    void wrongAmountTest() {
       withWrongAmount("xof", "XOF", "hnl", "HNL", "-2");
@@ -566,6 +634,9 @@ public class BotServiceTest {
       withWrongAmount("A Z N", "AZN", "X P F", "XPF", "p0q");
    }
 
+   /**
+    * Tests, that if one or two currencies are wrong, that bot's response is equal to expected for wrong and right amount
+    */
    @Test
    void wrongCurrency() {
       //wrong first currency, right amount
@@ -649,10 +720,11 @@ public class BotServiceTest {
       //second currency is unsupported
       withWrongCurrency("007", "007", "AFA", "AFA", "5500", false);
       withWrongCurrency("dog", "DOG", "p t e", "PTE", "-76", false);
-
-
    }
 
+   /**
+    * Tests, that if one or two currencies are unsupported, that bot's response is equal to expected for wrong and right amount
+    */
    @Test
    void unsupportedCurrency() {
       //first currency is unsupported, right amount
@@ -683,82 +755,189 @@ public class BotServiceTest {
    }
 
 
+   /**
+    * Checks, that bot's reaction for interruption conversion on third step by some command is equal to expected
+    *
+    * @param firstCurrency             the currency to convert from
+    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
+    * @param secondCurrency            the currency to convert to
+    * @param secondCurrencyInUpperCase the currency to convert to in upper case
+    * @param command                   command after conversion
+    * @param response                  expected bot's response for command
+    */
    private void interruptConvertOnThirdStep(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
                                             String secondCurrencyInUpperCase, String command, String response) {
       script(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase);
       compute(command, response);
    }
 
+   /**
+    * Checks, that bot's reaction for interruption conversion on second step by some command is equal to expected
+    *
+    * @param firstCurrency            the currency to convert from
+    * @param firstCurrencyInUpperCase the currency to convert from in upper case
+    * @param command                  command after conversion
+    * @param response                 expected bot's response for command
+    */
    private void interruptConvertOnSecondStep(String firstCurrency, String firstCurrencyInUpperCase, String command, String response) {
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
       compute(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrencyInUpperCase + SECOND_CONVERT_MESSAGE_2);
       compute(command, response);
    }
 
+   /**
+    * Checks, that bot's reaction entering some word and then command is equal to expected
+    *
+    * @param word     some word, which is not a command and gotten first
+    * @param command  command after gotten word
+    * @param response expected bot's response for command
+    */
    private void wordAndCommand(String word, String command, String response) {
       enterOtherWords(word);
       compute(command, response);
    }
 
+   /**
+    * Checks, that bot's reaction entering command and then some word is equal to expected
+    *
+    * @param command  command for bot
+    * @param response expected bot's response for command
+    * @param word     some word, which is not a command and gotten after command
+    */
    private void commandAndWord(String command, String response, String word) {
       compute(command, response);
       enterOtherWords(word);
    }
 
+   /**
+    * Checks, that bot's reaction for two consecutive commands is equal to expected
+    *
+    * @param firstCommand   first command to bot
+    * @param firstResponse  bot's response for first command
+    * @param secondCommand  next command to bot
+    * @param secondResponse expected bot's response for next command
+    */
    private void twoCommands(String firstCommand, String firstResponse, String secondCommand, String secondResponse) {
       compute(firstCommand, firstResponse);
       compute(secondCommand, secondResponse);
    }
 
+   /**
+    * Checks, that bot's reaction in conversion for unsupported currencies is equal to expected
+    *
+    * @param firstCurrency             the currency to convert from
+    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
+    * @param secondCurrency            the currency to convert to
+    * @param secondCurrencyInUpperCase the currency to convert to in upper case
+    * @param amount                    amount of first currency
+    * @param firstIsCorrect            true, if first currency is right and supported, false otherwise
+    */
    private void withUnsupportedCurrency(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
                                         String secondCurrencyInUpperCase, String amount, boolean firstIsCorrect) {
       rightScriptWithIncorrectCurrency(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase, amount,
               firstIsCorrect, true);
    }
 
+   /**
+    * Checks, that bot's reaction in conversion for wrong currencies is equal to expected
+    *
+    * @param firstCurrency             the currency to convert from
+    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
+    * @param secondCurrency            the currency to convert to
+    * @param secondCurrencyInUpperCase the currency to convert to in upper case
+    * @param amount                    amount of first currency
+    * @param firstIsCorrect            false, if first currency is some non-currency word, true otherwise
+    */
    private void withWrongCurrency(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
                                   String secondCurrencyInUpperCase, String amount, boolean firstIsCorrect) {
       rightScriptWithIncorrectCurrency(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase, amount,
               firstIsCorrect, false);
    }
 
+   /**
+    * Checks, that bot's reaction in conversion for incorrect currencies is equal to expected
+    *
+    * @param firstCurrency             the currency to convert from
+    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
+    * @param secondCurrency            the currency to convert to
+    * @param secondCurrencyInUpperCase the currency to convert to in upper case
+    * @param amount                    amount of first currency
+    * @param firstIsCorrect            true, if first currency is right
+    * @param isUnsupported             true,if one or two currencies are unsupported
+    */
    private void rightScriptWithIncorrectCurrency(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
                                                  String secondCurrencyInUpperCase, String amount, boolean firstIsCorrect, boolean isUnsupported) {
       String startOfMessage = "Sorry, but currency is not valid: ";
-      String wrongCurrency = "";
+      String wrongCurrency;
       if (isUnsupported) {
-         startOfMessage = "One or two currencies not supported.";
-      } else {
-         if (firstIsCorrect) {
-            wrongCurrency = secondCurrencyInUpperCase;
-         } else {
-            wrongCurrency = firstCurrencyInUpperCase;
-         }
+         startOfMessage = "Currency not supported: ";
       }
+      if (firstIsCorrect) {
+         wrongCurrency = secondCurrencyInUpperCase;
+      } else {
+         wrongCurrency = firstCurrencyInUpperCase;
+      }
+
       String message = startOfMessage + wrongCurrency + CONVERT_MESSAGE;
+
       rightScriptWithWrongValue(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase, amount, message);
+
    }
 
-
+   /**
+    * Checks, that bot's reaction in conversion for wrong amount is equal to expected
+    *
+    * @param firstCurrency             the currency to convert from
+    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
+    * @param secondCurrency            the currency to convert to
+    * @param secondCurrencyInUpperCase the currency to convert to in upper case
+    * @param amount                    amount of first currency
+    */
    private void withWrongAmount(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
                                 String secondCurrencyInUpperCase, String amount) {
       String message = "Sorry, but \"" + amount + "\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE;
       rightScriptWithWrongValue(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase, amount, message);
    }
 
+   /**
+    * Checks, that bot reaction for conversion, which contains wrong value is equal to expected
+    *
+    * @param firstCurrency             the currency to convert from
+    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
+    * @param secondCurrency            the currency to convert to
+    * @param secondCurrencyInUpperCase the currency to convert to in upper case
+    * @param amount                    amount of first currency
+    * @param message                   expected bot's response for given amount
+    */
    private void rightScriptWithWrongValue(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
                                           String secondCurrencyInUpperCase, String amount, String message) {
       script(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase);
       compute(amount, message);
    }
 
-
+   /**
+    * Checks, that bot reaction for consecutive /convert command and last result are equal to expected
+    *
+    * @param firstCurrency             the currency to convert from
+    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
+    * @param secondCurrency            the currency to convert to
+    * @param secondCurrencyInUpperCase the currency to convert to in upper case
+    * @param amount                    amount of first currency
+    */
    private void rightScript(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
                             String secondCurrencyInUpperCase, String amount) {
       script(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase);
       checkResult(amount, firstCurrencyInUpperCase, secondCurrencyInUpperCase);
    }
 
+   /**
+    * Checks, that bot's responses on conversion steps are equal to expected
+    *
+    * @param firstCurrency             the currency to convert from
+    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
+    * @param secondCurrency            the currency to convert to
+    * @param secondCurrencyInUpperCase the currency to convert to in upper case
+    */
    private void script(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
                        String secondCurrencyInUpperCase) {
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
@@ -766,15 +945,32 @@ public class BotServiceTest {
       compute(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrencyInUpperCase + " to " + secondCurrencyInUpperCase);
    }
 
-
+   /**
+    * Checks, that bot's reaction for non-command word is equal to expected
+    *
+    * @param message some word, which is not a command
+    */
    private void enterOtherWords(String message) {
       compute(message, "Sorry, but I don't understand what \"" + message + "\" means." + CONVERT_MESSAGE);
    }
 
+   /**
+    * Checks, that bot's response for user's request is correct
+    *
+    * @param usersMessage user's request to bot
+    * @param botsResponse expected bot's response to user
+    */
    private void compute(String usersMessage, String botsResponse) {
       assertEquals(botsResponse, testBotService.onUpdateReceived(usersMessage, testUser));
    }
 
+   /**
+    * Checks, that on last step bot's response contains positive value
+    *
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    * @param amount         amount of first currency
+    */
    private void checkResult(String amount, String firstCurrency, String secondCurrency) {
       String start = amount + " " + firstCurrency + " is ";
       String botsResponse = testBotService.onUpdateReceived(amount, testUser);

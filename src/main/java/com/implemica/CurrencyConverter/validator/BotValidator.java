@@ -33,7 +33,7 @@ public class BotValidator {
    /**
     * Regular expression, which matches, that string contains only the positive number
     */
-   private static final String POSITIVE_NUMBER_REGEX = "^\\d+(\\.|,)?\\d*$";
+   private static final String POSITIVE_NUMBER_REGEX = "^\\d+([.,])?\\d*$";
    /**
     * Defines the regular expression, which is needed to check that string has a comma
     */

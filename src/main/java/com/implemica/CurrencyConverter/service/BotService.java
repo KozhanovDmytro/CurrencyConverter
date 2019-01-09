@@ -200,7 +200,7 @@ public class BotService {
          Float convertedValue = converterService.convert(converter);
          message = value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
       } catch (CurrencyConverterException e) {
-         message = "One or two currencies not supported." + CONVERT_MESSAGE;
+         message = e.getMessage() + CONVERT_MESSAGE;
       } catch (ParseException e) {
          message = "Sorry, but \"" + value + "\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE;
       } catch (IllegalArgumentException e) {

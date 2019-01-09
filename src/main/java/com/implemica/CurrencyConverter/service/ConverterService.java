@@ -151,10 +151,7 @@ public final class ConverterService {
    private String analyzeException() {
       String result = MESSAGE_UNKNOWN_ERROR;
       for (Throwable e : exceptions) {
-         if (e instanceof IOException) {
-            logger.log(Level.SEVERE, e.getMessage());
-            result = MESSAGE_UNSUPPORTED_CURRENCY;
-         } else if (e instanceof CurrencyNotSupportedException) {
+         if (e instanceof CurrencyNotSupportedException) {
             logger.log(Level.SEVERE, e.getMessage());
             result = e.getMessage();
          }
