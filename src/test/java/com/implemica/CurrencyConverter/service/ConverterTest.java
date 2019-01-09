@@ -12,11 +12,14 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * @author Dmytro K., Daria S.
+ */
 public class ConverterTest {
 
    private static ConverterService converterService;
 
-   private static String[] existingCurrency = new String[] {/*"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
+   private static String[] existingCurrency = new String[]{/*"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
            "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD", "CDF",
            "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF",*/ "HTG", "PKR",
            "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO",
@@ -57,7 +60,10 @@ public class ConverterTest {
    }
 
    @Test
-   void testCurrencyTransferToUSD() throws CurrencyConverterException, IOException {
+   void checkCurrencyTransferToUSD() throws CurrencyConverterException, IOException {
+      checkConvert("BYR", "USD");
+      checkConvert("PAB", "USD");
+      checkConvert("LVL", "USD");
       checkConvert("SEK", "USD");
       checkConvert("XCD", "USD");
       checkConvert("DKK", "USD");
@@ -215,64 +221,249 @@ public class ConverterTest {
    }
 
    @Test
+   void checkCurrencyTransferToUAH() throws IOException, CurrencyConverterException {
+      checkConvert("BTN", "UAH");
+      checkConvert("BMD", "UAH");
+      checkConvert("KYD", "UAH");
+      checkConvert("STD", "UAH");
+      checkConvert("KPW", "UAH");
+      checkConvert("SHP", "UAH");
+      checkConvert("MGA", "UAH");
+      checkConvert("RSD", "UAH");
+   }
+
+   @Test
+   void checkCurrencyTransferFromUAH() throws IOException, CurrencyConverterException {
+      checkConvert("UAH", "BTN");
+      checkConvert("UAH", "BMD");
+      checkConvert("UAH", "KYD");
+      checkConvert("UAH", "STD");
+      checkConvert("UAH", "KPW");
+      checkConvert("UAH", "SHP");
+      checkConvert("UAH", "MGA");
+      checkConvert("UAH", "RSD");
+   }
+
+   @Test
+   void checkCurrencyTransferFromUSD() throws IOException, CurrencyConverterException {
+      checkConvert("USD", "BYR");
+      checkConvert("USD", "PAB");
+      checkConvert("USD", "LVL");
+      checkConvert("USD", "SEK");
+      checkConvert("USD", "XCD");
+      checkConvert("USD", "DKK");
+      checkConvert("USD", "GTQ");
+      checkConvert("USD", "MRO");
+      checkConvert("USD", "GBP");
+      checkConvert("USD", "INR");
+      checkConvert("USD", "PKR");
+      checkConvert("USD", "BRL");
+      checkConvert("USD", "XAF");
+      checkConvert("USD", "HKD");
+      checkConvert("USD", "MXN");
+      checkConvert("USD", "VEF");
+      checkConvert("USD", "EUR");
+      checkConvert("USD", "ETB");
+      checkConvert("USD", "SYP");
+      checkConvert("USD", "KES");
+      checkConvert("USD", "SBD");
+      checkConvert("USD", "MKD");
+      checkConvert("USD", "JPY");
+      checkConvert("USD", "GYD");
+      checkConvert("USD", "HNL");
+      checkConvert("USD", "KHR");
+      checkConvert("USD", "HRK");
+      checkConvert("USD", "OMR");
+      checkConvert("USD", "CZK");
+      checkConvert("USD", "MDL");
+      checkConvert("USD", "JMD");
+      checkConvert("USD", "PEN");
+      checkConvert("USD", "KWD");
+      checkConvert("USD", "BYN");
+      checkConvert("USD", "SZL");
+      checkConvert("USD", "LRD");
+      checkConvert("USD", "NOK");
+      checkConvert("USD", "ZMW");
+      checkConvert("USD", "BOB");
+      checkConvert("USD", "SCR");
+      checkConvert("USD", "MYR");
+      checkConvert("USD", "ZAR");
+      checkConvert("USD", "BIF");
+      checkConvert("USD", "AWG");
+      checkConvert("USD", "CNY");
+      checkConvert("USD", "WST");
+      checkConvert("USD", "CDF");
+      checkConvert("USD", "LBP");
+      checkConvert("USD", "AOA");
+      checkConvert("USD", "USD");
+      checkConvert("USD", "DOP");
+      checkConvert("USD", "NPR");
+      checkConvert("USD", "AZN");
+      checkConvert("USD", "ARS");
+      checkConvert("USD", "MMK");
+      checkConvert("USD", "TMT");
+      checkConvert("USD", "GIP");
+      checkConvert("USD", "IQD");
+      checkConvert("USD", "SDG");
+      checkConvert("USD", "BWP");
+      checkConvert("USD", "SOS");
+      checkConvert("USD", "NIO");
+      checkConvert("USD", "HTG");
+      checkConvert("USD", "VND");
+      checkConvert("USD", "TWD");
+      checkConvert("USD", "QAR");
+      checkConvert("USD", "GMD");
+      checkConvert("USD", "MOP");
+      checkConvert("USD", "TND");
+      checkConvert("USD", "BHD");
+      checkConvert("USD", "DJF");
+      checkConvert("USD", "THB");
+      checkConvert("USD", "MWK");
+      checkConvert("USD", "ISK");
+      checkConvert("USD", "SVC");
+      checkConvert("USD", "COP");
+      checkConvert("USD", "NAD");
+      checkConvert("USD", "MVR");
+      checkConvert("USD", "YER");
+      checkConvert("USD", "ANG");
+      checkConvert("USD", "RON");
+      checkConvert("USD", "SRD");
+      checkConvert("USD", "KGS");
+      checkConvert("USD", "JOD");
+      checkConvert("USD", "AFN");
+      checkConvert("USD", "NZD");
+      checkConvert("USD", "BND");
+      checkConvert("USD", "BTN");
+      checkConvert("USD", "SLL");
+      checkConvert("USD", "PYG");
+      checkConvert("USD", "UAH");
+      checkConvert("USD", "TOP");
+      checkConvert("USD", "PHP");
+      checkConvert("USD", "VUV");
+      checkConvert("USD", "XOF");
+      checkConvert("USD", "GEL");
+      checkConvert("USD", "AUD");
+      checkConvert("USD", "HUF");
+      checkConvert("USD", "UYU");
+      checkConvert("USD", "CAD");
+      checkConvert("USD", "BSD");
+      checkConvert("USD", "RWF");
+      checkConvert("USD", "PGK");
+      checkConvert("USD", "MZN");
+      checkConvert("USD", "MNT");
+      checkConvert("USD", "AMD");
+      checkConvert("USD", "TRY");
+      checkConvert("USD", "RUB");
+      checkConvert("USD", "BMD");
+      checkConvert("USD", "SAR");
+      checkConvert("USD", "LSL");
+      checkConvert("USD", "NGN");
+      checkConvert("USD", "GNF");
+      checkConvert("USD", "AED");
+      checkConvert("USD", "ALL");
+      checkConvert("USD", "KYD");
+      checkConvert("USD", "STD");
+      checkConvert("USD", "CRC");
+      checkConvert("USD", "BDT");
+      checkConvert("USD", "SGD");
+      checkConvert("USD", "KPW");
+      checkConvert("USD", "MUR");
+      checkConvert("USD", "ILS");
+      checkConvert("USD", "UGX");
+      checkConvert("USD", "SHP");
+      checkConvert("USD", "IDR");
+      checkConvert("USD", "BGN");
+      checkConvert("USD", "CVE");
+      checkConvert("USD", "KMF");
+      checkConvert("USD", "LYD");
+      checkConvert("USD", "CLP");
+      checkConvert("USD", "EGP");
+      checkConvert("USD", "CUP");
+      checkConvert("USD", "LKR");
+      checkConvert("USD", "TTD");
+      checkConvert("USD", "BBD");
+      checkConvert("USD", "PLN");
+      checkConvert("USD", "FKP");
+      checkConvert("USD", "UZS");
+      checkConvert("USD", "GHS");
+      checkConvert("USD", "BAM");
+      checkConvert("USD", "ERN");
+      checkConvert("USD", "MGA");
+      checkConvert("USD", "LAK");
+      checkConvert("USD", "TJS");
+      checkConvert("USD", "KRW");
+      checkConvert("USD", "LTL");
+      checkConvert("USD", "KZT");
+      checkConvert("USD", "RSD");
+      checkConvert("USD", "DZD");
+      checkConvert("USD", "MAD");
+      checkConvert("USD", "XPF");
+      checkConvert("USD", "BZD");
+      checkConvert("USD", "FJD");
+      checkConvert("USD", "CHF");
+      checkConvert("USD", "TZS");
+      checkConvert("USD", "IRR");
+   }
+
+   @Test
    void checkUnsupportedCurrency() {
-      checkNonConvertibility("GWP", "USD");
-      checkNonConvertibility("SKK", "USD");
-      checkNonConvertibility("SIT", "USD");
-      checkNonConvertibility("MZM", "USD");
-      checkNonConvertibility("IEP", "USD");
-      checkNonConvertibility("NLG", "USD");
-      checkNonConvertibility("ZWN", "USD");
-      checkNonConvertibility("GHC", "USD");
-      checkNonConvertibility("MGF", "USD");
-      checkNonConvertibility("ESP", "USD");
-      checkNonConvertibility("ZWR", "USD");
-      checkNonConvertibility("EEK", "USD");
-      checkNonConvertibility("USN", "USD");
-      checkNonConvertibility("TRL", "USD");
-      checkNonConvertibility("XBD", "USD");
-      checkNonConvertibility("CYP", "USD");
-      checkNonConvertibility("LUF", "USD");
-      checkNonConvertibility("SRG", "USD");
-      checkNonConvertibility("XPT", "USD");
-      checkNonConvertibility("ADP", "USD");
-      checkNonConvertibility("TPE", "USD");
-      checkNonConvertibility("COU", "USD");
-      checkNonConvertibility("BEF", "USD");
-      checkNonConvertibility("AFA", "USD");
-      checkNonConvertibility("ROL", "USD");
-      checkNonConvertibility("DEM", "USD");
-      checkNonConvertibility("BOV", "USD");
-      checkNonConvertibility("ATS", "USD");
-      checkNonConvertibility("XUA", "USD");
-      checkNonConvertibility("CHE", "USD");
-      checkNonConvertibility("PTE", "USD");
-      checkNonConvertibility("VEB", "USD");
-      checkNonConvertibility("AYM", "USD");
-      checkNonConvertibility("ZWD", "USD");
-      checkNonConvertibility("USS", "USD");
-      checkNonConvertibility("CSD", "USD");
-      checkNonConvertibility("XTS", "USD");
-      checkNonConvertibility("BYB", "USD");
-      checkNonConvertibility("XFU", "USD");
-      checkNonConvertibility("XSU", "USD");
-      checkNonConvertibility("TMM", "USD");
-      checkNonConvertibility("AZM", "USD");
-      checkNonConvertibility("XFO", "USD");
-      checkNonConvertibility("SDD", "USD");
-      checkNonConvertibility("YUM", "USD");
-      checkNonConvertibility("XTS", "UAH");
-      checkNonConvertibility("MTL", "USD");
-      checkNonConvertibility("FIM", "USD");
-      checkNonConvertibility("CHW", "USD");
-      checkNonConvertibility("XBA", "USD");
-      checkNonConvertibility("XXX", "USD");
-      checkNonConvertibility("UYI", "USD");
-      checkNonConvertibility("XBC", "USD");
-      checkNonConvertibility("GRD", "USD");
-      checkNonConvertibility("RUR", "USD");
-      checkNonConvertibility("XBB", "USD");
-      checkNonConvertibility("BGL", "USD");
+      checkNonConvertibility("GWP");
+      checkNonConvertibility("SKK");
+      checkNonConvertibility("SIT");
+      checkNonConvertibility("MZM");
+      checkNonConvertibility("IEP");
+      checkNonConvertibility("NLG");
+      checkNonConvertibility("ZWN");
+      checkNonConvertibility("GHC");
+      checkNonConvertibility("MGF");
+      checkNonConvertibility("ESP");
+      checkNonConvertibility("ZWR");
+      checkNonConvertibility("EEK");
+      checkNonConvertibility("USN");
+      checkNonConvertibility("TRL");
+      checkNonConvertibility("XBD");
+      checkNonConvertibility("CYP");
+      checkNonConvertibility("LUF");
+      checkNonConvertibility("SRG");
+      checkNonConvertibility("XPT");
+      checkNonConvertibility("ADP");
+      checkNonConvertibility("TPE");
+      checkNonConvertibility("COU");
+      checkNonConvertibility("BEF");
+      checkNonConvertibility("AFA");
+      checkNonConvertibility("ROL");
+      checkNonConvertibility("DEM");
+      checkNonConvertibility("BOV");
+      checkNonConvertibility("ATS");
+      checkNonConvertibility("XUA");
+      checkNonConvertibility("CHE");
+      checkNonConvertibility("PTE");
+      checkNonConvertibility("VEB");
+      checkNonConvertibility("AYM");
+      checkNonConvertibility("ZWD");
+      checkNonConvertibility("USS");
+      checkNonConvertibility("CSD");
+      checkNonConvertibility("XTS");
+      checkNonConvertibility("BYB");
+      checkNonConvertibility("XFU");
+      checkNonConvertibility("XSU");
+      checkNonConvertibility("TMM");
+      checkNonConvertibility("AZM");
+      checkNonConvertibility("XFO");
+      checkNonConvertibility("SDD");
+      checkNonConvertibility("YUM");
+      checkNonConvertibility("XTS");
+      checkNonConvertibility("MTL");
+      checkNonConvertibility("FIM");
+      checkNonConvertibility("CHW");
+      checkNonConvertibility("XBA");
+      checkNonConvertibility("XXX");
+      checkNonConvertibility("UYI");
+      checkNonConvertibility("XBC");
+      checkNonConvertibility("GRD");
+      checkNonConvertibility("RUR");
+      checkNonConvertibility("XBB");
+      checkNonConvertibility("BGL");
    }
 
    @Test
@@ -294,15 +485,15 @@ public class ConverterTest {
 
    private void checkConvert(String userCurrency, String desiredCurrency) throws CurrencyConverterException, IOException {
       Converter converter = new Converter(Currency.getInstance(userCurrency),
-                                          Currency.getInstance(desiredCurrency),
-                                          1f);
+              Currency.getInstance(desiredCurrency),
+              1f);
 
       Float value = converterService.convert(converter);
       assertNotNull(value);
    }
 
-   private void checkNonConvertibility(String userCurrency, String desiredCurrency) {
-      assertThrows(CurrencyConverterException.class, () -> checkConvert(userCurrency, desiredCurrency));
+   private void checkNonConvertibility(String userCurrency) {
+      assertThrows(CurrencyConverterException.class, () -> checkConvert(userCurrency, "USD"));
    }
 
    private void checkConvertForIdenticalCurrencies(String userCurrency, Float expectedValue) throws CurrencyConverterException, IOException {

@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.Currency;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,10 +29,13 @@ import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber
  */
 @Service
 public class BotService {
+
+   private static final String BOT_TOKEN = "736932538:AAFW981ptLJ4g1lbsVTn7HebaojMKLClEDg";
+
    /**
     * Data, which has to be added to .csv file
     */
-   private final DialogDao dialogDao ;
+   private final DialogDao dialogDao;
 
    private final SimpMessagingTemplate template;
    /**
@@ -87,32 +90,38 @@ public class BotService {
     */
    public String onUpdateReceived(String command, User user) {
       String message;
-      if (command.equals(START)) {
-         message = START_MESSAGE;
-         convertStep = 0;
-      } else if (command.equals(STOP)) {
-         message = STOP_MESSAGE;
-         convertStep = 0;
-      } else if (command.equals(CONVERT)) {
-         message = FIRST_CONVERT_MESSAGE;
-         convertStep = 1;
-      } else if (convertStep == 1) {
-         firstCurrency = BotValidator.toUpperCase(command);
-         message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
-         convertStep = 2;
-      } else if (convertStep == 2) {
-         secondCurrency = BotValidator.toUpperCase(command);
-         message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
-         convertStep = 3;
-      } else if (convertStep == 3) {
-         message = convertValue(command);
+      if (command.equals(BOT_TOKEN)) {
+         command = "Users message has incorrect content.";
+         message = "Sorry, but this message contains incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
          convertStep = 0;
       } else {
-         message = "Sorry, but I don't understand what \"" + command + "\" means." + CONVERT_MESSAGE;
-         convertStep = 0;
+         if (command.equals(START)) {
+            message = START_MESSAGE;
+            convertStep = 0;
+         } else if (command.equals(STOP)) {
+            message = STOP_MESSAGE;
+            convertStep = 0;
+         } else if (command.equals(CONVERT)) {
+            message = FIRST_CONVERT_MESSAGE;
+            convertStep = 1;
+         } else if (convertStep == 1) {
+            firstCurrency = BotValidator.toUpperCase(command);
+            message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
+            convertStep = 2;
+         } else if (convertStep == 2) {
+            secondCurrency = BotValidator.toUpperCase(command);
+            message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
+            convertStep = 3;
+         } else if (convertStep == 3) {
+            message = convertValue(command);
+            convertStep = 0;
+         } else {
+            message = "Sorry, but I don't understand what \"" + command + "\" means." + CONVERT_MESSAGE;
+            convertStep = 0;
+         }
       }
 
-      Date dateNow = new Date();
+      LocalDateTime dateNow  = LocalDateTime.now();
 
       Dialog dialog = new Dialog(dateNow, user, command, message);
 
@@ -150,7 +159,7 @@ public class BotService {
          }
          message = "Sorry, but currency is not valid: " + wrongCurrency + CONVERT_MESSAGE;
       } catch (IOException e) {
-         log.log(Level.SEVERE, e.getMessage()+ " is not responding.");
+         log.log(Level.SEVERE, e.getMessage() + " is not responding.");
          message = "Server is not responding." + CONVERT_MESSAGE;
       }
       return message;

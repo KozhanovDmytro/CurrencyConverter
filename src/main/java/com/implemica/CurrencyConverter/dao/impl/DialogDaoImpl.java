@@ -8,6 +8,8 @@ import com.opencsv.CSVWriter;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,27 +22,52 @@ import java.util.logging.Logger;
  */
 
 public class DialogDaoImpl implements DialogDao {
-
-   private static final String LINE_END = ";\n";
-   private static final char SEPARATOR = ';';
-   private static final String ELEMENTS_SEPARATOR = ";";
    /**
-    * Stores history
+    * Symbol of the end of line in .csv file
+    */
+   private static final String LINE_END = ";\n";
+
+   /**
+    * Symbol between elements in the line
+    */
+   private static final char SEPARATOR = ';';
+   /**
+    * Symbol between elements in the line
+    */
+   private static final String ELEMENTS_SEPARATOR = ";";
+
+   /**
+    * Path to .csv file, which stores changes
+    */
+   private static final String DATA_CSV = "src/main/resources/data.csv";
+   /**
+    * Stores history of changes
     */
    private File data;
-   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
-
+   /**
+    * Logger for this class
+    */
    private Logger log = Logger.getLogger(DialogDao.class.getName());
 
+   /**
+    * Date format
+    */
+   private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
+
+   /**
+    * Creates a new DialogDaoImpl instance for the DATA_CSV file
+    */
    public DialogDaoImpl() {
-      this(new File("src/main/resources/data.csv"));
+      this(new File(DATA_CSV));
    }
 
+   /**
+    * Creates a new DialogDaoImpl instance for the given file
+    */
    DialogDaoImpl(File data) {
       this.data = data;
    }
-
 
    /**
     * Writes all user's requests and bot's responses to file
@@ -70,7 +97,9 @@ public class DialogDaoImpl implements DialogDao {
    }
 
    /**
-    * Returns List of information from .csv file
+    * Returns all user's conversations
+    *
+    * @return List of information from .csv file
     */
    @Override
    public List<Dialog> getAll() {
@@ -97,27 +126,32 @@ public class DialogDaoImpl implements DialogDao {
    }
 
    /**
-    * Returns List of information from .csv file only for given Date
+    * Returns user's conversations by given date
+    *
+    * @param date given date, which for is needed to get information
+    * @return List of information from .csv file only for given Date
     */
 
    @Override
-   public List<Dialog> getByDate(Date date) {
-      ArrayList<Dialog> result = new ArrayList<>();
+   public List<Dialog> getByDate(LocalDateTime date) {
       ArrayList<Dialog> all = (ArrayList<Dialog>) getAll();
-      for(Dialog t: all){
-         if(isSameDate(t.getDate(),date)){
+      ArrayList<Dialog> result = new ArrayList<>();
+      for (Dialog t : all) {
+         if (isSameDate(t.getDate(), date)) {
             result.add(t);
          }
       }
-
-
       return result;
    }
 
    /**
-    * Returns true, if date1 and date2 is same calendar day
+    * Checks, that both date are same
+    *
+    * @param date1 first date to comparing
+    * @param date2 second date to comparing
+    * @return true, if date1 and date2 is same calendar day
     */
-   private boolean isSameDate(Date date1, Date date2) {
+   private boolean isSameDate(LocalDateTime date1, LocalDateTime date2) {
       int[] firstDate = getDayMonthYear(date1);
       int[] secondDate = getDayMonthYear(date2);
       for (int i = 0; i < firstDate.length; i++) {
@@ -129,29 +163,25 @@ public class DialogDaoImpl implements DialogDao {
    }
 
    /**
-    * Returns array {day, month, year} for given date
+    * Returns information about given date
+    *
+    * @param date given date, which for is needed to get information about day, month and year
+    * @return an array {day, month, year} for given date
     */
-   private int[] getDayMonthYear(Date date) {
-      Calendar calendar = GregorianCalendar.getInstance();
-      calendar.setTime(date);
-      int day = calendar.get(Calendar.DAY_OF_MONTH);
-      int month = calendar.get(Calendar.MONTH);
-      int year = calendar.get(Calendar.YEAR);
+   private int[] getDayMonthYear(LocalDateTime date) {
+      int day = date.getDayOfMonth();
+      int month = date.getMonthValue();
+      int year = date.getYear();
       return new int[]{day, month, year};
    }
 
    /**
-    * Parse string to date
+    * Parses string to date
+    *
+    * @param date string, which contains a date
+    * @return date, which was taken from string
     */
-   private Date getDate(String string) {
-      Date date = null;
-
-      try {
-         date = df.parse(string);
-      } catch (ParseException e) {
-         e.printStackTrace();
-      }
-
-      return date;
+   private LocalDateTime getDate(String date) {
+      return LocalDateTime.parse(date, formatter);
    }
 }
