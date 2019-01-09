@@ -165,6 +165,7 @@ public class BotService {
     */
    private void sendToWebSocketFollowers(Dialog dialog) {
       template.convertAndSend("/listen/bot", dialog);
+      log.log(Level.INFO, "send to web socket followers. ");
    }
 
 }

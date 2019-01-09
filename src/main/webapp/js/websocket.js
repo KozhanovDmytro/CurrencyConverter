@@ -1,11 +1,22 @@
 var stompClient = null;
 
+/**
+ * Function hides some elements in UI side.
+ *
+ * @author Dmytro K.
+ * @param connected
+ */
 function setConnected(connected) {
     document.getElementById('connect').disabled = connected;
     document.getElementById('disconnect').disabled = !connected;
     document.getElementById('conversationDiv').style.visibility = connected ? 'visible' : 'hidden';
 }
 
+/**
+ * Function connect to webSocket and listen to webSocket chanel.
+ *
+ * @author Dmytro K.
+ */
 function connect() {
     var socket = new SockJS('/monitor-bot');
     stompClient = Stomp.over(socket);
@@ -19,6 +30,11 @@ function connect() {
     });
 }
 
+/**
+ * Function disconnect from webSocket server.
+ *
+ * @author Dmytro K.
+ */
 function disconnect() {
     if (stompClient != null) {
         stompClient.disconnect();
@@ -27,6 +43,12 @@ function disconnect() {
     console.log("Disconnected");
 }
 
+/**
+ * Function parse {@param object} and show it in UI side.
+ *
+ * @param object
+ * @author Dmytro K.
+ */
 function showResponse(object) {
     var table = document.getElementById('response');
     var tr = document.createElement('tr');

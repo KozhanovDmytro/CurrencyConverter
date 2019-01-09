@@ -3,13 +3,15 @@ package com.implemica.CurrencyConverter.model;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * Information about user
  *
  * @author Daria S.
  */
 @Data
-public class User {
+public class User implements Serializable {
    private int userId;
    private String userFirstName;
    private String userLastName = "";
@@ -32,6 +34,9 @@ public class User {
       this.userFirstName = userFirstName;
       this.userLastName = userLastName;
 
+   }
+
+   public User() {
    }
 
    @Override

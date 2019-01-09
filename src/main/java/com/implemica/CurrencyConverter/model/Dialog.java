@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -11,7 +12,7 @@ import java.util.Date;
  * This class is part of user's conversation with bot. Stores date, information about user, their request and bot's response
  */
 @Data
-public class Dialog {
+public class Dialog implements Serializable {
 
    private String usersRequest;
 
@@ -33,6 +34,9 @@ public class Dialog {
       this.botsResponse = botsResponse;
       this.user = user;
       this.date = date;
+   }
+
+   public Dialog() {
    }
 
    /**Needed to write to .csv file*/

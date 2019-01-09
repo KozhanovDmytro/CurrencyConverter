@@ -12,13 +12,24 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Class for testing ConverterService.
+ *
+ * @see ConverterService
+ *
+ * @author Dmytro K.
+ * @author Dasha S.
+ */
 public class ConverterTest {
 
    private static ConverterService converterService;
 
-   private static String[] existingCurrency = new String[] {/*"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
+   /**
+    * Array of available currencies that can be converted between themselves by {@link ConverterService}.
+    */
+   private static String[] existingCurrency = new String[] {"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
            "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD", "CDF",
-           "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF",*/ "HTG", "PKR",
+           "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
            "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO",
            "AOA", "XAF", "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "LVL", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP",
            "SDG", "MUR", "VND", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "LRD",
@@ -33,8 +44,13 @@ public class ConverterTest {
       converterService = new ConverterService();
    }
 
-   @Test
-   void convert() throws CurrencyConverterException, IOException {
+   /**
+    * Function test popular currencies in Ukraine.
+    *
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException if has problem with internet connection.
+    */
+   @Test void convertPopularCurrencies() throws CurrencyConverterException, IOException {
       checkConvert("UAH", "RUB");
       checkConvert("UAH", "UAH");
       checkConvert("UAH", "EUR");
@@ -56,8 +72,13 @@ public class ConverterTest {
       checkConvert("USD", "USD");
    }
 
-   @Test
-   void testCurrencyTransferToUSD() throws CurrencyConverterException, IOException {
+   /**
+    * Test currency which can convert to USD. This list was taken by google.com
+    *
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException if has problem with internet connection.
+    */
+   @Test void testCurrencyTransferToUSD() throws CurrencyConverterException, IOException {
       checkConvert("SEK", "USD");
       checkConvert("XCD", "USD");
       checkConvert("DKK", "USD");
@@ -214,8 +235,10 @@ public class ConverterTest {
       checkConvert("IRR", "USD");
    }
 
-   @Test
-   void checkUnsupportedCurrency() {
+   /**
+    * Test currency which cannot be converted to USD.
+    */
+   @Test void checkUnsupportedCurrency() {
       checkNonConvertibility("GWP", "USD");
       checkNonConvertibility("SKK", "USD");
       checkNonConvertibility("SIT", "USD");
@@ -275,13 +298,25 @@ public class ConverterTest {
       checkNonConvertibility("BGL", "USD");
    }
 
-   @Test
-   void checkIdenticalCurrency() throws IOException, CurrencyConverterException {
+   /**
+    * Tests that {@link ConverterService} can convert all currencies with himself.
+    *
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException if has problem with internet connection.
+    */
+   @Test void checkIdenticalCurrency() throws IOException, CurrencyConverterException {
       for (Currency currency : Currency.getAvailableCurrencies()) {
          checkConvertForIdenticalCurrencies(currency.getCurrencyCode(), new Random().nextFloat());
       }
    }
 
+   /**
+    * Tests currencies which represented in {@link this#existingCurrency} currencies
+    * can be converted between themselves.
+    *
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException if has problem with internet connection.
+    */
    @Test
    @Disabled("this test takes 2 hours 25 min. ")
    void checkConversionsWithAllPossibleCurrencies() throws IOException, CurrencyConverterException {
@@ -292,6 +327,14 @@ public class ConverterTest {
       }
    }
 
+   /**
+    * Function for checking conversion and check that returns not null.
+    *
+    * @param userCurrency user's currency
+    * @param desiredCurrency desired currency
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException if has problem with internet connection.
+    */
    private void checkConvert(String userCurrency, String desiredCurrency) throws CurrencyConverterException, IOException {
       Converter converter = new Converter(Currency.getInstance(userCurrency),
                                           Currency.getInstance(desiredCurrency),
@@ -301,10 +344,24 @@ public class ConverterTest {
       assertNotNull(value);
    }
 
+   /**
+    * Checks that or user's currency, or desired currency cannot be converted.
+    *
+    * @param userCurrency user's currency
+    * @param desiredCurrency desired currency
+    */
    private void checkNonConvertibility(String userCurrency, String desiredCurrency) {
       assertThrows(CurrencyConverterException.class, () -> checkConvert(userCurrency, desiredCurrency));
    }
 
+   /**
+    * Function check identical currencies.
+    *
+    * @param userCurrency user's currency
+    * @param expectedValue value
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException if has problem with internet connection.
+    */
    private void checkConvertForIdenticalCurrencies(String userCurrency, Float expectedValue) throws CurrencyConverterException, IOException {
       Converter converter = new Converter(Currency.getInstance(userCurrency),
               Currency.getInstance(userCurrency),
