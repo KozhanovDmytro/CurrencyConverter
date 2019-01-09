@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Currency;
 import java.util.Date;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,23 +31,32 @@ import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber
 @Service
 public class BotService {
 
-   private static final String BOT_TOKEN = "736932538:AAFW981ptLJ4g1lbsVTn7HebaojMKLClEDg";
+   /**
+    * Unique string, which uses for messages, which has non text content.
+    */
+   public static final String UNIQUE = UUID.randomUUID().toString();
+
 
    /**
-    * Data, which has to be added to .csv file
+    * Dialog with user
     */
    private final DialogDao dialogDao;
 
+   /**
+    * Provides methods for sending messages to webSocket
+    */
    private final SimpMessagingTemplate template;
    /**
     * Greeting message to user
     */
    private static final String START_MESSAGE = "Hello! Could I help you?";
 
-
+   /**
+    * Message to the user with the suggestion of a new conversion
+    */
    private static final String CONVERT_MESSAGE = " You can use /convert to make me new convert currencies";
    /**
-    * Stop message to user
+    * Stop message to the user
     */
    private static final String STOP_MESSAGE = "OK." + CONVERT_MESSAGE;
 
@@ -62,22 +72,59 @@ public class BotService {
     * Bot's command to stop conversation
     */
    private static final String STOP = "/stop";
+   /**
+    * Bot's response for /convert command
+    */
    private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
+   /**
+    * Start of bot's response after entering first currency
+    */
    private static final String SECOND_CONVERT_MESSAGE_1 = "OK, you wish to convert from ";
+   /**
+    * End of bot's response after entering first currency
+    */
    private static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
+   /**
+    * Bot's response after entering second currency
+    */
    private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
-
+   /**
+    * Bot's response for non-text message
+    */
+   private static final String INCORRECT_CONTENT_MESSAGE = "Sorry, but this message contains incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
+   /**
+    * Message for log, that user sent incorrect content
+    */
+   private static final String NOT_TEXT_CONTENT = "Users message has incorrect content.";
+   /**
+    * The currency to convert from
+    */
    private String firstCurrency = "";
+   /**
+    * The currency to convert to
+    */
    private String secondCurrency = "";
+   /**
+    * Step of conversion
+    */
    private int convertStep = 0;
 
-
+   /**
+    * Logger for this class
+    */
    private final Logger log = Logger.getLogger(this.getClass().getName());
    /**
-    * Data, which has to be added to .csv file
+    * Converter for currencies
     */
    private final ConverterService converterService;
 
+   /**
+    * Creates new BotService containing specified converter, writer to storage and sender
+    *
+    * @param converterService converter for currencies
+    * @param dialogDao        write dialog into storage
+    * @param template         send messages to webSocket
+    */
    @Autowired
    public BotService(ConverterService converterService, DialogDao dialogDao, SimpMessagingTemplate template) {
       this.converterService = converterService;
@@ -86,13 +133,17 @@ public class BotService {
    }
 
    /**
-    * Gets users input and processes it. Writes conversation to .csv file.
+    * Gets users input and processes it, writes conversation to .csv file and sends their to webSocket
+    *
+    * @param command request from user
+    * @param user    user, which sent message
+    * @return bot's response to user
     */
    public String onUpdateReceived(String command, User user) {
       String message;
-      if (command.equals(BOT_TOKEN)) {
-         command = "Users message has incorrect content.";
-         message = "Sorry, but this message contains incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
+      if (command.equals(UNIQUE)) {
+         command = NOT_TEXT_CONTENT;
+         message = INCORRECT_CONTENT_MESSAGE;
          convertStep = 0;
       } else {
          if (command.equals(START)) {
@@ -124,7 +175,6 @@ public class BotService {
       Date dateNow  = new Date();
 
       Dialog dialog = new Dialog(dateNow, user, command, message);
-
       dialogDao.write(dialog);
       sendToWebSocketFollowers(dialog);
 
@@ -132,7 +182,10 @@ public class BotService {
    }
 
    /**
-    * Returns result of conversion from first currency to second currency
+    * Converts given currencies from first one to second.
+    *
+    * @param value amount of first currency
+    * @return result of conversion from first currency to second currency
     */
 
    private String convertValue(String value) {

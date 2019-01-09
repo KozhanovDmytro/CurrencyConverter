@@ -74,7 +74,7 @@ public final class ConverterService {
    }
 
    /**
-    * An interface where stores function for currency conversion.
+    * An interface which supplies function of currency conversion.
     */
    private interface OptionSupplier {
       void execute(Converter converter) throws Exception;
@@ -105,7 +105,7 @@ public final class ConverterService {
    }
 
    /**
-    * Function check connection.
+    * Function checks connection.
     *
     * @return if site google.com is reachable or not.
     */
@@ -143,7 +143,7 @@ public final class ConverterService {
    }
 
    /**
-    * Function read {@link this#exceptions} list and makes a decision which type of
+    * Function reads {@link this#exceptions} list and makes a decision which type of
     * exception was happen.
     *
     * @return analyzed exception.
@@ -164,7 +164,7 @@ public final class ConverterService {
    }
 
    /**
-    * Convert by bank-ua.com API.
+    * Converts by bank-ua.com API.
     *
     * @param converter contains currencies and value for conversion.
     * @throws CurrencyConverterException if currency does not support.
@@ -180,7 +180,7 @@ public final class ConverterService {
    }
 
    /**
-    * Function convert {@link java.util.Currency} to {@link Currency}
+    * Function converts {@link java.util.Currency} to {@link Currency}
     * 
     * @param currency contains currencies and value for conversion.
     * @return instance of {@link Currency}
@@ -191,7 +191,7 @@ public final class ConverterService {
    }
 
    /**
-    * Convert by java money api. 
+    * Converts by java money api.
     * 
     * @param converter contains currencies and value for conversion.
     */

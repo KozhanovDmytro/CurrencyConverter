@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +37,11 @@ public class BotController extends TelegramLongPollingBot {
     * It uses for getting and sending messages via Bot API
     */
    private static final String BOT_TOKEN = "736932538:AAFW981ptLJ4g1lbsVTn7HebaojMKLClEDg";
+
+   /**
+    * Unique string, which uses for messages, which has non text content.
+    */
+   private static final String UNIQUE = BotService.UNIQUE;
 
    /**
     * Logic of bot, how it processes user's input.
@@ -68,7 +74,7 @@ public class BotController extends TelegramLongPollingBot {
 
       //dialog with user
       if (!newMessage.hasText()) {
-         command = BOT_TOKEN;
+         command = UNIQUE;
       }
 
       //response to user
