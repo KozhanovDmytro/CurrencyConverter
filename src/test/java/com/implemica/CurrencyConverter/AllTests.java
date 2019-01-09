@@ -1,5 +1,6 @@
 package com.implemica.CurrencyConverter;
 
+import com.implemica.CurrencyConverter.controller.WebSocketTest;
 import com.implemica.CurrencyConverter.service.BotServiceTest;
 import com.implemica.CurrencyConverter.controller.WebControllerTest;
 import com.implemica.CurrencyConverter.dao.impl.DialogDaoImplTest;
@@ -10,7 +11,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(JUnitPlatform.class)
 @SelectClasses({BotServiceTest.class, DialogDaoImplTest.class,
-        ConverterTest.class, WebControllerTest.class})
+        ConverterTest.class, WebControllerTest.class, WebSocketTest.class})
 public class AllTests {
 }
 

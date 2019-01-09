@@ -13,15 +13,23 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * @author Dmytro K., Daria S.
+ * Class for testing ConverterService.
+ *
+ * @see ConverterService
+ *
+ * @author Dmytro K.
+ * @author Dasha S.
  */
 public class ConverterTest {
 
    private static ConverterService converterService;
 
-   private static String[] existingCurrency = new String[]{/*"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
+   /**
+    * Array of available currencies that can be converted between themselves by {@link ConverterService}.
+    */
+   private static String[] existingCurrency = new String[] {"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
            "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD", "CDF",
-           "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF",*/ "HTG", "PKR",
+           "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
            "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO",
            "AOA", "XAF", "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "LVL", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP",
            "SDG", "MUR", "VND", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "LRD",
@@ -36,8 +44,13 @@ public class ConverterTest {
       converterService = new ConverterService();
    }
 
-   @Test
-   void convert() throws CurrencyConverterException, IOException {
+   /**
+    * Function test popular currencies in Ukraine.
+    *
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException if has problem with internet connection.
+    */
+   @Test void convertPopularCurrencies() throws CurrencyConverterException, IOException {
       checkConvert("UAH", "RUB");
       checkConvert("UAH", "UAH");
       checkConvert("UAH", "EUR");
@@ -59,8 +72,13 @@ public class ConverterTest {
       checkConvert("USD", "USD");
    }
 
-   @Test
-   void checkCurrencyTransferToUSD() throws CurrencyConverterException, IOException {
+   /**
+    * Test currency which can convert to USD. This list was taken by google.com
+    *
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException if has problem with internet connection.
+    */
+   @Test void checkCurrencyTransferToUSD() throws CurrencyConverterException, IOException {
       checkConvert("BYR", "USD");
       checkConvert("PAB", "USD");
       checkConvert("LVL", "USD");
@@ -405,65 +423,67 @@ public class ConverterTest {
       checkConvert("USD", "IRR");
    }
 
-   @Test
-   void checkUnsupportedCurrency() {
-      checkNonConvertibility("GWP");
-      checkNonConvertibility("SKK");
-      checkNonConvertibility("SIT");
-      checkNonConvertibility("MZM");
-      checkNonConvertibility("IEP");
-      checkNonConvertibility("NLG");
-      checkNonConvertibility("ZWN");
-      checkNonConvertibility("GHC");
-      checkNonConvertibility("MGF");
-      checkNonConvertibility("ESP");
-      checkNonConvertibility("ZWR");
-      checkNonConvertibility("EEK");
-      checkNonConvertibility("USN");
-      checkNonConvertibility("TRL");
-      checkNonConvertibility("XBD");
-      checkNonConvertibility("CYP");
-      checkNonConvertibility("LUF");
-      checkNonConvertibility("SRG");
-      checkNonConvertibility("XPT");
-      checkNonConvertibility("ADP");
-      checkNonConvertibility("TPE");
-      checkNonConvertibility("COU");
-      checkNonConvertibility("BEF");
-      checkNonConvertibility("AFA");
-      checkNonConvertibility("ROL");
-      checkNonConvertibility("DEM");
-      checkNonConvertibility("BOV");
-      checkNonConvertibility("ATS");
-      checkNonConvertibility("XUA");
-      checkNonConvertibility("CHE");
-      checkNonConvertibility("PTE");
-      checkNonConvertibility("VEB");
-      checkNonConvertibility("AYM");
-      checkNonConvertibility("ZWD");
-      checkNonConvertibility("USS");
-      checkNonConvertibility("CSD");
-      checkNonConvertibility("XTS");
-      checkNonConvertibility("BYB");
-      checkNonConvertibility("XFU");
-      checkNonConvertibility("XSU");
-      checkNonConvertibility("TMM");
-      checkNonConvertibility("AZM");
-      checkNonConvertibility("XFO");
-      checkNonConvertibility("SDD");
-      checkNonConvertibility("YUM");
-      checkNonConvertibility("XTS");
-      checkNonConvertibility("MTL");
-      checkNonConvertibility("FIM");
-      checkNonConvertibility("CHW");
-      checkNonConvertibility("XBA");
-      checkNonConvertibility("XXX");
-      checkNonConvertibility("UYI");
-      checkNonConvertibility("XBC");
-      checkNonConvertibility("GRD");
-      checkNonConvertibility("RUR");
-      checkNonConvertibility("XBB");
-      checkNonConvertibility("BGL");
+   /**
+    * Test currency which cannot be converted to USD.
+    */
+   @Test void checkUnsupportedCurrency() {
+      checkNonConvertibility("GWP", "USD");
+      checkNonConvertibility("SKK", "USD");
+      checkNonConvertibility("SIT", "USD");
+      checkNonConvertibility("MZM", "USD");
+      checkNonConvertibility("IEP", "USD");
+      checkNonConvertibility("NLG", "USD");
+      checkNonConvertibility("ZWN", "USD");
+      checkNonConvertibility("GHC", "USD");
+      checkNonConvertibility("MGF", "USD");
+      checkNonConvertibility("ESP", "USD");
+      checkNonConvertibility("ZWR", "USD");
+      checkNonConvertibility("EEK", "USD");
+      checkNonConvertibility("USN", "USD");
+      checkNonConvertibility("TRL", "USD");
+      checkNonConvertibility("XBD", "USD");
+      checkNonConvertibility("CYP", "USD");
+      checkNonConvertibility("LUF", "USD");
+      checkNonConvertibility("SRG", "USD");
+      checkNonConvertibility("XPT", "USD");
+      checkNonConvertibility("ADP", "USD");
+      checkNonConvertibility("TPE", "USD");
+      checkNonConvertibility("COU", "USD");
+      checkNonConvertibility("BEF", "USD");
+      checkNonConvertibility("AFA", "USD");
+      checkNonConvertibility("ROL", "USD");
+      checkNonConvertibility("DEM", "USD");
+      checkNonConvertibility("BOV", "USD");
+      checkNonConvertibility("ATS", "USD");
+      checkNonConvertibility("XUA", "USD");
+      checkNonConvertibility("CHE", "USD");
+      checkNonConvertibility("PTE", "USD");
+      checkNonConvertibility("VEB", "USD");
+      checkNonConvertibility("AYM", "USD");
+      checkNonConvertibility("ZWD", "USD");
+      checkNonConvertibility("USS", "USD");
+      checkNonConvertibility("CSD", "USD");
+      checkNonConvertibility("XTS", "USD");
+      checkNonConvertibility("BYB", "USD");
+      checkNonConvertibility("XFU", "USD");
+      checkNonConvertibility("XSU", "USD");
+      checkNonConvertibility("TMM", "USD");
+      checkNonConvertibility("AZM", "USD");
+      checkNonConvertibility("XFO", "USD");
+      checkNonConvertibility("SDD", "USD");
+      checkNonConvertibility("YUM", "USD");
+      checkNonConvertibility("XTS", "UAH");
+      checkNonConvertibility("MTL", "USD");
+      checkNonConvertibility("FIM", "USD");
+      checkNonConvertibility("CHW", "USD");
+      checkNonConvertibility("XBA", "USD");
+      checkNonConvertibility("XXX", "USD");
+      checkNonConvertibility("UYI", "USD");
+      checkNonConvertibility("XBC", "USD");
+      checkNonConvertibility("GRD", "USD");
+      checkNonConvertibility("RUR", "USD");
+      checkNonConvertibility("XBB", "USD");
+      checkNonConvertibility("BGL", "USD");
    }
 
    @Test
@@ -492,8 +512,8 @@ public class ConverterTest {
       assertNotNull(value);
    }
 
-   private void checkNonConvertibility(String userCurrency) {
-      assertThrows(CurrencyConverterException.class, () -> checkConvert(userCurrency, "USD"));
+   private void checkNonConvertibility(String userCurrency, String desiredCurrency) {
+      assertThrows(CurrencyConverterException.class, () -> checkConvert(userCurrency, desiredCurrency));
    }
 
    private void checkConvertForIdenticalCurrencies(String userCurrency, Float expectedValue) throws CurrencyConverterException, IOException {

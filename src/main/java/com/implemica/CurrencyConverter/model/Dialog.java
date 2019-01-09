@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -14,7 +15,7 @@ import java.time.format.DateTimeFormatter;
  * @version 09.01.2019 14.48
  */
 @Data
-public class Dialog {
+public class Dialog implements Serializable {
    /**
     * User's message to bot
     */
@@ -39,6 +40,9 @@ public class Dialog {
     */
    @JsonIgnore
    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+
+   public Dialog() {
+   }
 
    /**
     * Creates new Dialog, that represents information about user, their request to bot, bot's response for it and date and time of
