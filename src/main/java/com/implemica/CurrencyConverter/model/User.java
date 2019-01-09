@@ -59,7 +59,7 @@ public class User implements Serializable {
    /**
     * Constructs simple user without any information
     */
-    private User() {
+   private User() {
    }
 
    /**

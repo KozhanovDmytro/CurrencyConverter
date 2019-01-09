@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -33,7 +34,7 @@ import java.time.format.DateTimeFormatter;
     */
    @GetMapping("/log") public String log(Model model) {
       model.addAttribute("transactions", dialogDao.getAll());
-      model.addAttribute("dateTimeFormatter", DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
+      model.addAttribute("dateFormatter", new SimpleDateFormat("dd.MM.yyyy hh:mm:ss"));
       return "log_page";
    }
 

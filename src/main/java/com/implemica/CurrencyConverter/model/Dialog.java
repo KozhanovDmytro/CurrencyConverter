@@ -32,19 +32,19 @@ public class Dialog implements Serializable {
    /**
     * Date and time of dialog
     */
-   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm:ss")
+   @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "GMT+2")
    private Date date;
 
    /**
     * Date format
     */
    @JsonIgnore
-   SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+   SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
    /**
     * Creates new simple Dialog
     */
-   public Dialog() {
+   private Dialog() {
    }
 
    /**
