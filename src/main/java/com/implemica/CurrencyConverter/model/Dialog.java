@@ -44,7 +44,7 @@ public class Dialog implements Serializable {
    /**
     * Creates new simple Dialog
     */
-   public Dialog() {
+   private Dialog() {
    }
 
    /**
