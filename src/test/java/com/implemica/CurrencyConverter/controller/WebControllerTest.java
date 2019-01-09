@@ -4,6 +4,7 @@ package com.implemica.CurrencyConverter.controller;
 import com.implemica.CurrencyConverter.configuration.SpringConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -14,9 +15,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-@SpringBootTest(classes = { WebController.class } )
+@SpringBootTest(classes = { WebController.class },
+webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import({SpringConfiguration.class})
 @AutoConfigureMockMvc
+@EnableAutoConfiguration
 public class WebControllerTest {
 
    @Autowired

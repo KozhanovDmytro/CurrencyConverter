@@ -162,7 +162,6 @@ public class BotService {
     *
     * @param dialog dialog
     * @author Dmytro K.
-    * @version 02.01.2019 10:00
     */
    private void sendToWebSocketFollowers(Dialog dialog) {
       template.convertAndSend("/listen/bot", dialog);

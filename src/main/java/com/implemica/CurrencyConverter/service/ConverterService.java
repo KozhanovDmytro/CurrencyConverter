@@ -8,6 +8,7 @@ import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import com.tunyk.currencyconverter.api.CurrencyNotSupportedException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.springframework.stereotype.Service;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
@@ -44,6 +45,7 @@ import java.util.logging.Logger;
  * @author Dmytro K.
  * @version 08.01.2019 05:01
  */
+@Service
 public final class ConverterService {
 
    /** Logger. */
