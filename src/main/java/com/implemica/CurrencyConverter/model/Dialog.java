@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * This class is part of user's conversation with bot. Stores date, information about user, their request and bot's response
@@ -33,15 +33,16 @@ public class Dialog implements Serializable {
     * Date and time of dialog
     */
    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm:ss")
-   private LocalDateTime date;
+   private Date date;
 
    /**
     * Date format
     */
    @JsonIgnore
-   private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+   SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
-   public Dialog() {
+
+   private Dialog() {
    }
 
    /**
@@ -53,7 +54,7 @@ public class Dialog implements Serializable {
     * @param usersRequest message, which was sent from user to bot
     * @param botsResponse message, which was sent from bot to user
     */
-   public Dialog(LocalDateTime date, User user, String usersRequest, String botsResponse) {
+   public Dialog(Date date, User user, String usersRequest, String botsResponse) {
       this.usersRequest = usersRequest;
       this.botsResponse = botsResponse;
       this.user = user;
@@ -64,7 +65,7 @@ public class Dialog implements Serializable {
     * Line of all information of one request to bot from one user
     */
    public String[] toCsv() {
-      return new String[]{date.format(formatter), Integer.toString(user.getUserId()), user.getUserFirstName(), user.getUserLastName()
+      return new String[]{df.format(date), Integer.toString(user.getUserId()), user.getUserFirstName(), user.getUserLastName()
               , user.getUserName(), usersRequest, botsResponse};
    }
 

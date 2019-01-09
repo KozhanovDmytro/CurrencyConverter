@@ -8,8 +8,6 @@ import com.opencsv.CSVWriter;
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,7 +50,7 @@ public class DialogDaoImpl implements DialogDao {
    /**
     * Date format
     */
-   private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
 
    /**
@@ -133,7 +131,7 @@ public class DialogDaoImpl implements DialogDao {
     */
 
    @Override
-   public List<Dialog> getByDate(LocalDateTime date) {
+   public List<Dialog> getByDate(Date date) {
       ArrayList<Dialog> all = (ArrayList<Dialog>) getAll();
       ArrayList<Dialog> result = new ArrayList<>();
       for (Dialog t : all) {
@@ -151,7 +149,7 @@ public class DialogDaoImpl implements DialogDao {
     * @param date2 second date to comparing
     * @return true, if date1 and date2 is same calendar day
     */
-   private boolean isSameDate(LocalDateTime date1, LocalDateTime date2) {
+   private boolean isSameDate(Date date1, Date date2) {
       int[] firstDate = getDayMonthYear(date1);
       int[] secondDate = getDayMonthYear(date2);
       for (int i = 0; i < firstDate.length; i++) {
@@ -168,20 +166,30 @@ public class DialogDaoImpl implements DialogDao {
     * @param date given date, which for is needed to get information about day, month and year
     * @return an array {day, month, year} for given date
     */
-   private int[] getDayMonthYear(LocalDateTime date) {
-      int day = date.getDayOfMonth();
-      int month = date.getMonthValue();
-      int year = date.getYear();
+   private int[] getDayMonthYear(Date date) {
+      Calendar calendar = GregorianCalendar.getInstance();
+      calendar.setTime(date);
+      int day = calendar.get(Calendar.DAY_OF_MONTH);
+      int month = calendar.get(Calendar.MONTH);
+      int year = calendar.get(Calendar.YEAR);
       return new int[]{day, month, year};
    }
 
    /**
     * Parses string to date
     *
-    * @param date string, which contains a date
+    * @param string string, which contains a date
     * @return date, which was taken from string
     */
-   private LocalDateTime getDate(String date) {
-      return LocalDateTime.parse(date, formatter);
+   private Date getDate(String string) {
+      Date date = null;
+
+      try {
+         date = df.parse(string);
+      } catch (ParseException e) {
+         e.printStackTrace();
+      }
+
+      return date;
    }
 }

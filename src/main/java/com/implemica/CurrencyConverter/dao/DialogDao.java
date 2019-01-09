@@ -2,7 +2,6 @@ package com.implemica.CurrencyConverter.dao;
 
 import com.implemica.CurrencyConverter.model.Dialog;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -38,5 +37,5 @@ public interface DialogDao {
     * @param date date, which for is needed to get information
     * @return instance
     */
-   List<Dialog> getByDate(LocalDateTime date);
+   List<Dialog> getByDate(Date date);
 }

@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.time.LocalDateTime;
 import java.util.Currency;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -121,7 +121,7 @@ public class BotService {
          }
       }
 
-      LocalDateTime dateNow  = LocalDateTime.now();
+      Date dateNow  = new Date();
 
       Dialog dialog = new Dialog(dateNow, user, command, message);
 

@@ -36,7 +36,7 @@ public class User implements Serializable {
 
    }
 
-   public User() {
+   private User() {
    }
 
    @Override

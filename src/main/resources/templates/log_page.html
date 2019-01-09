@@ -29,7 +29,7 @@
             <th>Response</th>
         </tr>
         <tr th:each="t : ${transactions}">
-            <td th:text="${t.getDate().format(dateTimeFormatter)}"></td>
+            <td th:text="${t.getDate()}"></td>
             <td th:text="${t.getUser().getUserId()}"></td>
             <td th:text="${t.getUser().getUserFirstName()}"></td>
             <td th:text="${t.getUser().getUserLastName()}"></td>

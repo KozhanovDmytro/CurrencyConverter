@@ -7,11 +7,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.time.LocalDateTime;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests DialogDaoImpl class.
@@ -53,6 +56,7 @@ public class DialogDaoImplTest {
    private static File tempFile;
    private static DialogDaoImpl tr;
    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
 
    @BeforeAll
@@ -68,7 +72,7 @@ public class DialogDaoImplTest {
    }
 
    @Test
-   void writeAndReadTest() {
+   void writeAndReadTest() throws ParseException {
       int size = tr.getAll().size();
 
       Dialog tr10 = createTransaction("27.12.2018 04:22:47", 13, "Vasiliy", "Ivanov", "", START_COMMAND, START_MESSAGE);
@@ -114,8 +118,8 @@ public class DialogDaoImplTest {
    }
 
    @Test
-   void getByDate() {
-      LocalDateTime date = LocalDateTime.of(2018, 12, 25, 0, 0);
+   void getByDate() throws ParseException {
+      Date date = df.parse("25.12.2018 00:00:00");
       int size = tr.getByDate(date).size();
 
       Dialog tr10 = createTransaction("25.12.2018 02:22:47", 547, "Fedor", "Makeeev", "", START_COMMAND, START_MESSAGE);
@@ -158,9 +162,8 @@ public class DialogDaoImplTest {
       tr.write(dialog);
    }
 
-   private Dialog createTransaction(String date, int userId, String userFirstName, String userLastName, String userName,
-                                    String usersRequest, String botsResponse) {
-      LocalDateTime parseDate = LocalDateTime.parse(date, FORMATTER);
+   private Dialog createTransaction(String date, int userId, String userFirstName, String userLastName, String userName, String usersRequest, String botsResponse) throws ParseException {
+      Date parseDate = df.parse(date);
       User user = new User(userId, userFirstName, userLastName, userName);
       return new Dialog(parseDate, user, usersRequest, botsResponse);
    }
