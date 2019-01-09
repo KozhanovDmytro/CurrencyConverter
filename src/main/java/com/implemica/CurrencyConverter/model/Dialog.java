@@ -41,8 +41,10 @@ public class Dialog implements Serializable {
    @JsonIgnore
    SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
-
-   private Dialog() {
+   /**
+    * Creates new simple Dialog
+    */
+   public Dialog() {
    }
 
    /**
@@ -85,6 +87,5 @@ public class Dialog implements Serializable {
                  this.botsResponse.equals(((Dialog) tr).botsResponse);
       }
       return false;
-
    }
 }
