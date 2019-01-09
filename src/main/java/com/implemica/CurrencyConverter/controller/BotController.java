@@ -6,65 +6,97 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * This class gets users input from telegram bot and processes it via Converter class
+ *
+ * @see BotService
+ * @see com.implemica.CurrencyConverter.model.Converter
  *
  * @author Daria S.
  * @version 27.12.2018 12:27
  */
 @Component
 public class BotController extends TelegramLongPollingBot {
-
-
-   private static final String CONVERT_MESSAGE = "You can use /convert to make me new convert currencies";
+   /**
+    * Logger for this class
+    */
+   private Logger log = Logger.getLogger(BotController.class.getName());
+   /**
+    * Bot name in Telegram.
+    */
    private static final String BOT_NAME = "CurrencyConverterImplemicaBot";
+   /**
+    * It uses for getting and sending messages via Bot API
+    */
    private static final String BOT_TOKEN = "736932538:AAFW981ptLJ4g1lbsVTn7HebaojMKLClEDg";
 
    /**
-    * Bot's logic
+    * Logic of bot, how it processes user's input.
+    */
+   private final BotService bot;
+
+   /**
+    * Creates new telegram bot's controller
+    *
+    * @param bot stores bot's logic
     */
    @Autowired
-   private BotService bot;
+   public BotController(BotService bot) {
+      this.bot = bot;
+   }
 
    /**
     * Gets users input and processes it. Writes conversation to .csv file.
+    *
+    * @param update represents an incoming update from Telegram
     */
    @Override
    public void onUpdateReceived(Update update) {
-
-      String command = update.getMessage().getText();
+      Message newMessage = update.getMessage();
+      String command = newMessage.getText();
       String message;
 
       //get information about user
       User user = getInformationAboutUser(update);
 
       //dialog with user
-      if (!update.getMessage().hasText()) {
-         message = "Sorry, but this message contains incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
-         command = "Users message has incorrect content.";
-      } else {
-         message = bot.onUpdateReceived(command, user);
+      if (!newMessage.hasText()) {
+         command = BOT_TOKEN;
       }
+
+      //response to user
+      message = bot.onUpdateReceived(command, user);
       sendMessage(update, message);
    }
 
+   /**
+    * @return bot's name in Telegram
+    */
    @Override
    public String getBotUsername() {
       return BOT_NAME;
-//      return "daras_bot";
-   }
-
-   @Override
-   public String getBotToken() {
-      return BOT_TOKEN;
-//      return "717479855:AAHstabH8JLkZ3oM7cXtleuGd_I1W38Z1Jg";
    }
 
    /**
-    * Shows some message to user
+    * @return bot's token in Telegram
+    */
+   @Override
+   public String getBotToken() {
+      return BOT_TOKEN;
+   }
+
+   /**
+    * Sends message to user in Telegram
+    *
+    * @param update  represents an incoming update from Telegram
+    * @param message message, which has to be sent to user
     */
    private void sendMessage(Update update, String message) {
       SendMessage sendMessage = new SendMessage();
@@ -73,12 +105,15 @@ public class BotController extends TelegramLongPollingBot {
       try {
          execute(sendMessage);
       } catch (TelegramApiException e) {
-         e.printStackTrace();
+         log.log(Level.SEVERE, "Some Telegram API exception");
       }
    }
 
    /**
-    * User initialisation: id, name, last name
+    * User initialisation: id, name, last name, userName.
+    *
+    * @param update represents an incoming update from Telegram
+    * @return new User
     */
    private User getInformationAboutUser(Update update) {
       org.telegram.telegrambots.meta.api.objects.User botUser = update.getMessage().getFrom();

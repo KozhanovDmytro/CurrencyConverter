@@ -6,6 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.time.format.DateTimeFormatter;
+
 /**
  * Controller for show bot's log.
  *
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.GetMapping;
     */
    @GetMapping("/log") public String log(Model model) {
       model.addAttribute("transactions", dialogDao.getAll());
+      model.addAttribute("dateTimeFormatter", DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
       return "log_page";
    }
 

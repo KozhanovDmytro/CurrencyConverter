@@ -7,13 +7,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Tests DialogDaoImpl class.
@@ -54,7 +52,7 @@ public class DialogDaoImplTest {
 
    private static File tempFile;
    private static DialogDaoImpl tr;
-   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+   private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
 
    @BeforeAll
@@ -65,7 +63,12 @@ public class DialogDaoImplTest {
 
 
    @Test
-   void writeAndReadTest() throws ParseException {
+   void fileWasCreated() {
+      assertTrue(tempFile.exists());
+   }
+
+   @Test
+   void writeAndReadTest() {
       int size = tr.getAll().size();
 
       Dialog tr10 = createTransaction("27.12.2018 04:22:47", 13, "Vasiliy", "Ivanov", "", START_COMMAND, START_MESSAGE);
@@ -79,6 +82,7 @@ public class DialogDaoImplTest {
       Dialog tr22 = createTransaction("27.12.2018 12:26:56", 67, "Natalia", "Nikitina", "flower", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
       Dialog tr23 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
       Dialog tr24 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
+      Dialog tr25 = createTransaction("27.12.2018 12:26:34", 67, "Natalia", "Nikitina", "flower", STOP_COMMAND, STOP_MESSAGE);
 
       writeToFile(tr10);
       writeToFile(tr11);
@@ -90,9 +94,10 @@ public class DialogDaoImplTest {
       writeToFile(tr22);
       writeToFile(tr23);
       writeToFile(tr24);
+      writeToFile(tr25);
 
       List<Dialog> list = tr.getAll();
-      assertEquals(10 + size, list.size());
+      assertEquals(11 + size, list.size());
 
       assertEquals(tr10, list.get(size));
       assertEquals(tr11, list.get(1 + size));
@@ -104,12 +109,13 @@ public class DialogDaoImplTest {
       assertEquals(tr22, list.get(7 + size));
       assertEquals(tr23, list.get(8 + size));
       assertEquals(tr24, list.get(9 + size));
+      assertEquals(tr25, list.get(10 + size));
 
    }
 
    @Test
-   void getByDate() throws ParseException {
-      Date date = df.parse("25.12.2018 00:00:00");
+   void getByDate() {
+      LocalDateTime date = LocalDateTime.of(2018, 12, 25, 0, 0);
       int size = tr.getByDate(date).size();
 
       Dialog tr10 = createTransaction("25.12.2018 02:22:47", 547, "Fedor", "Makeeev", "", START_COMMAND, START_MESSAGE);
@@ -152,8 +158,9 @@ public class DialogDaoImplTest {
       tr.write(dialog);
    }
 
-   private Dialog createTransaction(String date, int userId, String userFirstName, String userLastName, String userName, String usersRequest, String botsResponse) throws ParseException {
-      Date parseDate = df.parse(date);
+   private Dialog createTransaction(String date, int userId, String userFirstName, String userLastName, String userName,
+                                    String usersRequest, String botsResponse) {
+      LocalDateTime parseDate = LocalDateTime.parse(date, FORMATTER);
       User user = new User(userId, userFirstName, userLastName, userName);
       return new Dialog(parseDate, user, usersRequest, botsResponse);
    }
@@ -163,7 +170,6 @@ public class DialogDaoImplTest {
       if (tempFile == null) {
          return;
       }
-      tempFile.delete();
-      assertTrue(!tempFile.exists());
+      assertTrue(tempFile.delete());
    }
 }

@@ -3,7 +3,6 @@ package com.implemica.CurrencyConverter.service;
 import com.implemica.CurrencyConverter.configuration.SpringConfiguration;
 import com.implemica.CurrencyConverter.configuration.WebSocketConfiguration;
 import com.implemica.CurrencyConverter.model.User;
-import com.implemica.CurrencyConverter.service.ConverterService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +25,7 @@ public class BotServiceTest {
 
    @Autowired
    private BotService testBotService;
+   private static final String BOT_TOKEN = "736932538:AAFW981ptLJ4g1lbsVTn7HebaojMKLClEDg";
 
    private User testUser = new User(12, "user");
 
@@ -38,6 +38,7 @@ public class BotServiceTest {
     * Converting messages
     */
    private static final String CONVERT_MESSAGE = " You can use /convert to make me new convert currencies";
+   private static final String UNREADABLE_CONTENT_MESSAGE = "Sorry, but this message contains incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
    private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
    private static final String SECOND_CONVERT_MESSAGE_1 = "OK, you wish to convert from ";
    private static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
@@ -86,6 +87,97 @@ public class BotServiceTest {
       enterOtherWords("MY name is John");
       enterOtherWords("/clear");
    }
+
+   @Test
+   void unreadableContent() {
+      //wrong content
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      //wrong content after command
+      compute(START, START_MESSAGE);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      compute(STOP, STOP_MESSAGE);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      //wrong content after second conversion step
+      interruptConvertOnSecondStep("usd", "USD", BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnSecondStep("xxx", "XXX", BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnSecondStep("hello", "HELLO", BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      //wrong content after third conversion step
+      interruptConvertOnThirdStep("pln","PLN", "uah","UAH",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("cad","CAD", "uss","USS",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("mop","MOP", "say","SAY",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+
+      interruptConvertOnThirdStep("sit","SIT", "eur","EUR",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("trl","TRL", "xbb","XBB",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("xbc","XBC", "come","COME",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+
+      interruptConvertOnThirdStep("how","HOW", "rub","RUB",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("are","ARE", "afa","AFA",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("you","YOU", "talk","TALK",BOT_TOKEN,UNREADABLE_CONTENT_MESSAGE);
+
+      //wrong content after conversion
+      rightScript("Shp", "SHP", "Usd", "USD", "30.6");
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongAmount("Myr", "MYR", "KhR", "KHR", "-67");
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withUnsupportedCurrency("PLN", "PLN", "ITL", "ITL", "0.1", true);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongAmount("Gel", "GEL", "ITL", "ITL", "0.11,");
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongCurrency("UAH", "UAH", "rubli", "RUBLI", "2000", true);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongCurrency("Xof", "XOF", "hi", "HI", "abc", true);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withUnsupportedCurrency("xts", "XTS", "dop", "DOP", "301", false);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongAmount("cou", "COU", "ern", "ERN", "-17");
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withUnsupportedCurrency("xts", "XTS", "csd", "CSD", "804", false);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongAmount("mtl", "MTL", "USS", "USS", "-10000");
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongCurrency("xxx", "XXX", "val", "VAL", "13.3", true);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongCurrency("xua", "XUA", "I", "I", "0 01", true);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongCurrency("russian", "RUSSIAN", "uah", "UAH", "300", false);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongCurrency("tttttttt", "TTTTTTTT", "isk", "ISK", "-34", false);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongCurrency("lalala", "LALALA", "tMM", "TMM", "21", false);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongCurrency("go", "GO", "xts", "XTS", "-0.1", false);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongCurrency("dog", "DOG", "bird", "BIRD", "100000", false);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongCurrency("spoon", "SPOON", "plate", "PLATE", "4 cups", false);
+      compute(BOT_TOKEN, UNREADABLE_CONTENT_MESSAGE);
+
+   }
+
 
    @Test
    void twoCommandsTest() {
