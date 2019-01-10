@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -55,7 +54,6 @@ public class DialogDaoImplTest {
 
    private static File tempFile;
    private static DialogDaoImpl tr;
-   private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
    private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
 

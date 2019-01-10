@@ -7,7 +7,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Controller for show bot's log.

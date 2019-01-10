@@ -26,6 +26,7 @@ import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber
  * This class contains Bot's logic
  *
  * @author Daria S.
+ * @author Dmytro K.
  * @version 08.01.19 14:32
  */
 @Service
@@ -91,7 +92,8 @@ public class BotService {
    /**
     * Bot's response for non-text message
     */
-   private static final String INCORRECT_CONTENT_MESSAGE = "Sorry, but this message contains incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
+   private static final String INCORRECT_CONTENT_MESSAGE = "Sorry, but this message contains " +
+           "incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
    /**
     * Message for log, that user sent incorrect content
     */
@@ -145,32 +147,31 @@ public class BotService {
          command = NOT_TEXT_CONTENT;
          message = INCORRECT_CONTENT_MESSAGE;
          convertStep = 0;
+      } else if (command.equals(START)) {
+         message = START_MESSAGE;
+         convertStep = 0;
+      } else if (command.equals(STOP)) {
+         message = STOP_MESSAGE;
+         convertStep = 0;
+      } else if (command.equals(CONVERT)) {
+         message = FIRST_CONVERT_MESSAGE;
+         convertStep = 1;
+      } else if (convertStep == 1) {
+         firstCurrency = BotValidator.toUpperCase(command);
+         message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
+         convertStep = 2;
+      } else if (convertStep == 2) {
+         secondCurrency = BotValidator.toUpperCase(command);
+         message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
+         convertStep = 3;
+      } else if (convertStep == 3) {
+         message = convertValue(command);
+         convertStep = 0;
       } else {
-         if (command.equals(START)) {
-            message = START_MESSAGE;
-            convertStep = 0;
-         } else if (command.equals(STOP)) {
-            message = STOP_MESSAGE;
-            convertStep = 0;
-         } else if (command.equals(CONVERT)) {
-            message = FIRST_CONVERT_MESSAGE;
-            convertStep = 1;
-         } else if (convertStep == 1) {
-            firstCurrency = BotValidator.toUpperCase(command);
-            message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
-            convertStep = 2;
-         } else if (convertStep == 2) {
-            secondCurrency = BotValidator.toUpperCase(command);
-            message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
-            convertStep = 3;
-         } else if (convertStep == 3) {
-            message = convertValue(command);
-            convertStep = 0;
-         } else {
-            message = "Sorry, but I don't understand what \"" + command + "\" means." + CONVERT_MESSAGE;
-            convertStep = 0;
-         }
+         message = "Sorry, but I don't understand what \"" + command + "\" means." + CONVERT_MESSAGE;
+         convertStep = 0;
       }
+
 
       Date dateNow  = new Date();
 

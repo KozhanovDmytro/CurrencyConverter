@@ -16,19 +16,13 @@ import java.util.Currency;
 @AllArgsConstructor
 public class Converter {
 
-   /**
-    * User's currency which will be converted.
-    */
+   /** User's currency which will be converted. */
    private Currency usersCurrency;
 
-   /**
-    * Desired currency in which the conversion will be made
-    */
+   /** Desired currency in which the conversion will be made. */
    private Currency desiredCurrency;
 
-   /**
-    * Amount of {@link this#usersCurrency}
-    */
+   /** Amount of {@link this#usersCurrency} */
    private float value;
 
    /**
@@ -36,8 +30,7 @@ public class Converter {
     *
     * @return information of conversion
     */
-   @Override
-   public String toString() {
+   @Override public String toString() {
       return usersCurrency.getCurrencyCode() + " -> " +
               desiredCurrency.getCurrencyCode() + " value: " +
               value;

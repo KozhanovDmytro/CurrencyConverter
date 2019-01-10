@@ -9,7 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * This class is part of user's conversation with bot. Stores date, information about user, their request and bot's response
+ * This class is part of user's conversation with bot. Stores date,
+ * information about user, their request and bot's response
  *
  * @author Daria S., Dmytro K.
  * @version 09.01.2019 14.48
@@ -48,7 +49,8 @@ public class Dialog implements Serializable {
    }
 
    /**
-    * Creates new Dialog, that represents information about user, their request to bot, bot's response for it and date and time of
+    * Creates new Dialog, that represents information about user,
+    * their request to bot, bot's response for it and date and time of
     * conversation.
     *
     * @param date         date and time of users request

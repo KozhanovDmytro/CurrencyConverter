@@ -1,11 +1,9 @@
-package com.implemica.CurrencyConverter.controller;
+package com.implemica.CurrencyConverter.service;
 
 import com.implemica.CurrencyConverter.configuration.SpringConfiguration;
 import com.implemica.CurrencyConverter.configuration.WebSocketConfiguration;
 import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
-import com.implemica.CurrencyConverter.service.BotService;
-import com.implemica.CurrencyConverter.service.ConverterService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +37,10 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Class for testing websocket.
  *
+ * In this test created client endpoint {@link Handler}.
+ *
  * First of all, a message send to the {@link BotService}, bot sends to the web
- * socket channel, then the handler checks that he received this message.
+ * socket channel, then client endpoint checks that he received this message.
  *
  * @see BotService
  * @see Dialog
@@ -113,7 +113,7 @@ public class WebSocketTest {
       botService.onUpdateReceived(expectedMessage, user);
 
       try {
-         Thread.sleep(1000);
+         Thread.sleep(500);
       } catch (InterruptedException e) {
          e.printStackTrace();
       }

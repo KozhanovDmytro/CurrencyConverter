@@ -149,7 +149,7 @@ public final class ConverterService {
     * @return analyzed exception.
     */
    private String analyzeException() {
-      String result = MESSAGE_UNKNOWN_ERROR;
+      String result = MESSAGE_UNSUPPORTED_CURRENCY;
       for (Throwable e : exceptions) {
          if (e instanceof CurrencyNotSupportedException) {
             logger.log(Level.SEVERE, e.getMessage());
@@ -311,6 +311,5 @@ public final class ConverterService {
 
    private static final String MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION = "Problem with internet connection.";
    private static final String MESSAGE_EXCEPTION_WAS_THROWN = "exception was thrown: ";
-   private static final String MESSAGE_UNKNOWN_ERROR = "Unknown error!";
    private static final String MESSAGE_UNSUPPORTED_CURRENCY = "One or two currencies not supported.";
 }

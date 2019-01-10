@@ -238,29 +238,6 @@ public class ConverterTest {
       checkConvert("IRR", "USD");
    }
 
-   @Test
-   void checkCurrencyTransferToUAH() throws IOException, CurrencyConverterException {
-      checkConvert("BTN", "UAH");
-      checkConvert("BMD", "UAH");
-      checkConvert("KYD", "UAH");
-      checkConvert("STD", "UAH");
-      checkConvert("KPW", "UAH");
-      checkConvert("SHP", "UAH");
-      checkConvert("MGA", "UAH");
-      checkConvert("RSD", "UAH");
-   }
-
-   @Test
-   void checkCurrencyTransferFromUAH() throws IOException, CurrencyConverterException {
-      checkConvert("UAH", "BTN");
-      checkConvert("UAH", "BMD");
-      checkConvert("UAH", "KYD");
-      checkConvert("UAH", "STD");
-      checkConvert("UAH", "KPW");
-      checkConvert("UAH", "SHP");
-      checkConvert("UAH", "MGA");
-      checkConvert("UAH", "RSD");
-   }
 
    @Test
    void checkCurrencyTransferFromUSD() throws IOException, CurrencyConverterException {
@@ -423,6 +400,29 @@ public class ConverterTest {
       checkConvert("USD", "IRR");
    }
 
+   @Test
+   void checkCurrencyTransferToUAH() throws IOException, CurrencyConverterException {
+      checkConvert("BTN", "UAH");
+      checkConvert("BMD", "UAH");
+      checkConvert("KYD", "UAH");
+      checkConvert("STD", "UAH");
+      checkConvert("KPW", "UAH");
+      checkConvert("SHP", "UAH");
+      checkConvert("MGA", "UAH");
+      checkConvert("RSD", "UAH");
+   }
+
+   @Test
+   void checkCurrencyTransferFromUAH() throws IOException, CurrencyConverterException {
+      checkConvert("UAH", "BTN");
+      checkConvert("UAH", "BMD");
+      checkConvert("UAH", "KYD");
+      checkConvert("UAH", "STD");
+      checkConvert("UAH", "KPW");
+      checkConvert("UAH", "SHP");
+      checkConvert("UAH", "MGA");
+      checkConvert("UAH", "RSD");
+   }
    /**
     * Test currency which cannot be converted to USD.
     */
