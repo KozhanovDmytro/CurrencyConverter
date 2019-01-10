@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  * @see JSONObject
  *
  * @author Dmytro K.
- * @version 08.01.2019 05:01
+ * @version 10.01.2019 22:10
  */
 @Service
 public final class ConverterService {
@@ -74,7 +74,15 @@ public final class ConverterService {
    }
 
    /**
-    * The function which will be converted to some currency.
+    * Function converts  currency from {@link Converter#usersCurrency} to
+    * {@link Converter#desiredCurrency}.
+    *
+    * Firstly function  checks  internet connection if this false then it
+    * throws  {@link UnknownHostException},  then  it  calls all the APIs
+    * that are presented in the {@link this#options}, if any API was able
+    * to  convert the currency,  the function returns the result,  if all
+    * APIs  could  not  convert  the  currency,  the  function  throws an
+    * exception.
     *
     * @param converter contains currencies and value for conversion.
     * @return converted value.
@@ -122,8 +130,8 @@ public final class ConverterService {
    }
 
    /**
-    * Function makes a decision result was returned from APIs
-    * or not. If it false that it throws an exception.
+    * Function makes a decision - result was returned from APIs
+    * or was not returned, if it false that it throws an exception.
     *
     * @throws CurrencyConverterException if result wasn't returned from APIs
     * @return result of conversion.
@@ -137,8 +145,10 @@ public final class ConverterService {
    }
 
    /**
-    * Function analyze exceptions which was thrown in several APIs and makes decision
-    * which currency does not support.
+    * The function analyzes the exceptions that were thrown in several APIs
+    * and decides which currency is not supported. If it is not possible to
+    * decide (which currency is not supported) the message will be returned
+    * by default.
     *
     * @param exceptions exceptions which was thrown in APIs
     * @return exception message
@@ -172,17 +182,6 @@ public final class ConverterService {
    }
 
    /**
-    * Function converts {@link java.util.Currency} to {@link Currency}
-    * 
-    * @param currency contains currencies and value for conversion.
-    * @return instance of {@link Currency}
-    * @throws CurrencyNotSupportedException if currency does not support. 
-    */
-   private Currency getCurrencyByUtilCurrency(java.util.Currency currency) throws CurrencyNotSupportedException {
-      return Currency.fromString(currency.getCurrencyCode());
-   }
-
-   /**
     * Converts by java money api.
     *
     * @return result of conversion.
@@ -203,7 +202,7 @@ public final class ConverterService {
 
    /**
     * Function connects to free.currencyapi.com, gets json and parse it.
-    * 
+    *
     * @param converter contains currencies and value for conversion.
     * @throws IOException if didn't parse a json
     * @return result of conversion.
@@ -214,7 +213,7 @@ public final class ConverterService {
       JSONObject object = getJsonObjectByURL(url);
 
       double value = object.getJSONObject(converter.getUsersCurrency() + "_" + converter.getDesiredCurrency())
-                     .getDouble("val");
+              .getDouble("val");
 
       writeToLog(API_NAME_FREE_CURRENCYAPI_COM, converter);
 
@@ -223,7 +222,7 @@ public final class ConverterService {
 
    /**
     * Function connects to currencylayer.com, gets json and parse it.
-    * 
+    *
     * @param converter contains currencies and value for conversion.
     * @throws IOException if didn't parse a json
     * @return result of conversion.
@@ -234,7 +233,7 @@ public final class ConverterService {
       JSONObject object = getJsonObjectByURL(url);
 
       double value = object.getJSONObject("quotes")
-                           .getDouble(converter.getUsersCurrency() + "" + converter.getDesiredCurrency());
+              .getDouble(converter.getUsersCurrency() + "" + converter.getDesiredCurrency());
 
       writeToLog(API_NAME_CURRENCYLAYER_COM, converter);
 
@@ -243,7 +242,7 @@ public final class ConverterService {
 
    /**
     * Function connects to floatrates.com, gets json and parse it.
-    * 
+    *
     * @param converter contains currencies and value for conversion.
     * @throws IOException if didn't parse a json
     * @return result of conversion.
@@ -255,11 +254,23 @@ public final class ConverterService {
 
       String desiredCurrency = converter.getDesiredCurrency().getCurrencyCode();
 
-      double rate = object.getJSONObject(desiredCurrency.toLowerCase()).getDouble("rate");
+      double rate = object.getJSONObject(desiredCurrency.toLowerCase())
+              .getDouble("rate");
 
       writeToLog(API_NAME_FLOATRATES_COM, converter);
 
       return converter.getValue() * (float) rate;
+   }
+
+   /**
+    * Function converts {@link java.util.Currency} to {@link Currency}
+    *
+    * @param currency contains currencies and value for conversion.
+    * @return instance of {@link Currency}
+    * @throws CurrencyNotSupportedException if currency does not support.
+    */
+   private Currency getCurrencyByUtilCurrency(java.util.Currency currency) throws CurrencyNotSupportedException {
+      return Currency.fromString(currency.getCurrencyCode());
    }
 
    /**
@@ -276,7 +287,7 @@ public final class ConverterService {
    }
 
    /**
-    * Function for build URL. 
+    * Function for build URL.
     * 
     * @param path url as string
     * @param converter contains currencies and value for conversion.
@@ -284,7 +295,7 @@ public final class ConverterService {
     * @throws MalformedURLException if no protocol is specified, or an
     *               unknown protocol is found.
     */
-   private static URL buildURL(String path, Converter converter) throws MalformedURLException {
+   private URL buildURL(String path, Converter converter) throws MalformedURLException {
       String url = String.format(path, converter.getUsersCurrency(), converter.getDesiredCurrency());
       return new URL(url);
    }

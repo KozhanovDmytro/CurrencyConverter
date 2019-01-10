@@ -40,7 +40,7 @@ public class Dialog implements Serializable {
     * Date format
     */
    @JsonIgnore
-   SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
    /**
     * Creates new simple Dialog
