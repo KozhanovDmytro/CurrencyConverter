@@ -110,7 +110,7 @@ public class BotController extends TelegramLongPollingBot {
       try {
          execute(sendMessage);
       } catch (TelegramApiException e) {
-         log.log(Level.SEVERE, "Some Telegram API exception");
+         log.log(Level.SEVERE, e.getMessage());
       }
    }
 

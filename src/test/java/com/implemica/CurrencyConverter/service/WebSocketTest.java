@@ -120,6 +120,7 @@ public class WebSocketTest {
 
       assertNotNull(receivedDialog);
       assertEquals(expectedMessage, receivedDialog.getUsersRequest());
+      assertEquals(user, receivedDialog.getUser());
    }
 
    /**
