@@ -195,8 +195,8 @@ public class WebControllerTest {
       Dialog receivedDialogFromWS = clientEndPoint.getReceivedDialog();
 
       // sets null here is important for next tests
-      // it needed for check if data was received from
-      // web socket.
+      // it needed for check in next tests if data
+      // was received from webSocket or not.
       clientEndPoint.setReceivedDialog(null);
 
       // check WS
