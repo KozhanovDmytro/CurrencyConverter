@@ -4,12 +4,12 @@ package com.implemica.CurrencyConverter.controller;
 import com.implemica.CurrencyConverter.configuration.SpringConfiguration;
 import com.implemica.CurrencyConverter.configuration.WebSocketConfiguration;
 import com.implemica.CurrencyConverter.controller.util.ClientEndPoint;
+import com.implemica.CurrencyConverter.dao.DialogDao;
 import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.service.BotService;
 import com.implemica.CurrencyConverter.service.ConverterService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -29,6 +29,7 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -39,6 +40,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -54,6 +56,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @EnableAutoConfiguration
 public class WebControllerTest {
+
+   private static final String ROW_FORMAT = "<tr>" +
+                   "            <td>%s</td>" +
+                   "            <td>%d</td>" +
+                   "            <td>%s</td>" +
+                   "            <td>%s</td>" +
+                   "            <td>%s</td>" +
+                   "            <td>%s</td>" +
+                   "            <td>%s</td>" +
+                   "        </tr>";
 
    private Logger logger = Logger.getLogger(WebControllerTest.class.getName());
 
@@ -75,6 +87,9 @@ public class WebControllerTest {
 
    @Autowired
    private BotService botService;
+
+   @Autowired
+   private DialogDao dialogDao;
 
    @BeforeEach
    void setUp() throws InterruptedException, ExecutionException, TimeoutException {
@@ -136,26 +151,38 @@ public class WebControllerTest {
    }
 
    @Test
-   void webSocketTest() {
-      sendAndCheckWS("/convert");
-      sendAndCheckWS("some message");
-      sendAndCheckWS("UAH");
-      sendAndCheckWS("");
-      sendAndCheckWS("UAH");
-      sendAndCheckWS("USD");
-      sendAndCheckWS("BYR");
-      sendAndCheckWS("AND");
-      sendAndCheckWS("/stop");
+   void webSocketTest() throws Exception {
+
+      // non-valid data
+      sendAndCheckWSAndPageContent("pksajhyufd");
+      sendAndCheckWSAndPageContent("hfds43kj23 kj");
+      sendAndCheckWSAndPageContent("\"\"klhgf\"n.jhj\"\"lkljgt");
+      sendAndCheckWSAndPageContent("pksajhyufd");
+      sendAndCheckWSAndPageContent("dsakjdsa hasdvhj335j kgwa k34");
+      sendAndCheckWSAndPageContent("lkjfewqjf'''dsflkjj");
+      sendAndCheckWSAndPageContent("aslfhkkfakjsf,vslk");
+      sendAndCheckWSAndPageContent("Lorem kjfsdlksdfj");
+      sendAndCheckWSAndPageContent("dsflkalkdsfj");
+      sendAndCheckWSAndPageContent("wglkj45hkg");
+
+      // valid data
+      sendAndCheckWSAndPageContent("/start");
+      sendAndCheckWSAndPageContent("/convert");
+      sendAndCheckWSAndPageContent("USD");
+      sendAndCheckWSAndPageContent("UAH");
+      sendAndCheckWSAndPageContent("1");
+      sendAndCheckWSAndPageContent("/convert");
+      sendAndCheckWSAndPageContent("RUB");
+      sendAndCheckWSAndPageContent("UAH");
+      sendAndCheckWSAndPageContent("1");
+      sendAndCheckWSAndPageContent("/stop");
    }
 
-   @Test
-   @Disabled
-   void pageTest() throws Exception {
-      sendAndCheckPage("/convert");
-   }
-
-   private void sendAndCheckWS(String expectedMessage) {
+   private void sendAndCheckWSAndPageContent(String expectedMessage) throws Exception {
       botService.onUpdateReceived(expectedMessage, user);
+
+      List<Dialog> dialogs = dialogDao.getAll();
+      Dialog dialogFromFile = dialogs.get(dialogs.size() - 1);
 
       try {
          Thread.sleep(500);
@@ -165,63 +192,44 @@ public class WebControllerTest {
 
       assertNotNull(clientEndPoint.getReceivedDialog());
 
-      Dialog receivedDialog = clientEndPoint.getReceivedDialog();
+      Dialog receivedDialogFromWS = clientEndPoint.getReceivedDialog();
+
+      // sets null here is important for next tests
+      // it needed for check if data was received from
+      // web socket.
       clientEndPoint.setReceivedDialog(null);
 
-      assertEquals(expectedMessage, receivedDialog.getUsersRequest());
-      assertEquals(user, receivedDialog.getUser());
+      // check WS
+      assertEquals(dialogFromFile, receivedDialogFromWS);
+
+      String expectedRow = getExpectedRow(dialogFromFile);
+      String actualContent = getContentByMapping("/log");
+
+      // check page
+      assertTrue(actualContent.contains(expectedRow));
    }
 
-   private void sendAndCheckPage(String expectedMessage) throws Exception {
-//      TODO use Thyme leaf test!
-      botService.onUpdateReceived(expectedMessage, user);
-
-      try {
-         Thread.sleep(500);
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
-
-      assertNotNull(clientEndPoint.getReceivedDialog());
-
-      Dialog receivedDialog = clientEndPoint.getReceivedDialog();
-      clientEndPoint.setReceivedDialog(null);
-
-      String expectedInHTMLPage = new StringBuilder().append("<tr>")
-              .append("<td>")
-              .append(df.format(receivedDialog.getDate()))
-              .append("</td>")
-
-              .append("<td>")
-              .append(receivedDialog.getUser().getUserId())
-              .append("</td>")
-
-              .append("<td>")
-              .append(receivedDialog.getUser().getUserFirstName())
-              .append("</td>")
-
-              .append("<td>")
-              .append(receivedDialog.getUser().getUserLastName())
-              .append("</td>")
-
-              .append("<td>")
-              .append(receivedDialog.getUser().getUserName())
-              .append("</td>")
-
-              .append("<td>")
-              .append(receivedDialog.getUsersRequest())
-              .append("</td>")
-
-              .append("<td>")
-              .append(receivedDialog.getBotsResponse())
-              .append("</td>")
-
-              .append("</tr>").toString();
-
-      mockMvc.perform(get("/log"))
+   private String getContentByMapping(String mapping) throws Exception {
+      return mockMvc.perform(get(mapping))
+              .andDo(print())
               .andExpect(status().isOk())
-              .andExpect(content().string(containsString(expectedInHTMLPage)));
+              .andReturn()
+              .getResponse()
+              .getContentAsString()
+              .replaceAll("\n", "")
+              .replaceAll("\r", "")
+              .replaceAll("&quot;", "\"")
+              .replaceAll("&#39;", "'");
+   }
 
-
+   private String getExpectedRow(Dialog dialog) {
+      return String.format(ROW_FORMAT,
+              df.format(dialog.getDate()),
+              dialog.getUser().getUserId(),
+              dialog.getUser().getUserFirstName(),
+              dialog.getUser().getUserLastName(),
+              dialog.getUser().getUserName(),
+              dialog.getUsersRequest(),
+              dialog.getBotsResponse());
    }
 }

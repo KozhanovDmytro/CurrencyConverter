@@ -2,7 +2,7 @@ package com.implemica.CurrencyConverter.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -15,7 +15,7 @@ import java.util.Date;
  * @author Daria S., Dmytro K.
  * @version 09.01.2019 14.48
  */
-@Data
+@Getter
 public class Dialog implements Serializable {
    /**
     * User's message to bot

@@ -2,7 +2,7 @@ package com.implemica.CurrencyConverter.model;
 
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.Currency;
 
@@ -12,7 +12,7 @@ import java.util.Currency;
  * @author Dmytro K.
  * @version 08.01.2019 05:03
  */
-@Data
+@Getter
 @AllArgsConstructor
 public class Converter {
 

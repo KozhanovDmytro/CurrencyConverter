@@ -1,7 +1,6 @@
 package com.implemica.CurrencyConverter.model;
 
-
-import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -10,7 +9,7 @@ import java.io.Serializable;
  *
  * @author Daria S.
  */
-@Data
+@Getter
 public class User implements Serializable {
    /**
     * Unique identifier for this user
