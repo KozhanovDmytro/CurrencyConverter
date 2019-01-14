@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
  * @version 11.01.2019 17:48
  */
 @ExtendWith(MockitoExtension.class)
-class BotControllerTest {
+public class BotControllerTest {
 
    /**
     * Bot name in Telegram.

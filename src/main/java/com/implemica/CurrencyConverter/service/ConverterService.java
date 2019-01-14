@@ -176,9 +176,11 @@ public final class ConverterService {
       Currency desiredCurrency = getCurrencyByUtilCurrency(converter.getDesiredCurrency());
 
       CurrencyConverter currencyConverter = new BankUaCom(usersCurrency, desiredCurrency);
-      writeToLog(API_NAME_BANK_UA_COM, converter);
 
-      return currencyConverter.convertCurrency(converter.getValue());
+      Float result = currencyConverter.convertCurrency(converter.getValue());
+
+      writeToLog(API_NAME_BANK_UA_COM, converter);
+      return result;
    }
 
    /**
@@ -195,9 +197,10 @@ public final class ConverterService {
       CurrencyConversion conversion = MonetaryConversions.getConversion(converter.getDesiredCurrency().getCurrencyCode());
       MonetaryAmount converted = userMoney.with(conversion);
 
-      writeToLog(API_NAME_JAVA_MONEY, converter);
+      Float result = converted.getNumber().floatValue();
 
-      return converted.getNumber().floatValue();
+      writeToLog(API_NAME_JAVA_MONEY, converter);
+      return result;
    }
 
    /**
@@ -215,9 +218,10 @@ public final class ConverterService {
       double value = object.getJSONObject(converter.getUsersCurrency() + "_" + converter.getDesiredCurrency())
               .getDouble("val");
 
-      writeToLog(API_NAME_FREE_CURRENCYAPI_COM, converter);
+      Float result = converter.getValue() * (float) value;
 
-      return converter.getValue() * (float) value;
+      writeToLog(API_NAME_FREE_CURRENCYAPI_COM, converter);
+      return result;
    }
 
    /**
@@ -235,9 +239,10 @@ public final class ConverterService {
       double value = object.getJSONObject("quotes")
               .getDouble(converter.getUsersCurrency() + "" + converter.getDesiredCurrency());
 
-      writeToLog(API_NAME_CURRENCYLAYER_COM, converter);
+      Float result = converter.getValue() * (float) value;
 
-      return converter.getValue() * (float) value;
+      writeToLog(API_NAME_CURRENCYLAYER_COM, converter);
+      return result;
    }
 
    /**
@@ -257,9 +262,10 @@ public final class ConverterService {
       double rate = object.getJSONObject(desiredCurrency.toLowerCase())
               .getDouble("rate");
 
-      writeToLog(API_NAME_FLOATRATES_COM, converter);
+      Float result = converter.getValue() * (float) rate;
 
-      return converter.getValue() * (float) rate;
+      writeToLog(API_NAME_FLOATRATES_COM, converter);
+      return result;
    }
 
    /**
