@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 import java.util.UUID;
@@ -119,6 +120,8 @@ public class BotService {
     * Converter for currencies
     */
    private final ConverterService converterService;
+
+   public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
    /**
     * Creates new BotService containing specified converter, writer to storage and sender

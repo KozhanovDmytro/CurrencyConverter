@@ -30,7 +30,8 @@ public class Converter {
     *
     * @return information of conversion
     */
-   @Override public String toString() {
+   @Override
+   public String toString() {
       return usersCurrency.getCurrencyCode() + " -> " +
               desiredCurrency.getCurrencyCode() + " value: " +
               value;

@@ -2,6 +2,7 @@ package com.implemica.CurrencyConverter.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.implemica.CurrencyConverter.service.BotService;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -12,7 +13,8 @@ import java.util.Date;
  * This class is part of user's conversation with bot. Stores date,
  * information about user, their request and bot's response
  *
- * @author Daria S., Dmytro K.
+ * @author Daria S.
+ * @author Dmytro K.
  * @version 09.01.2019 14.48
  */
 @Getter
@@ -33,14 +35,14 @@ public class Dialog implements Serializable {
    /**
     * Date and time of dialog
     */
-   @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "GMT+2")
+   @JsonFormat(pattern = "dd.MM.yyyy hh:mm:ss", timezone = "GMT+2")
    private Date date;
 
    /**
     * Date format
     */
    @JsonIgnore
-   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+   private SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
 
    /**
     * Creates new simple Dialog

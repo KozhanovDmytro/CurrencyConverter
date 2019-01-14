@@ -2,6 +2,7 @@ package com.implemica.CurrencyConverter.dao.impl;
 
 import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
+import com.implemica.CurrencyConverter.service.BotService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ public class DialogDaoImplTest {
 
    private static File tempFile;
    private static DialogDaoImpl tr;
-   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+   private SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
 
 
    @BeforeAll

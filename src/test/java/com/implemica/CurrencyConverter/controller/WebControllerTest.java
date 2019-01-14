@@ -27,9 +27,7 @@ import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -80,7 +78,7 @@ public class WebControllerTest {
 
    private ClientEndPoint clientEndPoint = new ClientEndPoint();
 
-   private DateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+   private DateFormat df = BotService.SIMPLE_DATE_FORMAT;
 
    @Autowired
    private MockMvc mockMvc;
