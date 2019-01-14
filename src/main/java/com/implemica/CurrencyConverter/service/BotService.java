@@ -131,7 +131,7 @@ public class BotService {
     */
    private final ConverterService converterService;
 
-   public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+   public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
    /**
     * Creates new BotService containing specified converter, writer to storage and sender

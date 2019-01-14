@@ -35,7 +35,7 @@ public class Dialog implements Serializable {
    /**
     * Date and time of dialog
     */
-   @JsonFormat(pattern = "dd.MM.yyyy hh:mm:ss", timezone = "GMT+2")
+   @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "GMT+2")
    private Date date;
 
    /**

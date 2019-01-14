@@ -7,8 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.text.SimpleDateFormat;
-
 /**
  * Controller for show bot's log.
  *
@@ -60,5 +58,14 @@ public final class WebController {
    @GetMapping("/")
    public String main() {
       return "index";
+   }
+
+   /**
+    *
+    * @return
+    */
+   @GetMapping("/login")
+   public String login() {
+      return "login";
    }
 }
