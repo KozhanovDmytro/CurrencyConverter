@@ -1,0 +1,9 @@
+-------------------------------------------------------------------------------
+Test set: com.implemica.CurrencyConverter.service.ConverterTest
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 0, Errors: 1, Skipped: 1, Time elapsed: 358.941 s <<< FAILURE! - in com.implemica.CurrencyConverter.service.ConverterTest
+checkIdenticalCurrency  Time elapsed: 119.132 s  <<< ERROR!
+java.net.UnknownHostException: Problem with internet connection.
+	at com.implemica.CurrencyConverter.service.ConverterTest.checkConvertForIdenticalCurrencies(ConverterTest.java:524)
+	at com.implemica.CurrencyConverter.service.ConverterTest.checkIdenticalCurrency(ConverterTest.java:492)
+

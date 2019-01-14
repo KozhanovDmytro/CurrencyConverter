@@ -3,7 +3,6 @@ package com.implemica.CurrencyConverter.dao.impl;
 import com.implemica.CurrencyConverter.dao.DialogDao;
 import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
-import com.implemica.CurrencyConverter.service.BotService;
 import com.opencsv.CSVWriter;
 
 import java.io.*;
@@ -51,7 +50,7 @@ public class DialogDaoImpl implements DialogDao {
    /**
     * Date format
     */
-   private SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
+   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
 
    /**
