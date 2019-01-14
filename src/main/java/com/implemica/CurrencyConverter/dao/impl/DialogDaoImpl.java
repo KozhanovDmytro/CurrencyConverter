@@ -50,7 +50,7 @@ public class DialogDaoImpl implements DialogDao {
    /**
     * Date format
     */
-   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
 
    /**

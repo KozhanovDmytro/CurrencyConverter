@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -27,64 +28,94 @@ public class DialogDaoImplTest {
     */
    private static final String START_MESSAGE = "Hello! Could I help you?";
 
-
-   private static final String CONVERT_MESSAGE = "You can use /convert to make me new convert currencies";
    /**
-    * Stop message to user
+    * Message to the user with the suggestion of a new conversion
     */
-   private static final String STOP_MESSAGE = "OK. " + CONVERT_MESSAGE;
+   private static final String CONVERT_MESSAGE = " You can use /convert to make me new convert currencies";
+   /**
+    * Stop message to the user
+    */
+   private static final String STOP_MESSAGE = "OK." + CONVERT_MESSAGE;
 
    /**
     * Bot's command to start conversation
     */
-   private static final String START_COMMAND = "/start";
+   private static final String START = "/start";
    /**
     * Bot's command to start convert currencies
     */
-   private static final String CONVERT_COMMAND = "/convert";
+   private static final String CONVERT = "/convert";
    /**
     * Bot's command to stop conversation
     */
-   private static final String STOP_COMMAND = "/stop";
+   private static final String STOP = "/stop";
+   /**
+    * Bot's response for /convert command
+    */
    private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
+   /**
+    * Start of bot's response after entering first currency
+    */
    private static final String SECOND_CONVERT_MESSAGE_1 = "OK, you wish to convert from ";
+   /**
+    * End of bot's response after entering first currency
+    */
    private static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
+   /**
+    * Bot's response after entering second currency
+    */
    private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
 
 
+   /**
+    * Temporary File, which stores written data
+    */
    private static File tempFile;
+   /**
+    * DialogDaoImpl object for writing and reading dialogs
+    */
    private static DialogDaoImpl tr;
-   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+   /**
+    * Date format
+    */
+   private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
-
+   /**
+    * Creates temporary file and DialogDaoIml object
+    */
    @BeforeAll
    static void beforeClass() {
       tempFile = new File("testData.csv");
       tr = new DialogDaoImpl(tempFile);
    }
 
-
+   /**
+    * Tests, that file was created
+    */
    @Test
    void fileWasCreated() {
       assertTrue(tempFile.exists());
    }
 
+   /**
+    * Tests, that after writing data to file and data, which was read are equal
+    */
    @Test
    void writeAndReadTest() throws ParseException {
       int size = tr.getAll().size();
 
-      Dialog tr10 = createTransaction("27.12.2018 04:22:47", 13, "Vasiliy", "Ivanov", "", START_COMMAND, START_MESSAGE);
-      Dialog tr11 = createTransaction("27.12.2018 04:23:04", 13, "Vasiliy", "Ivanov", "", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
+      Dialog tr10 = createTransaction("27.12.2018 04:22:47", 13, "Vasiliy", "Ivanov", "", START, START_MESSAGE);
+      Dialog tr11 = createTransaction("27.12.2018 04:23:04", 13, "Vasiliy", "Ivanov", "", CONVERT, FIRST_CONVERT_MESSAGE);
       Dialog tr12 = createTransaction("27.12.2018 04:23:35", 13, "Vasiliy", "Ivanov", "", "usd", SECOND_CONVERT_MESSAGE_1 + "USD" + SECOND_CONVERT_MESSAGE_2);
       Dialog tr13 = createTransaction("27.12.2018 04:23:58", 13, "Vasiliy", "Ivanov", "", "uah", THIRD_CONVERT_MESSAGE + "USD to UAH");
       Dialog tr14 = createTransaction("27.12.2018 04:24:15", 13, "Vasiliy", "Ivanov", "", "10", "274");
 
-      Dialog tr20 = createTransaction("27.12.2018 12:24:47", 67, "Natalia", "Nikitina", "flower", START_COMMAND, START_MESSAGE);
+      Dialog tr20 = createTransaction("27.12.2018 12:24:47", 67, "Natalia", "Nikitina", "flower", START, START_MESSAGE);
       Dialog tr21 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "hello", "Sorry, but I don't understand what does \"hello\" mean. " + CONVERT_MESSAGE);
-      Dialog tr22 = createTransaction("27.12.2018 12:26:56", 67, "Natalia", "Nikitina", "flower", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
+      Dialog tr22 = createTransaction("27.12.2018 12:26:56", 67, "Natalia", "Nikitina", "flower", CONVERT, FIRST_CONVERT_MESSAGE);
       Dialog tr23 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
       Dialog tr24 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
-      Dialog tr25 = createTransaction("27.12.2018 12:26:34", 67, "Natalia", "Nikitina", "flower", STOP_COMMAND, STOP_MESSAGE);
+      Dialog tr25 = createTransaction("27.12.2018 12:26:34", 67, "Natalia", "Nikitina", "flower", STOP, STOP_MESSAGE);
 
       writeToFile(tr10);
       writeToFile(tr11);
@@ -115,20 +146,23 @@ public class DialogDaoImplTest {
 
    }
 
+   /**
+    * Tests, that after writing data to file and data, which was read by date are equal to expected
+    */
    @Test
    void getByDate() throws ParseException {
       Date date = df.parse("25.12.2018 00:00:00");
       int size = tr.getByDate(date).size();
 
-      Dialog tr10 = createTransaction("25.12.2018 02:22:47", 547, "Fedor", "Makeeev", "", START_COMMAND, START_MESSAGE);
-      Dialog tr11 = createTransaction("25.12.2018 02:23:04", 547, "Fedor", "Makeeev", "", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
+      Dialog tr10 = createTransaction("25.12.2018 02:22:47", 547, "Fedor", "Makeeev", "", START, START_MESSAGE);
+      Dialog tr11 = createTransaction("25.12.2018 02:23:04", 547, "Fedor", "Makeeev", "", CONVERT, FIRST_CONVERT_MESSAGE);
       Dialog tr12 = createTransaction("25.12.2018 02:23:35", 547, "Fedor", "Makeeev", "", "usd", SECOND_CONVERT_MESSAGE_1 + "USD" + SECOND_CONVERT_MESSAGE_2);
       Dialog tr13 = createTransaction("25.12.2018 02:23:58", 547, "Fedor", "Makeeev", "", "uah", THIRD_CONVERT_MESSAGE + "USD to UAH");
       Dialog tr14 = createTransaction("27.12.2018 02:24:15", 547, "Fedor", "Makeeev", "", "10", "274");
 
-      Dialog tr20 = createTransaction("25.12.2018 12:24:47", 8888, "Alice", "Alice", "fairy", START_COMMAND, START_MESSAGE);
+      Dialog tr20 = createTransaction("25.12.2018 12:24:47", 8888, "Alice", "Alice", "fairy", START, START_MESSAGE);
       Dialog tr21 = createTransaction("25.12.2018 04:08:13", 1345, "JD", "", "jd", "hello", "Sorry, but I don't understand what does \"hello\" mean. " + CONVERT_MESSAGE);
-      Dialog tr22 = createTransaction("27.12.2018 05:26:56", 1345, "JD", "", "jd", CONVERT_COMMAND, FIRST_CONVERT_MESSAGE);
+      Dialog tr22 = createTransaction("27.12.2018 05:26:56", 1345, "JD", "", "jd", CONVERT, FIRST_CONVERT_MESSAGE);
       Dialog tr23 = createTransaction("27.12.2018 05:26:01", 1345, "JD", "", "jd", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
       Dialog tr24 = createTransaction("27.12.2018 05:26:01", 1345, "JD", "", "jd", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
 
@@ -155,17 +189,25 @@ public class DialogDaoImplTest {
 
    }
 
-
+   /**
+    * Writes data to file
+    */
    private void writeToFile(Dialog dialog) {
       tr.write(dialog);
    }
 
+   /**
+    * Creates dialog, which has to be written
+    */
    private Dialog createTransaction(String date, int userId, String userFirstName, String userLastName, String userName, String usersRequest, String botsResponse) throws ParseException {
       Date parseDate = df.parse(date);
       User user = new User(userId, userFirstName, userLastName, userName);
       return new Dialog(parseDate, user, usersRequest, botsResponse);
    }
 
+   /**
+    * Deletes file and checks it
+    */
    @AfterAll
    static void afterClass() {
       if (tempFile == null) {

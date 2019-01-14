@@ -82,6 +82,9 @@ public class WebControllerTest {
 
    private DateFormat df = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
+   /**
+    * Uses for testing the server side of the application
+    */
    @Autowired
    private MockMvc mockMvc;
 
@@ -108,6 +111,9 @@ public class WebControllerTest {
       logger.log(Level.INFO, "connected: " + session.isConnected());
    }
 
+   /**
+    * Tests that main page contains specified text
+    */
    @Test
    void mainPageTest() throws Exception {
       this.mockMvc.perform(get("/"))
@@ -120,6 +126,10 @@ public class WebControllerTest {
               .andExpect(content().string(containsString("monitor bot")));
    }
 
+
+   /**
+    * Tests that log page contains specified text
+    */
    @Test
    void logPageTest() throws Exception {
       this.mockMvc.perform(get("/log"))
@@ -135,6 +145,10 @@ public class WebControllerTest {
               .andExpect(content().string(containsString("<th>Request</th>")));
    }
 
+
+   /**
+    * Tests that monitor page contains specified text
+    */
    @Test
    void monitorPageTest() throws Exception {
       this.mockMvc.perform(get("/monitor"))

@@ -16,11 +16,10 @@ import java.util.logging.Logger;
 /**
  * This class gets users input from telegram bot and processes it via Converter class
  *
+ * @author Daria S.
+ * @version 11.01.2019 17:48
  * @see BotService
  * @see com.implemica.CurrencyConverter.model.Converter
- *
- * @author Daria S.
- * @version 27.12.2018 12:27
  */
 @Component
 public class BotController extends TelegramLongPollingBot {
@@ -48,6 +47,11 @@ public class BotController extends TelegramLongPollingBot {
    private final BotService bot;
 
    /**
+    * Sender messages to user
+    */
+   private SendMessage sendMessage;
+
+   /**
     * Creates new telegram bot's controller
     *
     * @param bot stores bot's logic
@@ -55,6 +59,7 @@ public class BotController extends TelegramLongPollingBot {
    @Autowired
    public BotController(BotService bot) {
       this.bot = bot;
+      sendMessage = new SendMessage();
    }
 
    /**
@@ -64,21 +69,21 @@ public class BotController extends TelegramLongPollingBot {
     */
    @Override
    public void onUpdateReceived(Update update) {
-      Message newMessage = update.getMessage();
-      String command = newMessage.getText();
-      String message;
+      Message request = update.getMessage();
+      String command = request.getText();
+      String response;
 
       //get information about user
-      User user = getInformationAboutUser(update);
+      User user = getInformationAboutUser(request);
 
       //dialog with user
-      if (!newMessage.hasText()) {
+      if (!request.hasText()) {
          command = UNIQUE;
       }
 
       //response to user
-      message = bot.onUpdateReceived(command, user);
-      sendMessage(update, message);
+      response = bot.onUpdateReceived(command, user);
+      sendMessage(request, response);
    }
 
    /**
@@ -100,13 +105,12 @@ public class BotController extends TelegramLongPollingBot {
    /**
     * Sends message to user in Telegram
     *
-    * @param update  represents an incoming update from Telegram
-    * @param message message, which has to be sent to user
+    * @param request  represents an incoming message from Telegram
+    * @param response message, which has to be sent to user
     */
-   private void sendMessage(Update update, String message) {
-      SendMessage sendMessage = new SendMessage();
-      sendMessage.setText(message);
-      sendMessage.setChatId(update.getMessage().getChatId());
+   private void sendMessage(Message request, String response) {
+      sendMessage.setText(response);
+      sendMessage.setChatId(request.getChatId());
       try {
          execute(sendMessage);
       } catch (TelegramApiException e) {
@@ -117,11 +121,11 @@ public class BotController extends TelegramLongPollingBot {
    /**
     * User initialisation: id, name, last name, userName.
     *
-    * @param update represents an incoming update from Telegram
+    * @param message represents an incoming message from Telegram
     * @return new User
     */
-   private User getInformationAboutUser(Update update) {
-      org.telegram.telegrambots.meta.api.objects.User botUser = update.getMessage().getFrom();
+   User getInformationAboutUser(Message message) {
+      org.telegram.telegrambots.meta.api.objects.User botUser = message.getFrom();
       int userId = botUser.getId();
       User user;
       String userFirstName = botUser.getFirstName();
