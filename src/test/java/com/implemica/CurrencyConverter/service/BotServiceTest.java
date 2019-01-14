@@ -41,50 +41,58 @@ public class BotServiceTest {
    /**
     * Greeting message to user
     */
-   private static final String START_MESSAGE = "Hello! Could I help you?";
+   private static final String START_MESSAGE = BotService.START_MESSAGE;
 
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   private static final String CONVERT_MESSAGE = " You can use /convert to make me new convert currencies";
+   private static final String CONVERT_MESSAGE = BotService.CONVERT_MESSAGE;
    /**
     * Stop message to the user
     */
-   private static final String STOP_MESSAGE = "OK." + CONVERT_MESSAGE;
+   private static final String STOP_MESSAGE = BotService.STOP_MESSAGE;
 
    /**
     * Bot's command to start conversation
     */
-   private static final String START = "/start";
+   private static final String START = BotService.START;
    /**
     * Bot's command to start convert currencies
     */
-   private static final String CONVERT = "/convert";
+   private static final String CONVERT = BotService.CONVERT;
    /**
     * Bot's command to stop conversation
     */
-   private static final String STOP = "/stop";
+   private static final String STOP = BotService.STOP;
    /**
     * Bot's response for /convert command
     */
-   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
+   private static final String FIRST_CONVERT_MESSAGE = BotService.FIRST_CONVERT_MESSAGE;
    /**
     * Start of bot's response after entering first currency
     */
-   private static final String SECOND_CONVERT_MESSAGE_1 = "OK, you wish to convert from ";
+   private static final String SECOND_CONVERT_MESSAGE_1 = BotService.SECOND_CONVERT_MESSAGE_1;
    /**
     * End of bot's response after entering first currency
     */
-   private static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
+   private static final String SECOND_CONVERT_MESSAGE_2 = BotService.SECOND_CONVERT_MESSAGE_2;
    /**
     * Bot's response after entering second currency
     */
-   private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
+   private static final String THIRD_CONVERT_MESSAGE = BotService.THIRD_CONVERT_MESSAGE;
+   /**
+    * Bot's command to start convert currencies, which was written by one line
+    */
+   public static final String CONVERT_BY_LINE = BotService.CONVERT_BY_LINE;
+   /**
+    * Bot's response for convert_by_line command
+    */
+   public static final String CONVERT_BY_LINE_MESSAGE = BotService.CONVERT_BY_LINE_MESSAGE;
 
    /**
     * Bot's response for not-text requests
     */
-   private static final String UNREADABLE_CONTENT_MESSAGE = "Sorry, but this message contains incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
+   private static final String UNREADABLE_CONTENT_MESSAGE = BotService.INCORRECT_CONTENT_MESSAGE;
    /**
     * Regular expression, which matches, that string contains only the positive number
     */
@@ -254,6 +262,14 @@ public class BotServiceTest {
       twoCommands(CONVERT, FIRST_CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
       //if after '/convert' we type not command word, then we go to next conversion step. See wrongCurrencyTest
 
+      twoCommands(CONVERT, FIRST_CONVERT_MESSAGE, CONVERT_BY_LINE, CONVERT_BY_LINE_MESSAGE);
+      twoCommands(START, START_MESSAGE, CONVERT_BY_LINE, CONVERT_BY_LINE_MESSAGE);
+      twoCommands(STOP, STOP_MESSAGE, CONVERT_BY_LINE, CONVERT_BY_LINE_MESSAGE);
+      twoCommands("good bye","Sorry, but I don't understand what \"good bye\" means." +
+              CONVERT_MESSAGE, CONVERT_BY_LINE, CONVERT_BY_LINE_MESSAGE);
+
+
+      twoCommands(CONVERT_BY_LINE, CONVERT_BY_LINE_MESSAGE,CONVERT, FIRST_CONVERT_MESSAGE);
    }
 
    /**

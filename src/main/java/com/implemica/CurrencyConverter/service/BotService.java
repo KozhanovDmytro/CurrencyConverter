@@ -38,7 +38,6 @@ public class BotService {
     */
    public static final String UNIQUE = UUID.randomUUID().toString();
 
-
    /**
     * Dialog with user
     */
@@ -51,54 +50,65 @@ public class BotService {
    /**
     * Greeting message to user
     */
-   private static final String START_MESSAGE = "Hello! Could I help you?";
+   public static final String START_MESSAGE = "Hello! I can help you to convert currencies. Please choose command to " +
+           "start converting";
 
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   private static final String CONVERT_MESSAGE = " You can use /convert to make me new convert currencies";
+   public static final String CONVERT_MESSAGE = " You can use /convert or /convert_by_line to make me new convert " +
+           "currencies";
    /**
     * Stop message to the user
     */
-   private static final String STOP_MESSAGE = "OK." + CONVERT_MESSAGE;
+   public static final String STOP_MESSAGE = "OK." + CONVERT_MESSAGE;
 
    /**
     * Bot's command to start conversation
     */
-   private static final String START = "/start";
+   public static final String START = "/start";
    /**
     * Bot's command to start convert currencies
     */
-   private static final String CONVERT = "/convert";
+   public static final String CONVERT = "/convert";
+
+   /**
+    * Bot's command to start convert currencies, which was written by one line
+    */
+   public static final String CONVERT_BY_LINE = "/convert_by_line";
+   /**
+    * Bot's response for /convert_by_line command
+    */
+   public static final String CONVERT_BY_LINE_MESSAGE = "Please type from what currency to what and amount (Example: 10 USD to UAH )";
    /**
     * Bot's command to stop conversation
     */
-   private static final String STOP = "/stop";
+   public static final String STOP = "/stop";
    /**
     * Bot's response for /convert command
     */
-   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
+   public static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
    /**
     * Start of bot's response after entering first currency
     */
-   private static final String SECOND_CONVERT_MESSAGE_1 = "OK, you wish to convert from ";
+   public static final String SECOND_CONVERT_MESSAGE_1 = "OK, you wish to convert from ";
    /**
     * End of bot's response after entering first currency
     */
-   private static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
+   public static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
    /**
     * Bot's response after entering second currency
     */
-   private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
+   public static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
    /**
     * Bot's response for non-text message
     */
-   private static final String INCORRECT_CONTENT_MESSAGE = "Sorry, but this message contains " +
+   public static final String INCORRECT_CONTENT_MESSAGE = "Sorry, but this message contains " +
            "incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
    /**
     * Message for log, that user sent incorrect content
     */
-   private static final String NOT_TEXT_CONTENT = "Users message has incorrect content.";
+   public static final String NOT_TEXT_CONTENT = "Users message has incorrect content.";
    /**
     * The currency to convert from
     */
@@ -110,7 +120,7 @@ public class BotService {
    /**
     * Step of conversion
     */
-   private int convertStep = 0;
+   private int convertStep = -1;
 
    /**
     * Logger for this class
@@ -146,19 +156,26 @@ public class BotService {
     */
    public String onUpdateReceived(String command, User user) {
       String message;
+      System.out.println(convertStep);
       if (command.equals(UNIQUE)) {
          command = NOT_TEXT_CONTENT;
          message = INCORRECT_CONTENT_MESSAGE;
-         convertStep = 0;
+         convertStep = -1;
       } else if (command.equals(START)) {
          message = START_MESSAGE;
-         convertStep = 0;
+         convertStep = -1;
       } else if (command.equals(STOP)) {
          message = STOP_MESSAGE;
+         convertStep = -1;
+      } else if (command.equals(CONVERT_BY_LINE)) {
+         message = CONVERT_BY_LINE_MESSAGE;
          convertStep = 0;
       } else if (command.equals(CONVERT)) {
          message = FIRST_CONVERT_MESSAGE;
          convertStep = 1;
+      } else if (convertStep == 0) {
+         message = convertByLine(command);
+         convertStep = -1;
       } else if (convertStep == 1) {
          firstCurrency = BotValidator.toUpperCase(command);
          message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
@@ -169,14 +186,13 @@ public class BotService {
          convertStep = 3;
       } else if (convertStep == 3) {
          message = convertValue(command);
-         convertStep = 0;
+         convertStep = -1;
       } else {
          message = "Sorry, but I don't understand what \"" + command + "\" means." + CONVERT_MESSAGE;
-         convertStep = 0;
+         convertStep = -1;
       }
 
-
-      Date dateNow  = new Date();
+      Date dateNow = new Date();
 
       Dialog dialog = new Dialog(dateNow, user, command, message);
       dialogDao.write(dialog);
@@ -184,6 +200,27 @@ public class BotService {
 
       return message;
    }
+
+   /**
+    * Converts given currencies, if they were given by one line
+    *
+    * @param line given line
+    */
+   private String convertByLine(String line) {
+      System.out.println(line);
+      String[] request = line.split("\\s+");
+      firstCurrency = BotValidator.toUpperCase(request[1]);
+      secondCurrency = BotValidator.toUpperCase(request[3]);
+      String message;
+      if (request.length != 4 || request[2].equalsIgnoreCase("to")) {
+         message = "Sorry, but your request is incorrect. " + CONVERT_MESSAGE;
+      } else {
+         message = convertValue(request[0]);
+      }
+
+      return message;
+   }
+
 
    /**
     * Converts given currencies from first one to second.

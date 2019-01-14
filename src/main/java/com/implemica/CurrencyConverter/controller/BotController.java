@@ -30,11 +30,11 @@ public class BotController extends TelegramLongPollingBot {
    /**
     * Bot name in Telegram.
     */
-   private static final String BOT_NAME = "CurrencyConverterImplemicaBot";
+   private static final String BOT_NAME = "currConvBot";
    /**
     * It uses for getting and sending messages via Bot API
     */
-   private static final String BOT_TOKEN = "736932538:AAFW981ptLJ4g1lbsVTn7HebaojMKLClEDg";
+   private static final String BOT_TOKEN = "760246131:AAHZf7R9NZbVxxiDh4Dtn_76CH5-8LSpEG4";
 
    /**
     * Unique string, which uses for messages, which has non text content.
