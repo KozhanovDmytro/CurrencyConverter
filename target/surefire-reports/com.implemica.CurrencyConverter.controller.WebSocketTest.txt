@@ -1,9 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.implemica.CurrencyConverter.controller.WebSocketTest
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 6.438 s <<< FAILURE! - in com.implemica.CurrencyConverter.controller.WebSocketTest
-test  Time elapsed: 2.953 s  <<< FAILURE!
-org.opentest4j.AssertionFailedError: expected: not <null>
-	at com.implemica.CurrencyConverter.controller.WebSocketTest.sendAndCheck(WebSocketTest.java:123)
-	at com.implemica.CurrencyConverter.controller.WebSocketTest.test(WebSocketTest.java:98)
-
