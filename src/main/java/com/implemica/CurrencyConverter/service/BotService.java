@@ -47,17 +47,16 @@ public class BotService {
     * Provides methods for sending messages to webSocket
     */
    private final SimpMessagingTemplate template;
-   /**
-    * Greeting message to user
-    */
-   public static final String START_MESSAGE = "Hello! I can help you to convert currencies. Please choose command to " +
-           "start converting";
 
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   public static final String CONVERT_MESSAGE = " You can use /convert or /convert_by_line to make me new convert " +
-           "currencies";
+   public static final String CONVERT_MESSAGE = " You can use /convert command or type me a request " +
+           "(Example: 10 USD in UAH) to make me new convert currencies";
+   /**
+    * Greeting message to user
+    */
+   public static final String START_MESSAGE = "Hello! I can help you to convert currencies. " + CONVERT_MESSAGE;
    /**
     * Stop message to the user
     */
@@ -72,14 +71,7 @@ public class BotService {
     */
    public static final String CONVERT = "/convert";
 
-   /**
-    * Bot's command to start convert currencies, which was written by one line
-    */
-   public static final String CONVERT_BY_LINE = "/convert_by_line";
-   /**
-    * Bot's response for /convert_by_line command
-    */
-   public static final String CONVERT_BY_LINE_MESSAGE = "Please type from what currency to what and amount (Example: 10 USD to UAH )";
+
    /**
     * Bot's command to stop conversation
     */
@@ -101,6 +93,11 @@ public class BotService {
     */
    public static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
    /**
+    * Bot's response for incorrect request from user
+    */
+   public static final String INCORRECT_REQUEST_MESSAGE = "Sorry, but your request is incorrect. " + CONVERT_MESSAGE;
+
+   /**
     * Bot's response for non-text message
     */
    public static final String INCORRECT_CONTENT_MESSAGE = "Sorry, but this message contains " +
@@ -108,7 +105,7 @@ public class BotService {
    /**
     * Message for log, that user sent incorrect content
     */
-   public static final String NOT_TEXT_CONTENT = "Users message has incorrect content.";
+   private static final String NOT_TEXT_CONTENT = "Users message has incorrect content.";
    /**
     * The currency to convert from
     */
@@ -120,7 +117,7 @@ public class BotService {
    /**
     * Step of conversion
     */
-   private int convertStep = -1;
+   private int convertStep = 0;
 
    /**
     * Logger for this class
@@ -156,26 +153,19 @@ public class BotService {
     */
    public String onUpdateReceived(String command, User user) {
       String message;
-      System.out.println(convertStep);
       if (command.equals(UNIQUE)) {
          command = NOT_TEXT_CONTENT;
          message = INCORRECT_CONTENT_MESSAGE;
-         convertStep = -1;
+         convertStep = 0;
       } else if (command.equals(START)) {
          message = START_MESSAGE;
-         convertStep = -1;
+         convertStep = 0;
       } else if (command.equals(STOP)) {
          message = STOP_MESSAGE;
-         convertStep = -1;
-      } else if (command.equals(CONVERT_BY_LINE)) {
-         message = CONVERT_BY_LINE_MESSAGE;
          convertStep = 0;
       } else if (command.equals(CONVERT)) {
          message = FIRST_CONVERT_MESSAGE;
          convertStep = 1;
-      } else if (convertStep == 0) {
-         message = convertByLine(command);
-         convertStep = -1;
       } else if (convertStep == 1) {
          firstCurrency = BotValidator.toUpperCase(command);
          message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
@@ -186,10 +176,10 @@ public class BotService {
          convertStep = 3;
       } else if (convertStep == 3) {
          message = convertValue(command);
-         convertStep = -1;
+         convertStep = 0;
       } else {
-         message = "Sorry, but I don't understand what \"" + command + "\" means." + CONVERT_MESSAGE;
-         convertStep = -1;
+         message = convertByLine(command);
+         convertStep = 0;
       }
 
       Date dateNow = new Date();
@@ -207,14 +197,14 @@ public class BotService {
     * @param line given line
     */
    private String convertByLine(String line) {
-      System.out.println(line);
       String[] request = line.split("\\s+");
-      firstCurrency = BotValidator.toUpperCase(request[1]);
-      secondCurrency = BotValidator.toUpperCase(request[3]);
+      int length = request.length;
       String message;
-      if (request.length != 4 || request[2].equalsIgnoreCase("to")) {
-         message = "Sorry, but your request is incorrect. " + CONVERT_MESSAGE;
+      if (length != 4 || (!request[2].equalsIgnoreCase("to") && !request[2].equalsIgnoreCase("in"))) {
+         message = INCORRECT_REQUEST_MESSAGE;
       } else {
+         firstCurrency = BotValidator.toUpperCase(request[1]);
+         secondCurrency = BotValidator.toUpperCase(request[3]);
          message = convertValue(request[0]);
       }
 
@@ -267,6 +257,7 @@ public class BotService {
     * @author Dmytro K.
     */
    private void sendToWebSocketFollowers(Dialog dialog) {
+
       template.convertAndSend("/listen/bot", dialog);
       log.log(Level.INFO, "send to web socket followers. ");
    }

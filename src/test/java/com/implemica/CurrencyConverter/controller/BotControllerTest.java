@@ -35,15 +35,15 @@ public class BotControllerTest {
    /**
     * Start command
     */
-   private static final String message1Text = "/start";
+   private static final String message1Text = BotService.START;
    /**
     * Stop command
     */
-   private static final String message2Text = "/stop";
+   private static final String message2Text = BotService.STOP;
    /**
     * Convert command
     */
-   private static final String message3Text = "/convert";
+   private static final String message3Text = BotService.CONVERT;
    /**
     * Some non-command word
     */
@@ -51,28 +51,23 @@ public class BotControllerTest {
    /**
     * Bot's response for start command
     */
-   private static final String startMessage = "Hello, could I help you?";
+   private static final String startMessage = BotService.START_MESSAGE;
    /**
     * Bot's response for stop command
     */
-   private static final String stopMessage = "OK. You can use /convert to make me new " +
-           "convert currencies";
+   private static final String stopMessage = BotService.STOP_MESSAGE;
    /**
     * Bot's response for convert command
     */
-   private static final String firstConvertMessage = "Please, type in the currency to convert from" +
-           " (example: USD)";
+   private static final String firstConvertMessage = BotService.FIRST_CONVERT_MESSAGE;
    /**
     * Bot's response for non-command word
     */
-   private static final String wrongMessage = "Sorry, but I don't understand what \"hello\"" +
-           " means. You can use /convert to make me new convert currencies";
+   private static final String wrongMessage = BotService.INCORRECT_REQUEST_MESSAGE;
    /**
     * Bot's response for message, which contains incorrect content
     */
-   private static final String wrongContentMessage = "Sorry, but this message contains " +
-           "incorrect content. Please, don't send me messages, which I can't handle. You can use /convert to make me new " +
-           "convert currencies";
+   private static final String wrongContentMessage = BotService.INCORRECT_CONTENT_MESSAGE;
 
    /**
     * A dummy implementation for BotService class, represents bot's logic

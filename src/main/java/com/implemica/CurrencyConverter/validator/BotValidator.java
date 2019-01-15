@@ -94,7 +94,7 @@ public class BotValidator {
     * Formats number to String
     *
     * @param number float number, which has to be converted to String
-    * @return the Strinf of given number
+    * @return the String of given number
     */
    public static String formatNumber(Float number) {
       DecimalFormatSymbols s = new DecimalFormatSymbols();
