@@ -18,6 +18,10 @@
 
 </div>
 <div class="content">
+    <a href="/">to main page</a>
+    <form th:action="@{/logout}" method="post">
+        <input type="submit" value="Sign Out"/>
+    </form>
     <table th:object="${transactions}" border="1" class="makeCenterByFlex table">
         <tr class="thead-dark">
             <th>Date</th>
