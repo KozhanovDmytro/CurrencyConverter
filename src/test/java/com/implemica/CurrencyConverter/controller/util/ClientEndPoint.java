@@ -35,4 +35,6 @@ public class ClientEndPoint extends StompSessionHandlerAdapter {
       receivedDialog = (Dialog) payload;
       logger.log(Level.INFO, "receive from web socket server. ");
    }
+
+
 }

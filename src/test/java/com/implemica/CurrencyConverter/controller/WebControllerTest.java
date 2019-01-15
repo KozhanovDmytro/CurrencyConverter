@@ -4,6 +4,7 @@ package com.implemica.CurrencyConverter.controller;
 import com.implemica.CurrencyConverter.configuration.SpringConfiguration;
 import com.implemica.CurrencyConverter.configuration.WebSocketConfiguration;
 import com.implemica.CurrencyConverter.controller.util.ClientEndPoint;
+import com.implemica.CurrencyConverter.controller.util.TestSecurityConfiguration;
 import com.implemica.CurrencyConverter.dao.DialogDao;
 import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -35,13 +37,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -53,6 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({SpringConfiguration.class, WebSocketConfiguration.class})
 @AutoConfigureMockMvc
 @EnableAutoConfiguration
+@ContextConfiguration(classes = TestSecurityConfiguration.class)
 public class WebControllerTest {
 
    private static final String ROW_FORMAT = "<tr>" +
@@ -107,59 +106,6 @@ public class WebControllerTest {
       session.subscribe(URL_SUBSCRIBE, clientEndPoint);
 
       logger.log(Level.INFO, "connected: " + session.isConnected());
-   }
-
-   /**
-    * Tests that main page contains specified text
-    */
-   @Test
-   void mainPageTest() throws Exception {
-      this.mockMvc.perform(get("/"))
-              .andDo(print())
-              .andExpect(status().isOk())
-              .andExpect(content().string(containsString("WELCOME!")))
-              .andExpect(content().string(containsString("to currency converter")))
-              .andExpect(content().string(containsString("designed by Dasha S. and Dmytro K.")))
-              .andExpect(content().string(containsString("show log")))
-              .andExpect(content().string(containsString("monitor bot")));
-   }
-
-
-   /**
-    * Tests that log page contains specified text
-    */
-   @Test
-   void logPageTest() throws Exception {
-      this.mockMvc.perform(get("/log"))
-              .andDo(print())
-              .andExpect(status().isOk())
-              .andExpect(content().string(containsString("Log")))
-              .andExpect(content().string(containsString("<th>Date</th>")))
-              .andExpect(content().string(containsString("<th>ID</th>")))
-              .andExpect(content().string(containsString("<th>First name</th>")))
-              .andExpect(content().string(containsString("<th>Last name</th>")))
-              .andExpect(content().string(containsString("<th>User name</th>")))
-              .andExpect(content().string(containsString("<th>Response</th>")))
-              .andExpect(content().string(containsString("<th>Request</th>")));
-   }
-
-
-   /**
-    * Tests that monitor page contains specified text
-    */
-   @Test
-   void monitorPageTest() throws Exception {
-      this.mockMvc.perform(get("/monitor"))
-              .andDo(print())
-              .andExpect(status().isOk())
-              .andExpect(content().string(containsString("monitor")))
-              .andExpect(content().string(containsString("<th>Date</th>")))
-              .andExpect(content().string(containsString("<th>ID</th>")))
-              .andExpect(content().string(containsString("<th>First name</th>")))
-              .andExpect(content().string(containsString("<th>Last name</th>")))
-              .andExpect(content().string(containsString("<th>User name</th>")))
-              .andExpect(content().string(containsString("<th>Response</th>")))
-              .andExpect(content().string(containsString("<th>Request</th>")));
    }
 
    @Test

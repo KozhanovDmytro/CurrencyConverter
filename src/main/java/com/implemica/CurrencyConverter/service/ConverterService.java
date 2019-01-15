@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -103,7 +104,6 @@ public final class ConverterService {
             result = option.execute(converter);
             break;
          } catch (Exception e) {
-            logger.log(Level.SEVERE, MESSAGE_EXCEPTION_WAS_THROWN + e.getMessage());
             exceptions.add(e);
          }
       }
@@ -138,6 +138,7 @@ public final class ConverterService {
     */
    private Float analyzeResult(ArrayList<Exception> exceptions, Float result) throws CurrencyConverterException {
       if(result == null) {
+         logger.log(Level.SEVERE, MESSAGE_EXCEPTION_WAS_THROWN + Arrays.toString(exceptions.toArray()));
          throw new CurrencyConverterException(getExceptionMessage(exceptions));
       } else {
          return result;

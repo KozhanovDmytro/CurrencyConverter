@@ -4,11 +4,13 @@
     <title>Log</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="/css/style.css">
+    <!-- Boot strap-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
+    <!--Web socket-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.0.3/sockjs.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
@@ -18,9 +20,9 @@
 
 </div>
 <div class="content">
-    <a href="/">to main page</a>
-    <form th:action="@{/logout}" method="post">
-        <input type="submit" value="Sign Out"/>
+    <form th:action="@{/logout}" method="post" style="text-align: center; padding-bottom: 10px">
+        <input type="submit" value="Sign Out" class="btn btn-dark btn-md"/>
+        <a class="btn btn-dark btn-md" href="/">to main page</a>
     </form>
     <table th:object="${transactions}" border="1" class="makeCenterByFlex table">
         <tr class="thead-dark">
