@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.core.StringContains.containsString;
@@ -22,16 +22,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Tests webApplication with and without anonymous user.
+ *
+ * @see MockMvc
+ *
+ * @author Dmytro K.
+ */
 @SpringBootTest(classes = { WebController.class, BotService.class, ConverterService.class},
-        webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@Import({SpringConfiguration.class, WebSocketConfiguration.class, WebSecurityConfig.class})
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @EnableAutoConfiguration
+@ContextConfiguration(classes = {SpringConfiguration.class, WebSocketConfiguration.class, WebSecurityConfig.class})
 public class WebControllerTest {
 
-   @Autowired
-   private MockMvc mockMvc;
+   /** Main entry point for server-side Spring MVC test support. */
+   @Autowired private MockMvc mockMvc;
 
+   /**
+    * Test content on main page with anonymous user.
+    *
+    * @throws Exception if an error occurs
+    */
    @Test
    @WithAnonymousUser
    void mainPageTest() throws Exception {
@@ -45,6 +57,11 @@ public class WebControllerTest {
               .andExpect(content().string(containsString("monitor bot")));
    }
 
+   /**
+    * Test content on log page with anonymous user.
+    *
+    * @throws Exception if an error occurs
+    */
    @Test
    @WithAnonymousUser
    void logPageTest() throws Exception {
@@ -53,6 +70,11 @@ public class WebControllerTest {
               .andExpect(status().is3xxRedirection());
    }
 
+   /**
+    * Test content on monitor page with anonymous user.
+    *
+    * @throws Exception if an error occurs
+    */
    @Test
    @WithAnonymousUser
    void monitorPageTest() throws Exception {
@@ -61,6 +83,11 @@ public class WebControllerTest {
               .andExpect(status().is3xxRedirection());
    }
 
+   /**
+    * Test content on main page with some user.
+    *
+    * @throws Exception if an error occurs
+    */
    @Test
    @WithMockUser
    void mainPageTestWithUser() throws Exception {
@@ -74,6 +101,11 @@ public class WebControllerTest {
               .andExpect(content().string(containsString("monitor bot")));
    }
 
+   /**
+    * Test content on log page with some user.
+    *
+    * @throws Exception if an error occurs
+    */
    @Test
    @WithMockUser
    void logPageTestWithUser() throws Exception {
@@ -90,6 +122,11 @@ public class WebControllerTest {
               .andExpect(content().string(containsString("<th>Request</th>")));
    }
 
+   /**
+    * Test content on monitor page with some user.
+    *
+    * @throws Exception if an error occurs
+    */
    @Test
    @WithMockUser
    void monitorPageTestWithUser() throws Exception {

@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.test.context.ContextConfiguration;
@@ -43,17 +42,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
+ * The goal of this test is create webSocket follower - {@link ClientEndPoint},
+ * call {@link BotService#onUpdateReceived(String, User)} method, it have to send
+ * instance of {@link Dialog} to webSocket followers and catch it in {@link ClientEndPoint}
  *
- * @author Dmytro K., Daria S.
+ * @see ClientEndPoint
+ * @see Dialog
+ * @see BotService
+ *
+ * @author Dmytro K.
+ * @author Daria S.
  */
 @SpringBootTest(classes = { WebController.class, BotService.class, ConverterService.class},
                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@Import({SpringConfiguration.class, WebSocketConfiguration.class})
 @AutoConfigureMockMvc
 @EnableAutoConfiguration
-@ContextConfiguration(classes = TestSecurityConfiguration.class)
+@ContextConfiguration(classes = {SpringConfiguration.class, WebSocketConfiguration.class, TestSecurityConfiguration.class})
 public class WebSocketTest {
 
+   /** Row representational in HTML table. */
    private static final String ROW_FORMAT = "<tr>" +
                    "            <td>%s</td>" +
                    "            <td>%d</td>" +
@@ -66,31 +73,43 @@ public class WebSocketTest {
 
    private Logger logger = Logger.getLogger(WebSocketTest.class.getName());
 
+   /** WebSocket URL. */
    private final String URL = "ws://localhost:8080/monitor-bot";
 
+   /** Path for listening webSocket. */
    private final String URL_SUBSCRIBE = "/listen/bot";
 
+   /** Test user. */
    private User user = new User(1234234,
            "testFirstName",
            "testLastName",
            "testUserName");
 
+   /** Client end point which catch message from webSocket. */
    private ClientEndPoint clientEndPoint = new ClientEndPoint();
 
+   /** Date formatter for check date format. */
    private DateFormat df = BotService.SIMPLE_DATE_FORMAT;
 
+   /** Main entry point for server-side Spring MVC test support. */
+   @Autowired private MockMvc mockMvc;
+
+   /** BotService which send message to webSocket followers. */
+   @Autowired private BotService botService;
+
    /**
-    * Uses for testing the server side of the application
+    * Uses for get last {@link com.implemica.CurrencyConverter.model.Dialog} which
+    * was sent to webSocket followers.
+    * */
+   @Autowired private DialogDao dialogDao;
+
+   /**
+    * Settings for client end point.
+    *
+    * @throws ExecutionException if the computation threw an exception
+    * @throws InterruptedException if the current thread was interrupted while waiting
+    * @throws TimeoutException if the wait timed out
     */
-   @Autowired
-   private MockMvc mockMvc;
-
-   @Autowired
-   private BotService botService;
-
-   @Autowired
-   private DialogDao dialogDao;
-
    @BeforeEach
    void setUp() throws InterruptedException, ExecutionException, TimeoutException {
       List<Transport> transports = new ArrayList<>(1);
@@ -157,10 +176,15 @@ public class WebSocketTest {
 
       //shows, that user sent non-text message
       sendAndCheckWSAndPageContent(BotService.UNIQUE);
-
-
    }
 
+   /**
+    * Call {@link BotService#onUpdateReceived(String, User)} which sends to
+    * webSocket followers and check it on the log page and in client end point.
+    *
+    * @param expectedMessage message received from user
+    * @throws Exception if an error occurs
+    */
    private void sendAndCheckWSAndPageContent(String expectedMessage) throws Exception {
       botService.onUpdateReceived(expectedMessage, user);
 

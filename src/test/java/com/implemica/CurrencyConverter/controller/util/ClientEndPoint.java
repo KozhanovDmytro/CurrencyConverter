@@ -12,12 +12,21 @@ import java.lang.reflect.Type;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Class simulate client end point. Which listens a webSocket
+ * channel and saves the response. Which  possible to get and
+ * check.
+ *
+ * @see Dialog
+ *
+ * @author Dmytro K.
+ */
 public class ClientEndPoint extends StompSessionHandlerAdapter {
 
    private Logger logger = Logger.getLogger(ClientEndPoint.class.getName());
 
-   @Getter
-   @Setter
+   /** Received instance of Dialog from webSocket chanel. */
+   @Getter @Setter
    private Dialog receivedDialog;
 
    @Override
@@ -30,9 +39,14 @@ public class ClientEndPoint extends StompSessionHandlerAdapter {
       return Dialog.class;
    }
 
-   @Override
-   public void handleFrame(StompHeaders headers, Object payload) {
-      receivedDialog = (Dialog) payload;
+   /**
+    * Function for getting instance of Dialog.
+    *
+    * @param headers information about response
+    * @param o object which was received from webSocket
+    */
+   @Override public void handleFrame(StompHeaders headers, Object o) {
+      receivedDialog = (Dialog) o;
       logger.log(Level.INFO, "receive from web socket server. ");
    }
 
