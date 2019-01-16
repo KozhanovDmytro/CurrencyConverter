@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -100,6 +99,8 @@ public class DialogDaoImplTest {
 
    /**
     * Tests, that after writing data to file and data, which was read are equal
+    *
+    * @throws ParseException if date format is not correct
     */
    @Test
    void writeAndReadTest() throws ParseException {
@@ -149,6 +150,8 @@ public class DialogDaoImplTest {
 
    /**
     * Tests, that after writing data to file and data, which was read by date are equal to expected
+    *
+    * @throws ParseException if date format is not correct
     */
    @Test
    void getByDate() throws ParseException {
@@ -192,6 +195,7 @@ public class DialogDaoImplTest {
 
    /**
     * Writes data to file
+    * @param dialog one line of data, which has to be wrote
     */
    private void writeToFile(Dialog dialog) {
       tr.write(dialog);
@@ -199,6 +203,15 @@ public class DialogDaoImplTest {
 
    /**
     * Creates dialog, which has to be written
+    * @param date date and time of user's request
+    * @param userId user's id
+    * @param userFirstName user's first name
+    * @param userLastName user's last name
+    * @param userName user's username
+    * @param usersRequest user's request to bot
+    * @param botsResponse bot's response to user's request
+    * @return dialog, which contains information about last given user's request and bot's response
+    * @throws ParseException if date format is incorrect
     */
    private Dialog createTransaction(String date, int userId, String userFirstName, String userLastName, String userName, String usersRequest, String botsResponse) throws ParseException {
       Date parseDate = df.parse(date);

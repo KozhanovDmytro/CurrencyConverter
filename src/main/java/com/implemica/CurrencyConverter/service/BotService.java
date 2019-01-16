@@ -71,7 +71,6 @@ public class BotService {
     */
    public static final String CONVERT = "/convert";
 
-
    /**
     * Bot's command to stop conversation
     */
@@ -195,6 +194,7 @@ public class BotService {
     * Converts given currencies, if they were given by one line
     *
     * @param line given line
+    * @return message to user with result of conversion from first currency to second currency
     */
    private String convertByLine(String line) {
       String[] request = line.split("\\s+");
@@ -216,7 +216,7 @@ public class BotService {
     * Converts given currencies from first one to second.
     *
     * @param value amount of first currency
-    * @return result of conversion from first currency to second currency
+    * @return message to user with result of conversion from first currency to second currency
     */
 
    private String convertValue(String value) {
@@ -257,7 +257,6 @@ public class BotService {
     * @author Dmytro K.
     */
    private void sendToWebSocketFollowers(Dialog dialog) {
-
       template.convertAndSend("/listen/bot", dialog);
       log.log(Level.INFO, "send to web socket followers. ");
    }

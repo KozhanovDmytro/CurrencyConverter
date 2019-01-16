@@ -69,6 +69,7 @@ public class Dialog implements Serializable {
 
    /**
     * Line of all information of one request to bot from one user
+    * @return array with information about date, User, user's request to bot and bot's response to user
     */
    public String[] toCsv() {
       return new String[]{df.format(date), Integer.toString(user.getUserId()), user.getUserFirstName(), user.getUserLastName()
@@ -81,14 +82,14 @@ public class Dialog implements Serializable {
     * @return true if the objects are the same; false otherwise.
     */
    @Override
-   public boolean equals(Object tr) {
-      if (this == tr) {
+   public boolean equals(Object dialog) {
+      if (this == dialog) {
          return true;
       }
-      if (tr instanceof Dialog) {
-         return this.date.equals(((Dialog) tr).date) && this.user.equals(((Dialog) tr).user) &&
-                 this.usersRequest.equals(((Dialog) tr).usersRequest) &&
-                 this.botsResponse.equals(((Dialog) tr).botsResponse);
+      if (dialog instanceof Dialog) {
+         return this.date.equals(((Dialog) dialog).date) && this.user.equals(((Dialog) dialog).user) &&
+                 this.usersRequest.equals(((Dialog) dialog).usersRequest) &&
+                 this.botsResponse.equals(((Dialog) dialog).botsResponse);
       }
       return false;
    }

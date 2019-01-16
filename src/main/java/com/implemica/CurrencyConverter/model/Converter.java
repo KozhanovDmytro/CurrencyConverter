@@ -7,7 +7,7 @@ import lombok.Getter;
 import java.util.Currency;
 
 /**
- * Class for convert currencies.
+ * Class for conversion currencies.
  *
  * @author Dmytro K.
  * @version 08.01.2019 05:03
@@ -22,7 +22,7 @@ public class Converter {
    /** Desired currency in which the conversion will be made. */
    private Currency desiredCurrency;
 
-   /** Amount of {@link this#usersCurrency} */
+   /** Amount of {@link #usersCurrency} */
    private float value;
 
    /**

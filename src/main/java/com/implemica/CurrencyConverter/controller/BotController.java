@@ -37,7 +37,7 @@ public class BotController extends TelegramLongPollingBot {
    private static final String BOT_TOKEN = "760246131:AAHZf7R9NZbVxxiDh4Dtn_76CH5-8LSpEG4";
 
    /**
-    * Unique string, which uses for messages, which has non text content.
+    * Unique string, which uses for identification messages, which has non-text content.
     */
    private static final String UNIQUE = BotService.UNIQUE;
 

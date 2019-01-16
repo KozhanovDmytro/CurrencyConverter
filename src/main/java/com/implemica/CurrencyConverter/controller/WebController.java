@@ -61,8 +61,9 @@ public final class WebController {
    }
 
    /**
+    * Login page
     *
-    * @return
+    * @return template page
     */
    @GetMapping("/login")
    public String login() {

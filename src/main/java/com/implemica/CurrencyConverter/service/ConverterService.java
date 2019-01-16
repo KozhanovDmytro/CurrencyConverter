@@ -80,7 +80,7 @@ public final class ConverterService {
     *
     * Firstly function  checks  internet connection if this false then it
     * throws  {@link UnknownHostException},  then  it  calls all the APIs
-    * that are presented in the {@link this#options}, if any API was able
+    * that are presented in the {@link #options}, if any API was able
     * to  convert the currency,  the function returns the result,  if all
     * APIs  could  not  convert  the  currency,  the  function  throws an
     * exception.
@@ -133,6 +133,8 @@ public final class ConverterService {
     * Function makes a decision - result was returned from APIs
     * or was not returned, if it false that it throws an exception.
     *
+    * @param exceptions exceptions, which could be thrown
+    * @param result result of conversion
     * @throws CurrencyConverterException if result wasn't returned from APIs
     * @return result of conversion.
     */

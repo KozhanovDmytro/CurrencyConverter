@@ -17,7 +17,7 @@ public class BotValidator {
    /**
     * Format for amount of currency
     */
-   private static final DecimalFormat DF = new DecimalFormat("#.##");
+   private static final DecimalFormat DECIMAL_FORMATTER = new DecimalFormat("#.##");
    /**
     * Separator of amount value
     */
@@ -71,6 +71,7 @@ public class BotValidator {
     *
     * @param value value, which has to be converted to Float value
     * @throws ParseException if value is not a number
+    * @return Float number of given String
     */
    public static Float parseNumber(String value) throws ParseException {
       Matcher matcher = isPositiveNumber.matcher(value);
@@ -86,8 +87,8 @@ public class BotValidator {
       }
       DecimalFormatSymbols symbols = new DecimalFormatSymbols();
       symbols.setDecimalSeparator(separator);
-      DF.setDecimalFormatSymbols(symbols);
-      return DF.parse(value).floatValue();
+      DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
+      return DECIMAL_FORMATTER.parse(value).floatValue();
    }
 
    /**
@@ -99,7 +100,7 @@ public class BotValidator {
    public static String formatNumber(Float number) {
       DecimalFormatSymbols s = new DecimalFormatSymbols();
       s.setDecimalSeparator(POINT);
-      DF.setDecimalFormatSymbols(s);
-      return DF.format(number);
+      DECIMAL_FORMATTER.setDecimalFormatSymbols(s);
+      return DECIMAL_FORMATTER.format(number);
    }
 }

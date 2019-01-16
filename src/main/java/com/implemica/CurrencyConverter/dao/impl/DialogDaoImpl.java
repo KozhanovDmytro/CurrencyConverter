@@ -63,6 +63,7 @@ public class DialogDaoImpl implements DialogDao {
 
    /**
     * Creates a new DialogDaoImpl instance for the given file
+    * @param data file, where stores data
     */
    DialogDaoImpl(File data) {
       this.data = data;
@@ -91,8 +92,6 @@ public class DialogDaoImpl implements DialogDao {
       } catch (IOException e) {
          log.log(Level.SEVERE, "The changes were not recorded", e);
       }
-
-
    }
 
    /**
@@ -190,7 +189,6 @@ public class DialogDaoImpl implements DialogDao {
       } catch (ParseException e) {
          e.printStackTrace();
       }
-
       return date;
    }
 }
