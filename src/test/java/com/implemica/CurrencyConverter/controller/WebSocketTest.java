@@ -44,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  *
- * @author Dmytro K.
+ * @author Dmytro K., Daria S.
  */
 @SpringBootTest(classes = { WebController.class, BotService.class, ConverterService.class},
                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -111,7 +111,7 @@ public class WebSocketTest {
    @Test
    void webSocketTest() throws Exception {
 
-      // non-valid data
+      //non-valid data
       sendAndCheckWSAndPageContent("pksajhyufd");
       sendAndCheckWSAndPageContent("hfds43kj23 kj");
       sendAndCheckWSAndPageContent("\"\"klhgf\"n.jhj\"\"lkljgt");
@@ -123,7 +123,7 @@ public class WebSocketTest {
       sendAndCheckWSAndPageContent("dsflkalkdsfj");
       sendAndCheckWSAndPageContent("wglkj45hkg");
 
-      // valid data
+      //valid data
       sendAndCheckWSAndPageContent("/start");
       sendAndCheckWSAndPageContent("/convert");
       sendAndCheckWSAndPageContent("USD");
@@ -134,6 +134,31 @@ public class WebSocketTest {
       sendAndCheckWSAndPageContent("UAH");
       sendAndCheckWSAndPageContent("1");
       sendAndCheckWSAndPageContent("/stop");
+      sendAndCheckWSAndPageContent("18 usd to uah");
+      sendAndCheckWSAndPageContent("1000 eur in rub");
+
+      //valid data, but incorrect requests from user
+      sendAndCheckWSAndPageContent("hello");
+      sendAndCheckWSAndPageContent("start");
+      sendAndCheckWSAndPageContent("stop");
+      sendAndCheckWSAndPageContent("convert");
+      sendAndCheckWSAndPageContent("/help");
+      sendAndCheckWSAndPageContent("/clear");
+      sendAndCheckWSAndPageContent("/cancel");
+      sendAndCheckWSAndPageContent("14$ to eur");
+      sendAndCheckWSAndPageContent("sell 16 usd to eur");
+      sendAndCheckWSAndPageContent("107 dollars to yen");
+      sendAndCheckWSAndPageContent("77,4 pln from byn");
+      sendAndCheckWSAndPageContent("10 USD is PLN");
+      sendAndCheckWSAndPageContent("Please, convert 7 uah to rub");
+      sendAndCheckWSAndPageContent("How are you?");
+      sendAndCheckWSAndPageContent("-7,5 xxx to rur");
+      sendAndCheckWSAndPageContent("repeat last");
+
+      //shows, that user sent non-text message
+      sendAndCheckWSAndPageContent(BotService.UNIQUE);
+
+
    }
 
    private void sendAndCheckWSAndPageContent(String expectedMessage) throws Exception {
