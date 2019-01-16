@@ -41,16 +41,16 @@ public class ConverterTest {
    private static String[] existingCurrency = new String[]{"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
            "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD", "CDF",
            "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
-           "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO",
-           "AOA", "XAF", "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "LVL", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP",
+           "GTQ",  "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO",
+           "AOA", "XAF", "BOB", "KZT", "LSL", "TMT", "HRK", "BGN",  "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP",
            "SDG", "MUR", "VND", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "LRD",
            "JPY", "NAD", "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "IRR", "GYD", "TWD", "ZMW", "XOF",
-           "MWK", "KMF", "KRW", "TZS", "LTL", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS",
+           "MWK", "KMF", "KRW", "TZS",  "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS",
            "NGN", "SBD", "LKR", "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC",
            "SGD", "PYG", "JOD", "AFN", "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD",
            "UZS", "EUR", "AED", "UYU", "MZN", "BRL"};
 
-   /**
+     /**
     * Initialisation of ConverterService
     */
    @BeforeAll
@@ -95,9 +95,7 @@ public class ConverterTest {
     */
    @Test
    void checkCurrencyTransferToUSD() throws CurrencyConverterException, IOException {
-      checkConvert("BYR", "USD");
       checkConvert("PAB", "USD");
-      checkConvert("LVL", "USD");
       checkConvert("SEK", "USD");
       checkConvert("XCD", "USD");
       checkConvert("DKK", "USD");
@@ -182,7 +180,6 @@ public class ConverterTest {
       checkConvert("AFN", "USD");
       checkConvert("NZD", "USD");
       checkConvert("BND", "USD");
-      checkConvert("BTN", "USD");
       checkConvert("SLL", "USD");
       checkConvert("PYG", "USD");
       checkConvert("UAH", "USD");
@@ -203,23 +200,18 @@ public class ConverterTest {
       checkConvert("AMD", "USD");
       checkConvert("TRY", "USD");
       checkConvert("RUB", "USD");
-      checkConvert("BMD", "USD");
       checkConvert("SAR", "USD");
       checkConvert("LSL", "USD");
       checkConvert("NGN", "USD");
       checkConvert("GNF", "USD");
       checkConvert("AED", "USD");
       checkConvert("ALL", "USD");
-      checkConvert("KYD", "USD");
-      checkConvert("STD", "USD");
       checkConvert("CRC", "USD");
       checkConvert("BDT", "USD");
       checkConvert("SGD", "USD");
-      checkConvert("KPW", "USD");
       checkConvert("MUR", "USD");
       checkConvert("ILS", "USD");
       checkConvert("UGX", "USD");
-      checkConvert("SHP", "USD");
       checkConvert("IDR", "USD");
       checkConvert("BGN", "USD");
       checkConvert("CVE", "USD");
@@ -232,7 +224,6 @@ public class ConverterTest {
       checkConvert("TTD", "USD");
       checkConvert("BBD", "USD");
       checkConvert("PLN", "USD");
-      checkConvert("FKP", "USD");
       checkConvert("UZS", "USD");
       checkConvert("GHS", "USD");
       checkConvert("BAM", "USD");
@@ -241,7 +232,6 @@ public class ConverterTest {
       checkConvert("LAK", "USD");
       checkConvert("TJS", "USD");
       checkConvert("KRW", "USD");
-      checkConvert("LTL", "USD");
       checkConvert("KZT", "USD");
       checkConvert("RSD", "USD");
       checkConvert("DZD", "USD");
@@ -262,9 +252,7 @@ public class ConverterTest {
     */
    @Test
    void checkCurrencyTransferFromUSD() throws IOException, CurrencyConverterException {
-      checkConvert("USD", "BYR");
       checkConvert("USD", "PAB");
-      checkConvert("USD", "LVL");
       checkConvert("USD", "SEK");
       checkConvert("USD", "XCD");
       checkConvert("USD", "DKK");
@@ -349,7 +337,6 @@ public class ConverterTest {
       checkConvert("USD", "AFN");
       checkConvert("USD", "NZD");
       checkConvert("USD", "BND");
-      checkConvert("USD", "BTN");
       checkConvert("USD", "SLL");
       checkConvert("USD", "PYG");
       checkConvert("USD", "UAH");
@@ -370,23 +357,18 @@ public class ConverterTest {
       checkConvert("USD", "AMD");
       checkConvert("USD", "TRY");
       checkConvert("USD", "RUB");
-      checkConvert("USD", "BMD");
       checkConvert("USD", "SAR");
       checkConvert("USD", "LSL");
       checkConvert("USD", "NGN");
       checkConvert("USD", "GNF");
       checkConvert("USD", "AED");
       checkConvert("USD", "ALL");
-      checkConvert("USD", "KYD");
-      checkConvert("USD", "STD");
       checkConvert("USD", "CRC");
       checkConvert("USD", "BDT");
       checkConvert("USD", "SGD");
-      checkConvert("USD", "KPW");
       checkConvert("USD", "MUR");
       checkConvert("USD", "ILS");
       checkConvert("USD", "UGX");
-      checkConvert("USD", "SHP");
       checkConvert("USD", "IDR");
       checkConvert("USD", "BGN");
       checkConvert("USD", "CVE");
@@ -399,7 +381,6 @@ public class ConverterTest {
       checkConvert("USD", "TTD");
       checkConvert("USD", "BBD");
       checkConvert("USD", "PLN");
-      checkConvert("USD", "FKP");
       checkConvert("USD", "UZS");
       checkConvert("USD", "GHS");
       checkConvert("USD", "BAM");
@@ -408,7 +389,6 @@ public class ConverterTest {
       checkConvert("USD", "LAK");
       checkConvert("USD", "TJS");
       checkConvert("USD", "KRW");
-      checkConvert("USD", "LTL");
       checkConvert("USD", "KZT");
       checkConvert("USD", "RSD");
       checkConvert("USD", "DZD");
@@ -429,12 +409,6 @@ public class ConverterTest {
     */
    @Test
    void checkCurrencyTransferToUAH() throws IOException, CurrencyConverterException {
-      checkConvert("BTN", "UAH");
-      checkConvert("BMD", "UAH");
-      checkConvert("KYD", "UAH");
-      checkConvert("STD", "UAH");
-      checkConvert("KPW", "UAH");
-      checkConvert("SHP", "UAH");
       checkConvert("MGA", "UAH");
       checkConvert("RSD", "UAH");
    }
@@ -447,12 +421,6 @@ public class ConverterTest {
     */
    @Test
    void checkCurrencyTransferFromUAH() throws IOException, CurrencyConverterException {
-      checkConvert("UAH", "BTN");
-      checkConvert("UAH", "BMD");
-      checkConvert("UAH", "KYD");
-      checkConvert("UAH", "STD");
-      checkConvert("UAH", "KPW");
-      checkConvert("UAH", "SHP");
       checkConvert("UAH", "MGA");
       checkConvert("UAH", "RSD");
    }
@@ -519,6 +487,17 @@ public class ConverterTest {
       checkNonConvertibility("RUR", "USD");
       checkNonConvertibility("XBB", "USD");
       checkNonConvertibility("BGL", "USD");
+
+      checkNonConvertibility("BYR", "USD");
+      checkNonConvertibility("LVL", "USD");
+      checkNonConvertibility("BTN", "USD");
+      checkNonConvertibility("BMD", "USD");
+      checkNonConvertibility("KYD", "USD");
+      checkNonConvertibility("STD", "USD");
+      checkNonConvertibility("KPW", "USD");
+      checkNonConvertibility("SHP", "USD");
+      checkNonConvertibility("FKP", "USD");
+      checkNonConvertibility("LTL", "USD");
    }
 
    /**

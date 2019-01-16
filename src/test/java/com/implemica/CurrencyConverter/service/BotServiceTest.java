@@ -167,7 +167,7 @@ public class BotServiceTest {
       interruptConvertOnThirdStep("you", "YOU", "talk", "TALK", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       //wrong content after conversion
-      rightScript("Shp", "SHP", "Usd", "USD", "30.6");
+      rightScript("EUR", "EUR", "Usd", "USD", "30.6");
       compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       withWrongAmount("Myr", "MYR", "KhR", "KHR", "-67");
@@ -578,7 +578,7 @@ public class BotServiceTest {
    @Test
    void commandAfterConversionTest() {
       //with right currencies and right amount
-      rightScript("Shp", "SHP", "Usd", "USD", "30.6");
+      rightScript("Pln", "PLN", "Usd", "USD", "30.6");
       compute(START, START_MESSAGE);
 
       rightScript("EUr", "EUR", "UAh", "UAH", "150,50");
@@ -725,7 +725,7 @@ public class BotServiceTest {
       compute(STOP, STOP_MESSAGE);
 
       withWrongCurrency("pte", "PTE", "pet", "PET", "0",true);
-      oneLineRequest("562 bob in byr");
+      oneLineRequest("562 bob in pab");
 
       withWrongCurrency("CSD", "CSD", "sad", "SAD", "222222222222", true);
       compute(CONVERT, FIRST_CONVERT_MESSAGE);
