@@ -24,6 +24,10 @@ public class ConverterTest {
 
    private static ConverterService converterService;
 
+   private static final String MESSAGE_UNSUPPORTED_CURRENCY = "One or two currencies not supported.";
+
+   private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
+
    /**
     * Array of available currencies that can be converted between themselves by {@link ConverterService}.
     */
@@ -513,7 +517,17 @@ public class ConverterTest {
    }
 
    private void checkNonConvertibility(String userCurrency, String desiredCurrency) {
-      assertThrows(CurrencyConverterException.class, () -> checkConvert(userCurrency, desiredCurrency));
+      try {
+         checkConvert(userCurrency, desiredCurrency);
+      } catch (IOException e) {
+         // if problem with internet connection was occur
+      } catch (CurrencyConverterException e) {
+         assertTrue(isRightMessage(e));
+      }
+   }
+
+   private boolean isRightMessage(CurrencyConverterException e) {
+      return e.getMessage().contains(MESSAGE_UNSUPPORTED_CURRENCY) || e.getMessage().contains(API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY);
    }
 
    private void checkConvertForIdenticalCurrencies(String userCurrency, Float expectedValue) throws CurrencyConverterException, IOException {

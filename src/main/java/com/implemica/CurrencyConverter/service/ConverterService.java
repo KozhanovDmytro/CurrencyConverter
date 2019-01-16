@@ -157,12 +157,23 @@ public final class ConverterService {
    private String getExceptionMessage(ArrayList<Exception> exceptions) {
       String message = MESSAGE_UNSUPPORTED_CURRENCY;
       for (Exception e : exceptions) {
-         if(e instanceof CurrencyConverterException) {
+         if(isValidMessage(e)) {
             message = e.getMessage();
          }
       }
 
       return message;
+   }
+
+   /**
+    * Function define if exception has valid message, which
+    * possible to return to user, or not.
+    *
+    * @param e exception
+    * @return possibility to return to user exception message.
+    */
+   private boolean isValidMessage(Exception e) {
+      return e instanceof CurrencyConverterException && e.getMessage().contains(API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY);
    }
 
    /**
@@ -329,4 +340,6 @@ public final class ConverterService {
    private static final String MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION = "Problem with internet connection.";
    private static final String MESSAGE_EXCEPTION_WAS_THROWN = "exception was thrown: ";
    private static final String MESSAGE_UNSUPPORTED_CURRENCY = "One or two currencies not supported.";
+
+   private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
 }
