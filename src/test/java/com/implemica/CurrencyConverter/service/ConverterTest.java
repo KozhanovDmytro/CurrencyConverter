@@ -15,23 +15,30 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Class for testing ConverterService.
  *
- * @see ConverterService
- *
  * @author Dmytro K.
- * @author Dasha S.
+ * @author Daria S.
+ * @see ConverterService
  */
 public class ConverterTest {
 
+   /**
+    * Service, which uses for conversion
+    */
    private static ConverterService converterService;
 
+   /**
+    * Text of exception, if one or both currencies not supported
+    */
    private static final String MESSAGE_UNSUPPORTED_CURRENCY = "One or two currencies not supported.";
-
+   /**
+    * Text of exception, if currency not supported
+    */
    private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
 
    /**
     * Array of available currencies that can be converted between themselves by {@link ConverterService}.
     */
-   private static String[] existingCurrency = new String[] {"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
+   private static String[] existingCurrency = new String[]{"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
            "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD", "CDF",
            "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
            "GTQ", "BYR", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO",
@@ -43,6 +50,9 @@ public class ConverterTest {
            "SGD", "PYG", "JOD", "AFN", "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD",
            "UZS", "EUR", "AED", "UYU", "MZN", "BRL"};
 
+   /**
+    * Initialisation of ConverterService
+    */
    @BeforeAll
    static void setUp() {
       converterService = new ConverterService();
@@ -52,9 +62,10 @@ public class ConverterTest {
     * Function test popular currencies in Ukraine.
     *
     * @throws CurrencyConverterException if currency does not support.
-    * @throws IOException if has problem with internet connection.
+    * @throws IOException                if has problem with internet connection.
     */
-   @Test void convertPopularCurrencies() throws CurrencyConverterException, IOException {
+   @Test
+   void convertPopularCurrencies() throws CurrencyConverterException, IOException {
       checkConvert("UAH", "RUB");
       checkConvert("UAH", "UAH");
       checkConvert("UAH", "EUR");
@@ -80,9 +91,10 @@ public class ConverterTest {
     * Test currency which can convert to USD. This list was taken by google.com
     *
     * @throws CurrencyConverterException if currency does not support.
-    * @throws IOException if has problem with internet connection.
+    * @throws IOException                if has problem with internet connection.
     */
-   @Test void checkCurrencyTransferToUSD() throws CurrencyConverterException, IOException {
+   @Test
+   void checkCurrencyTransferToUSD() throws CurrencyConverterException, IOException {
       checkConvert("BYR", "USD");
       checkConvert("PAB", "USD");
       checkConvert("LVL", "USD");
@@ -242,7 +254,12 @@ public class ConverterTest {
       checkConvert("IRR", "USD");
    }
 
-
+   /**
+    * Test currency which can convert from USD. This list was taken by google.com
+    *
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException                if has problem with internet connection.
+    */
    @Test
    void checkCurrencyTransferFromUSD() throws IOException, CurrencyConverterException {
       checkConvert("USD", "BYR");
@@ -404,6 +421,12 @@ public class ConverterTest {
       checkConvert("USD", "IRR");
    }
 
+   /**
+    * Test currency which can convert to UAH and doesn't contain in {@link #existingCurrency}.
+    *
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException                if has problem with internet connection.
+    */
    @Test
    void checkCurrencyTransferToUAH() throws IOException, CurrencyConverterException {
       checkConvert("BTN", "UAH");
@@ -416,6 +439,12 @@ public class ConverterTest {
       checkConvert("RSD", "UAH");
    }
 
+   /**
+    * Test currency which can convert from UAH and doesn't contain in {@link #existingCurrency}.
+    *
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws IOException                if has problem with internet connection.
+    */
    @Test
    void checkCurrencyTransferFromUAH() throws IOException, CurrencyConverterException {
       checkConvert("UAH", "BTN");
@@ -427,10 +456,12 @@ public class ConverterTest {
       checkConvert("UAH", "MGA");
       checkConvert("UAH", "RSD");
    }
+
    /**
-    * Test currency which cannot be converted to USD.
+    * Tests currencies, which cannot be converted to USD.
     */
-   @Test void checkUnsupportedCurrency() {
+   @Test
+   void checkUnsupportedCurrency() {
       checkNonConvertibility("GWP", "USD");
       checkNonConvertibility("SKK", "USD");
       checkNonConvertibility("SIT", "USD");
@@ -490,6 +521,9 @@ public class ConverterTest {
       checkNonConvertibility("BGL", "USD");
    }
 
+   /**
+    * Tests, that if currency converts in itself, then amount of it doesn't change
+    */
    @Test
    void checkIdenticalCurrency() throws IOException, CurrencyConverterException {
       for (Currency currency : Currency.getAvailableCurrencies()) {
@@ -497,6 +531,9 @@ public class ConverterTest {
       }
    }
 
+   /**
+    * Tests conversion all currencies from {@link #existingCurrency} between themselves
+    */
    @Test
    @Disabled("this test takes 2 hours 25 min. ")
    void checkConversionsWithAllPossibleCurrencies() throws IOException, CurrencyConverterException {
@@ -507,6 +544,12 @@ public class ConverterTest {
       }
    }
 
+   /**
+    * Asserts, that if first currency converts to second, result of conversion is not null
+    *
+    * @param userCurrency    currency  to convert from
+    * @param desiredCurrency currency  to convert to
+    */
    private void checkConvert(String userCurrency, String desiredCurrency) throws CurrencyConverterException, IOException {
       Converter converter = new Converter(Currency.getInstance(userCurrency),
               Currency.getInstance(desiredCurrency),
@@ -516,6 +559,12 @@ public class ConverterTest {
       assertNotNull(value);
    }
 
+   /**
+    * Asserts that one or both currencies are not supported
+    *
+    * @param userCurrency    currency  to convert from
+    * @param desiredCurrency currency  to convert to
+    */
    private void checkNonConvertibility(String userCurrency, String desiredCurrency) {
       try {
          checkConvert(userCurrency, desiredCurrency);
@@ -526,6 +575,11 @@ public class ConverterTest {
       }
    }
 
+   /**
+    * Checks, that exception text contains expected text
+    *
+    * @param e exception, text of message of which has to be checked
+    */
    private boolean isRightMessage(CurrencyConverterException e) {
       return e.getMessage().contains(MESSAGE_UNSUPPORTED_CURRENCY) || e.getMessage().contains(API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY);
    }

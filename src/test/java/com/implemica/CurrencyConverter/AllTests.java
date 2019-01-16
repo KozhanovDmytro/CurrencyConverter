@@ -10,6 +10,7 @@ import org.junit.platform.runner.JUnitPlatform;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.runner.RunWith;
 
+/**Runs all tests*/
 @RunWith(JUnitPlatform.class)
 @SelectClasses({BotServiceTest.class, DialogDaoImplTest.class, WebControllerTest.class,
         ConverterTest.class, WebSocketTest.class, BotControllerTest.class})
