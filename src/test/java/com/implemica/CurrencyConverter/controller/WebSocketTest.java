@@ -258,6 +258,8 @@ public class WebSocketTest {
 
    /**
     * Formats given dialog to String, which will be ay table row on web page
+    *
+    * @param dialog given dialog
     * @return formatted String
     */
    private String getExpectedRow(Dialog dialog) {
