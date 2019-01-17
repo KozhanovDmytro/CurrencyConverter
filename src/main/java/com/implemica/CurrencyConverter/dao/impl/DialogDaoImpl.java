@@ -38,7 +38,7 @@ public class DialogDaoImpl implements DialogDao {
    /**
     * Path to .csv file, which stores changes
     */
-   private static final String DATA_CSV = "src/main/resources/data.csv";
+   private static final String DATA_CSV_FILE = "data.csv";
    /**
     * Stores history of changes
     */
@@ -55,10 +55,10 @@ public class DialogDaoImpl implements DialogDao {
 
 
    /**
-    * Creates a new DialogDaoImpl instance for the DATA_CSV file
+    * Creates a new DialogDaoImpl instance for the DATA_CSV_FILE file
     */
    public DialogDaoImpl() {
-      this(new File(DATA_CSV));
+      this(new File(DATA_CSV_FILE));
    }
 
    /**
