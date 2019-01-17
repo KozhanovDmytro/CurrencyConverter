@@ -3,14 +3,14 @@ package com.implemica.CurrencyConverter.controller.util;
 import com.implemica.CurrencyConverter.model.Dialog;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
 import java.lang.reflect.Type;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class simulate client end point. Which listens a webSocket
@@ -22,11 +22,9 @@ import java.util.logging.Logger;
  */
 public class ClientEndPoint extends StompSessionHandlerAdapter {
 
-   private Logger logger = Logger.getLogger(ClientEndPoint.class.getName());
+   private Logger logger = LoggerFactory.getLogger(ClientEndPoint.class.getName());
 
-   /**
-    * Received instance of Dialog from webSocket chanel.
-    */
+   /** Received instance of Dialog from webSocket chanel. */
    @Getter
    @Setter
    private Dialog receivedDialog;
@@ -65,8 +63,6 @@ public class ClientEndPoint extends StompSessionHandlerAdapter {
    @Override
    public void handleFrame(StompHeaders headers, Object o) {
       receivedDialog = (Dialog) o;
-      logger.log(Level.INFO, "receive from web socket server. ");
+      logger.info("received from web socket server. ");
    }
-
-
 }

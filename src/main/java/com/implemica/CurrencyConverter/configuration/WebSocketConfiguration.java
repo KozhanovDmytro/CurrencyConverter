@@ -15,8 +15,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer {
+
    /**
-    * Configure message broker options.
+    * Configure message broker options. That's a destination where
+    * possible to listen webSocket chanel.
     */
    @Override
    public void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -25,8 +27,8 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
    }
 
    /**
-    * Register STOMP endpoints mapping each to a specific URL and (optionally)
-    * enabling and configuring SockJS fallback options.
+    * Creates an end-point where will be put JSON representational
+    * of {@link com.implemica.CurrencyConverter.model.Dialog} instance.
     */
    @Override
    public void registerStompEndpoints(StompEndpointRegistry stompEndpointRegistry) {

@@ -22,23 +22,16 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class ConverterTest {
 
-   /**
-    * Service, which uses for conversion
-    */
+   /** Service, which uses for conversion. */
    private static ConverterService converterService;
 
-   /**
-    * Text of exception, if one or both currencies not supported
-    */
+   /** Text of exception, if one or both currencies not supported. */
    private static final String MESSAGE_UNSUPPORTED_CURRENCY = "One or two currencies not supported.";
-   /**
-    * Text of exception, if currency not supported
-    */
+
+   /** Text of exception, if currency not supported. */
    private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
 
-   /**
-    * Array of available currencies that can be converted between themselves by {@link ConverterService}.
-    */
+   /** Array of available currencies that can be converted between themselves by {@link ConverterService}. */
    private static String[] existingCurrency = new String[]{"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
            "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD", "CDF",
            "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",

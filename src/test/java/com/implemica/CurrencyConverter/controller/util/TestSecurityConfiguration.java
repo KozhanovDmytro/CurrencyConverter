@@ -26,7 +26,9 @@ public class TestSecurityConfiguration extends WebSecurityConfigurerAdapter {
       http.csrf().disable().authorizeRequests().anyRequest().permitAll();
    }
 
-   /**Configures WebSecurity. Enables debug support with Spring Security*/
+   /**
+    * Configures WebSecurity. Enables debug support with Spring Security
+    */
    @Override
    public void configure(WebSecurity web) {
       web.debug(true);

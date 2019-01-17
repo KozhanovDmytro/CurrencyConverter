@@ -11,13 +11,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 /**
- * Class for configure WebSecurity
+ * Class for configure Spring security
  *
  * @author Dmytro K.
  */
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
    /**
     * Configures the {@link HttpSecurity}
     */
@@ -25,19 +26,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
    protected void configure(HttpSecurity http) throws Exception {
       http
               .authorizeRequests()
-              .antMatchers("/").permitAll()
-              .anyRequest().authenticated()
+                 .antMatchers("/").permitAll()
+                 .anyRequest().authenticated()
               .and()
-              .formLogin()
-              .loginPage("/login")
-              .permitAll()
+                 .formLogin()
+                 .loginPage("/login")
+                 .permitAll()
               .and()
-              .logout()
-              .permitAll();
+                 .logout()
+                 .permitAll();
    }
 
    /**
-    * Loads user-specific data
+    * Loads admin user.
     */
    @Bean
    @Override

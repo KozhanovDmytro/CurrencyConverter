@@ -19,28 +19,21 @@ import java.util.Date;
  */
 @Getter
 public class Dialog implements Serializable {
-   /**
-    * User's message to bot
-    */
+
+   /** User's message to bot. */
    private String usersRequest;
-   /**
-    * Bot's reaction for user's message
-    */
+
+   /** Bot's reaction for user's message. */
    private String botsResponse;
-   /**
-    * Represents a Telegram user
-    */
+
+   /** Represents a Telegram user. */
    private User user;
 
-   /**
-    * Date and time of dialog
-    */
+   /** Date and time of dialog. */
    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "GMT+2")
    private Date date;
 
-   /**
-    * Date format
-    */
+   /** Date format. */
    @JsonIgnore
    private SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
 

@@ -12,6 +12,8 @@ import com.implemica.CurrencyConverter.service.BotService;
 import com.implemica.CurrencyConverter.service.ConverterService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,8 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,9 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {SpringConfiguration.class, WebSocketConfiguration.class, TestSecurityConfiguration.class})
 public class WebSocketTest {
 
-   /**
-    * Row representational in HTML table.
-    */
+   /** Representational of row in HTML table. */
    private static final String ROW_FORMAT = "<tr>" +
            "            <td>%s</td>" +
            "            <td>%d</td>" +
@@ -72,54 +70,37 @@ public class WebSocketTest {
            "            <td>%s</td>" +
            "        </tr>";
 
-   private Logger logger = Logger.getLogger(WebSocketTest.class.getName());
+   private Logger logger = LoggerFactory.getLogger(WebSocketTest.class.getName());
 
-   /**
-    * WebSocket URL.
-    */
+   /** WebSocket URL. */
    private static final String URL = "ws://localhost:8080/monitor-bot";
 
-   /**
-    * Path for listening webSocket.
-    */
+   /** Path for listening webSocket. */
    private static final String URL_SUBSCRIBE = "/listen/bot";
 
-   /**
-    * Test user.
-    */
+   /** Test user. */
    private User user = new User(1234234,
            "testFirstName",
            "testLastName",
            "testUserName");
 
-   /**
-    * Client end point which catch message from webSocket.
-    */
+   /** Client end point which catch message from webSocket. */
    private ClientEndPoint clientEndPoint = new ClientEndPoint();
 
-   /**
-    * Date formatter for check date format.
-    */
+   /** Date formatter for check date format. */
    private DateFormat df = BotService.SIMPLE_DATE_FORMAT;
 
-   /**
-    * Main entry point for server-side Spring MVC test support.
-    */
-   @Autowired
-   private MockMvc mockMvc;
+   /** Main entry point for server-side Spring MVC test support. */
+   @Autowired private MockMvc mockMvc;
 
-   /**
-    * BotService which send message to webSocket followers.
-    */
-   @Autowired
-   private BotService botService;
+   /** BotService which send message to webSocket followers. */
+   @Autowired private BotService botService;
 
    /**
     * Uses for get last {@link com.implemica.CurrencyConverter.model.Dialog} which
     * was sent to webSocket followers.
     */
-   @Autowired
-   private DialogDao dialogDao;
+   @Autowired private DialogDao dialogDao;
 
    /**
     * Settings for client end point.
@@ -142,7 +123,7 @@ public class WebSocketTest {
 
       session.subscribe(URL_SUBSCRIBE, clientEndPoint);
 
-      logger.log(Level.INFO, "connected: " + session.isConnected());
+      logger.info("connected: " + session.isConnected());
    }
 
    /**

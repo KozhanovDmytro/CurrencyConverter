@@ -25,7 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests webApplication with and without anonymous user.
  *
- * @author Dmytro K., Daria S.
+ * @author Dmytro K.
+ * @author Daria S.
  * @see MockMvc
  */
 @SpringBootTest(classes = {WebController.class, BotService.class, ConverterService.class},
@@ -35,11 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {SpringConfiguration.class, WebSocketConfiguration.class, WebSecurityConfig.class})
 public class WebControllerTest {
 
-   /**
-    * Main entry point for server-side Spring MVC test support.
-    */
-   @Autowired
-   private MockMvc mockMvc;
+   /** Main entry point for server-side Spring MVC test support. */
+   @Autowired private MockMvc mockMvc;
 
    /**
     * Test content on main page with anonymous user.
