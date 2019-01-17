@@ -2,6 +2,8 @@ package com.implemica.CurrencyConverter.controller;
 
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.service.BotService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -10,8 +12,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class gets users input from telegram bot and processes it via Converter class
@@ -26,7 +26,7 @@ public class BotController extends TelegramLongPollingBot {
    /**
     * Logger for this class
     */
-   private Logger log = Logger.getLogger(BotController.class.getName());
+   private Logger logger = LoggerFactory.getLogger(BotController.class.getName());
    /**
     * Bot name in Telegram.
     */
@@ -114,7 +114,7 @@ public class BotController extends TelegramLongPollingBot {
       try {
          execute(sendMessage);
       } catch (TelegramApiException e) {
-         log.log(Level.SEVERE, e.getMessage());
+         logger.error(e.getMessage());
       }
    }
 

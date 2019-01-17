@@ -8,6 +8,8 @@ import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import com.tunyk.currencyconverter.api.CurrencyNotSupportedException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.money.Monetary;
@@ -22,8 +24,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The class for conversion currency.
@@ -49,7 +49,7 @@ import java.util.logging.Logger;
 public final class ConverterService {
 
    /** Logger. */
-   private final Logger logger = Logger.getLogger(this.getClass().getName());
+   private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
    /** The list stores links to functions which make conversion. */
    private List<OptionSupplier> options = new ArrayList<>();
@@ -92,7 +92,7 @@ public final class ConverterService {
     */
    public Float convert(Converter converter) throws CurrencyConverterException, UnknownHostException {
       if(!checkConnection()) {
-         logger.log(Level.SEVERE, MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
+         logger.error(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
          throw new UnknownHostException(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
       }
 
@@ -140,7 +140,7 @@ public final class ConverterService {
     */
    private Float analyzeResult(ArrayList<Exception> exceptions, Float result) throws CurrencyConverterException {
       if(result == null) {
-         logger.log(Level.SEVERE, MESSAGE_EXCEPTION_WAS_THROWN + Arrays.toString(exceptions.toArray()));
+         logger.error(MESSAGE_EXCEPTION_WAS_THROWN + Arrays.toString(exceptions.toArray()));
          throw new CurrencyConverterException(getExceptionMessage(exceptions));
       } else {
          return result;
@@ -321,7 +321,7 @@ public final class ConverterService {
    }
    
    private void writeToLog(String api, Converter converter) {
-      logger.log(Level.INFO, "converted by " + api + ": " + converter);
+      logger.info("converted by " + api + ": " + converter);
    }
 
    /* constants */

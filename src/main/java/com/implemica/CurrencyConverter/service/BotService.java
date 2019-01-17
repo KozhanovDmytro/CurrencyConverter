@@ -7,6 +7,8 @@ import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.validator.BotValidator;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -17,8 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.implemica.CurrencyConverter.validator.BotValidator.formatNumber;
 import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber;
@@ -121,7 +121,7 @@ public class BotService {
    /**
     * Logger for this class
     */
-   private final Logger log = Logger.getLogger(this.getClass().getName());
+   private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
    /**
     * Converter for currencies
     */
@@ -243,7 +243,7 @@ public class BotService {
          }
          message = "Sorry, but currency is not valid: " + wrongCurrency + CONVERT_MESSAGE;
       } catch (IOException e) {
-         log.log(Level.SEVERE, e.getMessage() + " is not responding.");
+         logger.error(e.getMessage() + " is not responding.");
          message = "Server is not responding." + CONVERT_MESSAGE;
       }
       return message;
@@ -258,7 +258,7 @@ public class BotService {
     */
    private void sendToWebSocketFollowers(Dialog dialog) {
       template.convertAndSend("/listen/bot", dialog);
-      log.log(Level.INFO, "send to web socket followers. ");
+      logger.info("send to web socket followers. ");
    }
 
 }

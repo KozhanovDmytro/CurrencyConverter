@@ -5,13 +5,13 @@ import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.service.BotService;
 import com.opencsv.CSVWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class writes and reads history of users conversations.
@@ -46,7 +46,7 @@ public class DialogDaoImpl implements DialogDao {
    /**
     * Logger for this class
     */
-   private Logger log = Logger.getLogger(DialogDao.class.getName());
+   private Logger logger = LoggerFactory.getLogger(DialogDao.class.getName());
 
    /**
     * Date format
@@ -90,7 +90,7 @@ public class DialogDaoImpl implements DialogDao {
          writer.flush();
          writer.close();
       } catch (IOException e) {
-         log.log(Level.SEVERE, "The changes were not recorded", e);
+         logger.error("The changes were not recorded", e);
       }
    }
 
