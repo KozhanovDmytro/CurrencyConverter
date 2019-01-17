@@ -25,19 +25,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Tests webApplication with and without anonymous user.
  *
+ * @author Dmytro K., Daria S.
  * @see MockMvc
- *
- * @author Dmytro K.
  */
-@SpringBootTest(classes = { WebController.class, BotService.class, ConverterService.class},
+@SpringBootTest(classes = {WebController.class, BotService.class, ConverterService.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @EnableAutoConfiguration
 @ContextConfiguration(classes = {SpringConfiguration.class, WebSocketConfiguration.class, WebSecurityConfig.class})
 public class WebControllerTest {
 
-   /** Main entry point for server-side Spring MVC test support. */
-   @Autowired private MockMvc mockMvc;
+   /**
+    * Main entry point for server-side Spring MVC test support.
+    */
+   @Autowired
+   private MockMvc mockMvc;
 
    /**
     * Test content on main page with anonymous user.
@@ -141,5 +143,37 @@ public class WebControllerTest {
               .andExpect(content().string(containsString("<th>User name</th>")))
               .andExpect(content().string(containsString("<th>Response</th>")))
               .andExpect(content().string(containsString("<th>Request</th>")));
+   }
+
+   /**
+    * Test content on monitor page with anonymous user.
+    *
+    * @throws Exception if an error occurs
+    */
+   @Test
+   @WithAnonymousUser
+   void loginPageWithUser() throws Exception {
+      this.mockMvc.perform(get("/login"))
+              .andDo(print())
+              .andExpect(status().isOk())
+              .andExpect(content().string(containsString("Login")))
+              .andExpect(content().string(containsString("Password")));
+
+   }
+
+   /**
+    * Test content on monitor page with some user.
+    *
+    * @throws Exception if an error occurs
+    */
+   @Test
+   @WithMockUser
+   void loginPageWithMockUser() throws Exception {
+      this.mockMvc.perform(get("/login"))
+              .andDo(print())
+              .andExpect(status().isOk())
+              .andExpect(content().string(containsString("Login")))
+              .andExpect(content().string(containsString("Password")));
+
    }
 }
