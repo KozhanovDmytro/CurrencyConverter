@@ -5,12 +5,14 @@ import com.implemica.CurrencyConverter.service.BotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 
 
 /**
@@ -23,19 +25,23 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
  */
 @Component
 public class BotController extends TelegramLongPollingBot {
+
+   /**
+    * Bot name in Telegram.
+    */
+   @Value("${telegram.botName}")
+   private String BOT_NAME;
+
+   /**
+    * It uses for getting and sending messages via Bot API
+    */
+   @Value("${telegram.botToken}")
+   private String BOT_TOKEN;
+
    /**
     * Logger for this class
     */
    private Logger logger = LoggerFactory.getLogger(BotController.class.getName());
-   /**
-    * Bot name in Telegram.
-    */
-   private static final String BOT_NAME = "currConvBot";
-   /**
-    * It uses for getting and sending messages via Bot API
-    */
-   private static final String BOT_TOKEN = "760246131:AAHZf7R9NZbVxxiDh4Dtn_76CH5-8LSpEG4";
-
    /**
     * Unique string, which uses for identification messages, which has non-text content.
     */
