@@ -1,5 +1,6 @@
 package com.implemica.CurrencyConverter.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,6 +19,12 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+   @Value("${admin.login}")
+   private String ADMIN_LOGIN;
+
+   @Value("${admin.password}")
+   private String ADMIN_PASSWORD;
 
    /**
     * Configures the {@link HttpSecurity}
@@ -44,8 +51,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
    @Override
    public UserDetailsService userDetailsService() {
       UserDetails user = User.withDefaultPasswordEncoder()
-              .username("admin")
-              .password("admin")
+              .username(ADMIN_LOGIN)
+              .password(ADMIN_PASSWORD)
               .roles("ADMIN")
               .build();
 
