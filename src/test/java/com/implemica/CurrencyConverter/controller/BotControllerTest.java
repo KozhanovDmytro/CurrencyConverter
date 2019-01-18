@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -22,15 +23,6 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 public class BotControllerTest {
-
-   /**
-    * Bot name in Telegram.
-    */
-   private static final String BOT_NAME = "currConvBot";
-   /**
-    * It uses for getting and sending messages via Bot API
-    */
-   private static final String BOT_TOKEN = "760246131:AAHZf7R9NZbVxxiDh4Dtn_76CH5-8LSpEG4";
 
    /**
     * Start command
@@ -70,6 +62,18 @@ public class BotControllerTest {
    private static final String wrongContentMessage = BotService.INCORRECT_CONTENT_MESSAGE;
 
    /**
+    * Bot name in Telegram.
+    */
+   @Value("${telegram.botName}")
+   private String BOT_NAME;
+
+   /**
+    * It uses for getting and sending messages via Bot API
+    */
+   @Value("${telegram.botToken}")
+   private String BOT_TOKEN;
+
+   /**
     * A dummy implementation for BotService class, represents bot's logic
     */
    @Mock
@@ -102,14 +106,14 @@ public class BotControllerTest {
    @InjectMocks
    private BotController controller;
 
+
    /**
     * Creates new BotController, which depends on mocked botService
     */
    @BeforeEach
    void setUp() {
       controller = new BotController(botService);
-
-   }
+     }
 
    /**
     * Tests, that methods returns bots username and token correctly
@@ -161,7 +165,6 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest3() {
       //update3 from user3
-
       messageBehavior(message3Text, true);
 
       //user without username
@@ -178,7 +181,6 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest4() {
       //update4 from user4
-
       messageBehavior(message4Text, true);
 
       //user without last name and username
@@ -194,8 +196,7 @@ public class BotControllerTest {
     */
    @Test
    void onUpdateReceivedTest5() {
-
-      //update5 from user1
+      //update5 from user5
       messageBehavior(null, false);
 
       createUser(38210, "tutta", "carlson", "chicken");
