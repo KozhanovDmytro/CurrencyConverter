@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(JUnitPlatform.class)
 @SelectClasses({BotServiceTest.class, DialogDaoImplTest.class, WebControllerTest.class,
-        ConverterTest.class, WebSocketTest.class, BotControllerTest.class})
+        WebSocketTest.class, BotControllerTest.class})
 public class AllTests {
 }
 
