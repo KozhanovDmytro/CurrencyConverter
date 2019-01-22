@@ -61,10 +61,10 @@ public final class ConverterService {
    {
       options.add(this::convertByBankUaCom);                      // unlimited
       options.add(this::convertByFloatRatesCom);                  // unlimited
-      options.add(this::convertByJavaMoney);                      // unlimited, but so slow
 
       options.add(this::convertByFreeCurrencyConverterApiCom);    // has a limit - 100  requests per hour
       options.add(this::convertByCurrencyLayerCom);               // has a limit - 1000 requests per month
+      options.add(this::convertByJavaMoney);                      // unlimited, slow, does not work with multithreading
    }
 
    /**
