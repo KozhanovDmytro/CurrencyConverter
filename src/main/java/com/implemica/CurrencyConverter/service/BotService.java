@@ -56,7 +56,7 @@ public class BotService {
    /**
     * Greeting message to user
     */
-   public static final String START_MESSAGE = "Hello! I can help you to convert currencies. " + CONVERT_MESSAGE;
+   public static final String START_MESSAGE = "Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
    /**
     * Stop message to the user
     */
@@ -94,13 +94,13 @@ public class BotService {
    /**
     * Bot's response for incorrect request from user
     */
-   public static final String INCORRECT_REQUEST_MESSAGE = "Sorry, but your request is incorrect. " + CONVERT_MESSAGE;
+   public static final String INCORRECT_REQUEST_MESSAGE = "Sorry, but your request is incorrect." + CONVERT_MESSAGE;
 
    /**
     * Bot's response for non-text message
     */
    public static final String INCORRECT_CONTENT_MESSAGE = "Sorry, but this message contains " +
-           "incorrect content. Please, don't send me messages, which I can't handle. " + CONVERT_MESSAGE;
+           "incorrect content. Please, don't send me messages, which I can't handle." + CONVERT_MESSAGE;
    /**
     * Message for log, that user sent incorrect content
     */
@@ -233,7 +233,7 @@ public class BotService {
       } catch (CurrencyConverterException e) {
          message = e.getMessage() + CONVERT_MESSAGE;
       } catch (ParseException e) {
-         message = "Sorry, but \"" + value + "\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE;
+         message = "Sorry, but \"" + value + "\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE;
       } catch (IllegalArgumentException e) {
          String wrongCurrency;
          if (count == 0) {

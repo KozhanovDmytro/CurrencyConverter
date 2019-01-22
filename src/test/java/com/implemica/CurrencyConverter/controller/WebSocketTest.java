@@ -10,11 +10,15 @@ import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.service.BotService;
 import com.implemica.CurrencyConverter.service.ConverterService;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -70,6 +74,8 @@ public class WebSocketTest {
            "            <td>%s</td>" +
            "        </tr>";
 
+   private static final String SELENIUM_FORMAT = "%s %d %s %s %s %s %s";
+
    private Logger logger = LoggerFactory.getLogger(WebSocketTest.class.getName());
 
    /** WebSocket URL. */
@@ -102,6 +108,21 @@ public class WebSocketTest {
     */
    @Autowired private DialogDao dialogDao;
 
+   private static ChromeDriver chromeDriver;
+
+   @Value("${admin.login}")
+   private String ADMIN_LOGIN;
+
+   @Value("${admin.password}")
+   private String ADMIN_PASSWORD;
+
+   @BeforeAll
+   static void beforeAll() {
+      System.setProperty("webdriver.chrome.driver", "C:/Selenium/chromedriver.exe");
+
+      chromeDriver = new ChromeDriver();
+   }
+
    /**
     * Settings for client end point.
     *
@@ -122,6 +143,9 @@ public class WebSocketTest {
               .get(1, SECONDS);
 
       session.subscribe(URL_SUBSCRIBE, clientEndPoint);
+
+      chromeDriver.get("localhost:8080/monitor");
+      chromeDriver.findElementById("connect").click();
 
       logger.info("connected: " + session.isConnected());
    }
@@ -212,10 +236,11 @@ public class WebSocketTest {
       assertEquals(dialogFromFile, receivedDialogFromWS);
 
       String expectedRow = getExpectedRow(dialogFromFile);
-      String actualContent = getContentByMapping("/log");
+      String expectedRowForSelenium = getExpectedDataForSelenium(dialogFromFile);
 
-      // check page
-      assertTrue(actualContent.contains(expectedRow));
+      // check log page
+      checkLogPage(expectedRow);
+      checkMonitorPage(expectedRowForSelenium);
    }
 
    /**
@@ -252,5 +277,31 @@ public class WebSocketTest {
               dialog.getUser().getUserName(),
               dialog.getUsersRequest(),
               dialog.getBotsResponse());
+   }
+
+   private String getExpectedDataForSelenium(Dialog  dialog) {
+      return String.format(SELENIUM_FORMAT,
+              df.format(dialog.getDate()),
+              dialog.getUser().getUserId(),
+              dialog.getUser().getUserFirstName(),
+              dialog.getUser().getUserLastName(),
+              dialog.getUser().getUserName(),
+              dialog.getUsersRequest(),
+              dialog.getBotsResponse());
+   }
+
+   private void checkMonitorPage(String expected) {
+      String content = chromeDriver.findElementById("response").getText();
+      assertTrue(content.contains(expected));
+   }
+
+   private void checkLogPage(String expected) throws Exception {
+      String actualContentOnPageLog = getContentByMapping("/log");
+      assertTrue(actualContentOnPageLog.contains(expected));
+   }
+
+   @AfterAll
+   static void afterAll() {
+      chromeDriver.quit();
    }
 }

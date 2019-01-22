@@ -398,15 +398,15 @@ public class BotServiceTest {
       oneLineRequestAndCommand("511 brl to xcd", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       incorrectOneLineRequestAndCommand("-367 tzs in inr", "Sorry, but \"-367\" is not a valid number." +
-              " Conversion is impossible. " + CONVERT_MESSAGE, START, START_MESSAGE);
+              " Conversion is impossible." + CONVERT_MESSAGE, START, START_MESSAGE);
       incorrectOneLineRequestAndCommand("hundred rub to xxx", "Sorry, but \"hundred\" is not a valid number." +
-              " Conversion is impossible. " + CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
+              " Conversion is impossible." + CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
       incorrectOneLineRequestAndCommand("13$ usd in rur", "Sorry, but \"13$\" is not a valid number." +
-              " Conversion is impossible. " + CONVERT_MESSAGE, STOP, STOP_MESSAGE);
+              " Conversion is impossible." + CONVERT_MESSAGE, STOP, STOP_MESSAGE);
       incorrectOneLineRequestAndCommand("15..7 irr to php", "Sorry, but \"15..7\" is not a valid number." +
-              " Conversion is impossible. " + CONVERT_MESSAGE, "hello", INCORRECT_REQUEST_MESSAGE);
+              " Conversion is impossible." + CONVERT_MESSAGE, "hello", INCORRECT_REQUEST_MESSAGE);
       incorrectOneLineRequestAndCommand("0.01. xof in xfo", "Sorry, but \"0.01.\" is not a valid number." +
-              " Conversion is impossible. " + CONVERT_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+              " Conversion is impossible." + CONVERT_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       incorrectOneLineRequestAndCommand("44 xbb to xcd", "Currency not supported: XBB" + CONVERT_MESSAGE,
               START, START_MESSAGE);
@@ -444,15 +444,15 @@ public class BotServiceTest {
       commandAndOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "140.01 rub to rub");
 
       commandAndIncorrectOneLineRequest(START, START_MESSAGE, "-678 afn in usd", "Sorry, but " +
-              "\"-678\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE);
+              "\"-678\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "177.. xxx to xxx", "Sorry, but " +
-              "\"177..\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE);
+              "\"177..\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "one uss in lkr", SECOND_CONVERT_MESSAGE_1 +
               "ONEUSSINLKR" + SECOND_CONVERT_MESSAGE_2);
       commandAndIncorrectOneLineRequest("conversion", INCORRECT_REQUEST_MESSAGE, "67h uah to omr",
-              "Sorry, but \"67h\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE);
+              "Sorry, but \"67h\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "0,.1 brl in pln",
-              "Sorry, but \"0,.1\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE);
+              "Sorry, but \"0,.1\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE);
 
       commandAndIncorrectOneLineRequest(START, START_MESSAGE, "37 Xua to Clp", "Currency not supported: XUA"
               + CONVERT_MESSAGE);
@@ -1143,7 +1143,7 @@ public class BotServiceTest {
     */
    private void withWrongAmount(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
                                 String secondCurrencyInUpperCase, String amount) {
-      String message = "Sorry, but \"" + amount + "\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE;
+      String message = "Sorry, but \"" + amount + "\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE;
       rightScriptWithWrongValue(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase, amount, message);
    }
 
@@ -1297,7 +1297,7 @@ public class BotServiceTest {
    private void oneLineRequestWithWrongAmount(String request) {
       String[] words = request.split("\\s+");
       String amount = words[0];
-      compute(request, "Sorry, but \"" + amount + "\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE);
+      compute(request, "Sorry, but \"" + amount + "\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE);
    }
 
    /**
