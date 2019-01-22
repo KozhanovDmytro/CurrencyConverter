@@ -1,6 +1,6 @@
 package com.implemica.CurrencyConverter.service;
 
-import com.implemica.CurrencyConverter.model.Converter;
+import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.tunyk.currencyconverter.BankUaCom;
 import com.tunyk.currencyconverter.api.Currency;
 import com.tunyk.currencyconverter.api.CurrencyConverter;
@@ -36,7 +36,7 @@ import java.util.List;
  *    5. currencylayer.com
  *
  *
- * @see Converter
+ * @see UsersRequest
  * @see Currency
  * @see CurrencyConverter
  * @see URL
@@ -52,7 +52,7 @@ public final class ConverterService {
    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
    /** The list stores links to functions which make conversion. */
-   private List<OptionSupplier> options = new ArrayList<>();
+   private List<ConverterAPI> options = new ArrayList<>();
 
    /*
     * Initialization scope for options. Note! In this
@@ -70,13 +70,22 @@ public final class ConverterService {
    /**
     * An interface which supplies function of currency conversion.
     */
-   private interface OptionSupplier {
-      Float execute(Converter converter) throws CurrencyConverterException, IOException;
+   private interface ConverterAPI {
+      /**
+       * Contains the function which can convert currency
+       * by {@link UsersRequest}
+       *
+       * @param usersRequest contains currencies and value for conversion.
+       * @return converted value.
+       * @throws CurrencyConverterException if currency does not support.
+       * @throws IOException if there is no internet connection.
+       */
+      Float convert(UsersRequest usersRequest) throws CurrencyConverterException, IOException;
    }
 
    /**
-    * Function converts  currency from {@link Converter#usersCurrency} to
-    * {@link Converter#desiredCurrency}.
+    * Function converts  currency from {@link UsersRequest#currencyFrom} to
+    * {@link UsersRequest#currencyTo}.
     *
     * Firstly function  checks  internet connection if this false then it
     * throws  {@link UnknownHostException},  then  it  calls all the APIs
@@ -85,12 +94,12 @@ public final class ConverterService {
     * APIs  could  not  convert  the  currency,  the  function  throws an
     * exception.
     *
-    * @param converter contains currencies and value for conversion.
+    * @param usersRequest contains currencies and value for conversion.
     * @return converted value.
     * @throws CurrencyConverterException if currency does not support.
     * @throws UnknownHostException if there is no internet connection.
     */
-   public Float convert(Converter converter) throws CurrencyConverterException, UnknownHostException {
+   public Float convert(UsersRequest usersRequest) throws CurrencyConverterException, UnknownHostException {
       if(!checkConnection()) {
          logger.error(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
          throw new UnknownHostException(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
@@ -99,9 +108,9 @@ public final class ConverterService {
       Float result = null;
       ArrayList<Exception> exceptions = new ArrayList<>();
 
-      for (OptionSupplier option : options) {
+      for (ConverterAPI option : options) {
          try {
-            result = option.execute(converter);
+            result = option.convert(usersRequest);
             break;
          } catch (Exception e) {
             exceptions.add(e);
@@ -181,19 +190,19 @@ public final class ConverterService {
    /**
     * Converts by bank-ua.com API.
     *
-    * @param converter contains currencies and value for conversion.
+    * @param usersRequest contains currencies and value for conversion.
     * @throws CurrencyConverterException if currency does not support.
     * @return result of conversion.
     */
-   private Float convertByBankUaCom(Converter converter) throws CurrencyConverterException {
-      Currency usersCurrency = getCurrencyByUtilCurrency(converter.getUsersCurrency());
-      Currency desiredCurrency = getCurrencyByUtilCurrency(converter.getDesiredCurrency());
+   Float convertByBankUaCom(UsersRequest usersRequest) throws CurrencyConverterException {
+      Currency usersCurrency = getCurrencyByUtilCurrency(usersRequest.getCurrencyFrom());
+      Currency desiredCurrency = getCurrencyByUtilCurrency(usersRequest.getCurrencyTo());
 
       CurrencyConverter currencyConverter = new BankUaCom(usersCurrency, desiredCurrency);
 
-      Float result = currencyConverter.convertCurrency(converter.getValue());
+      Float result = currencyConverter.convertCurrency(usersRequest.getValue());
 
-      writeToLog(API_NAME_BANK_UA_COM, converter);
+      writeToLog(API_NAME_BANK_UA_COM, usersRequest);
       return result;
    }
 
@@ -201,84 +210,84 @@ public final class ConverterService {
     * Converts by java money api.
     *
     * @return result of conversion.
-    * @param converter contains currencies and value for conversion.
+    * @param usersRequest contains currencies and value for conversion.
     */
-   private Float convertByJavaMoney(Converter converter) {
+   Float convertByJavaMoney(UsersRequest usersRequest) {
       MonetaryAmount userMoney = Monetary.getDefaultAmountFactory()
-              .setCurrency(converter.getUsersCurrency().getCurrencyCode())
-              .setNumber(converter.getValue()).create();
+              .setCurrency(usersRequest.getCurrencyFrom().getCurrencyCode())
+              .setNumber(usersRequest.getValue()).create();
 
-      CurrencyConversion conversion = MonetaryConversions.getConversion(converter.getDesiredCurrency().getCurrencyCode());
+      CurrencyConversion conversion = MonetaryConversions.getConversion(usersRequest.getCurrencyTo().getCurrencyCode());
       MonetaryAmount converted = userMoney.with(conversion);
 
       Float result = converted.getNumber().floatValue();
 
-      writeToLog(API_NAME_JAVA_MONEY, converter);
+      writeToLog(API_NAME_JAVA_MONEY, usersRequest);
       return result;
    }
 
    /**
     * Function connects to free.currencyapi.com, gets json and parse it.
     *
-    * @param converter contains currencies and value for conversion.
+    * @param usersRequest contains currencies and value for conversion.
     * @throws IOException if didn't parse a json
     * @return result of conversion.
     */
-   private Float convertByFreeCurrencyConverterApiCom(Converter converter) throws IOException {
-      URL url = buildURL(URL_FREE_CURRENCY_CONVERTER_API_COM, converter);
+   Float convertByFreeCurrencyConverterApiCom(UsersRequest usersRequest) throws IOException {
+      URL url = buildURL(URL_FREE_CURRENCY_CONVERTER_API_COM, usersRequest);
 
       JSONObject object = getJsonObjectByURL(url);
 
-      double value = object.getJSONObject(converter.getUsersCurrency() + "_" + converter.getDesiredCurrency())
+      double value = object.getJSONObject(usersRequest.getCurrencyFrom() + "_" + usersRequest.getCurrencyTo())
               .getDouble("val");
 
-      Float result = converter.getValue() * (float) value;
+      Float result = usersRequest.getValue() * (float) value;
 
-      writeToLog(API_NAME_FREE_CURRENCYAPI_COM, converter);
+      writeToLog(API_NAME_FREE_CURRENCYAPI_COM, usersRequest);
       return result;
    }
 
    /**
     * Function connects to currencylayer.com, gets json and parse it.
     *
-    * @param converter contains currencies and value for conversion.
+    * @param usersRequest contains currencies and value for conversion.
     * @throws IOException if didn't parse a json
     * @return result of conversion.
     */
-   private Float convertByCurrencyLayerCom(Converter converter) throws IOException {
-      URL url = buildURL(URL_CURRENCY_LAYER_COM, converter);
+   Float convertByCurrencyLayerCom(UsersRequest usersRequest) throws IOException {
+      URL url = buildURL(URL_CURRENCY_LAYER_COM, usersRequest);
 
       JSONObject object = getJsonObjectByURL(url);
 
       double value = object.getJSONObject("quotes")
-              .getDouble(converter.getUsersCurrency() + "" + converter.getDesiredCurrency());
+              .getDouble(usersRequest.getCurrencyFrom() + "" + usersRequest.getCurrencyTo());
 
-      Float result = converter.getValue() * (float) value;
+      Float result = usersRequest.getValue() * (float) value;
 
-      writeToLog(API_NAME_CURRENCYLAYER_COM, converter);
+      writeToLog(API_NAME_CURRENCYLAYER_COM, usersRequest);
       return result;
    }
 
    /**
     * Function connects to floatrates.com, gets json and parse it.
     *
-    * @param converter contains currencies and value for conversion.
+    * @param usersRequest contains currencies and value for conversion.
     * @throws IOException if didn't parse a json
     * @return result of conversion.
     */
-   private Float convertByFloatRatesCom(Converter converter) throws IOException {
-      String url = String.format(URL_FLOAT_RATES_COM, converter.getUsersCurrency());
+   Float convertByFloatRatesCom(UsersRequest usersRequest) throws IOException {
+      String url = String.format(URL_FLOAT_RATES_COM, usersRequest.getCurrencyFrom());
 
       JSONObject object = getJsonObjectByURL(new URL(url));
 
-      String desiredCurrency = converter.getDesiredCurrency().getCurrencyCode();
+      String desiredCurrency = usersRequest.getCurrencyTo().getCurrencyCode();
 
       double rate = object.getJSONObject(desiredCurrency.toLowerCase())
               .getDouble("rate");
 
-      Float result = converter.getValue() * (float) rate;
+      Float result = usersRequest.getValue() * (float) rate;
 
-      writeToLog(API_NAME_FLOATRATES_COM, converter);
+      writeToLog(API_NAME_FLOATRATES_COM, usersRequest);
       return result;
    }
 
@@ -310,18 +319,18 @@ public final class ConverterService {
     * Function for build URL.
     * 
     * @param path url as string
-    * @param converter contains currencies and value for conversion.
+    * @param usersRequest contains currencies and value for conversion.
     * @return An instance of URL. 
     * @throws MalformedURLException if no protocol is specified, or an
     *               unknown protocol is found.
     */
-   private URL buildURL(String path, Converter converter) throws MalformedURLException {
-      String url = String.format(path, converter.getUsersCurrency(), converter.getDesiredCurrency());
+   private URL buildURL(String path, UsersRequest usersRequest) throws MalformedURLException {
+      String url = String.format(path, usersRequest.getCurrencyFrom(), usersRequest.getCurrencyTo());
       return new URL(url);
    }
    
-   private void writeToLog(String api, Converter converter) {
-      logger.info("converted by " + api + ": " + converter);
+   private void writeToLog(String api, UsersRequest usersRequest) {
+      logger.info("converted by " + api + ": " + usersRequest);
    }
 
    /* constants */

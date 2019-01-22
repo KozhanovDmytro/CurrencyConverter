@@ -42,7 +42,6 @@ import java.util.concurrent.TimeoutException;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -132,6 +131,9 @@ public class WebSocketTest {
     */
    @BeforeEach
    void setUp() throws InterruptedException, ExecutionException, TimeoutException {
+      chromeDriver.get("localhost:8080/monitor");
+      chromeDriver.findElementById("connect").click();
+
       List<Transport> transports = new ArrayList<>(1);
       transports.add(new WebSocketTransport(new StandardWebSocketClient()));
       WebSocketClient transport = new SockJsClient(transports);
@@ -144,9 +146,6 @@ public class WebSocketTest {
 
       session.subscribe(URL_SUBSCRIBE, clientEndPoint);
 
-      chromeDriver.get("localhost:8080/monitor");
-      chromeDriver.findElementById("connect").click();
-
       logger.info("connected: " + session.isConnected());
    }
 
@@ -154,54 +153,54 @@ public class WebSocketTest {
     * Tests, that content, which was sent to page is present on the page
     */
    @Test
-   void webSocketTest() throws Exception {
+   void integrationTest() throws Exception {
 
       //non-valid data
-      sendAndCheckWSAndPageContent("pksajhyufd");
-      sendAndCheckWSAndPageContent("hfds43kj23 kj");
-      sendAndCheckWSAndPageContent("\"\"klhgf\"n.jhj\"\"lkljgt");
-      sendAndCheckWSAndPageContent("pksajhyufd");
-      sendAndCheckWSAndPageContent("dsakjdsa hasdvhj335j kgwa k34");
-      sendAndCheckWSAndPageContent("lkjfewqjf'''dsflkjj");
-      sendAndCheckWSAndPageContent("aslfhkkfakjsf,vslk");
-      sendAndCheckWSAndPageContent("Lorem kjfsdlksdfj");
-      sendAndCheckWSAndPageContent("dsflkalkdsfj");
-      sendAndCheckWSAndPageContent("wglkj45hkg");
+      integrationTest("pksajhyufd");
+      integrationTest("hfds43kj23 kj");
+      integrationTest("\"\"klhgf\"n.jhj\"\"lkljgt");
+      integrationTest("pksajhyufd");
+      integrationTest("dsakjdsa hasdvhj335j kgwa k34");
+      integrationTest("lkjfewqjf'''dsflkjj");
+      integrationTest("aslfhkkfakjsf,vslk");
+      integrationTest("Lorem kjfsdlksdfj");
+      integrationTest("dsflkalkdsfj");
+      integrationTest("wglkj45hkg");
 
       //valid data
-      sendAndCheckWSAndPageContent("/start");
-      sendAndCheckWSAndPageContent("/convert");
-      sendAndCheckWSAndPageContent("USD");
-      sendAndCheckWSAndPageContent("UAH");
-      sendAndCheckWSAndPageContent("1");
-      sendAndCheckWSAndPageContent("/convert");
-      sendAndCheckWSAndPageContent("RUB");
-      sendAndCheckWSAndPageContent("UAH");
-      sendAndCheckWSAndPageContent("1");
-      sendAndCheckWSAndPageContent("/stop");
-      sendAndCheckWSAndPageContent("18 usd to uah");
-      sendAndCheckWSAndPageContent("1000 eur in rub");
+      integrationTest("/start");
+      integrationTest("/convert");
+      integrationTest("USD");
+      integrationTest("UAH");
+      integrationTest("1");
+      integrationTest("/convert");
+      integrationTest("RUB");
+      integrationTest("UAH");
+      integrationTest("1");
+      integrationTest("/stop");
+      integrationTest("18 usd to uah");
+      integrationTest("1000 eur in rub");
 
       //valid data, but incorrect requests from user
-      sendAndCheckWSAndPageContent("hello");
-      sendAndCheckWSAndPageContent("start");
-      sendAndCheckWSAndPageContent("stop");
-      sendAndCheckWSAndPageContent("convert");
-      sendAndCheckWSAndPageContent("/help");
-      sendAndCheckWSAndPageContent("/clear");
-      sendAndCheckWSAndPageContent("/cancel");
-      sendAndCheckWSAndPageContent("14$ to eur");
-      sendAndCheckWSAndPageContent("sell 16 usd to eur");
-      sendAndCheckWSAndPageContent("107 dollars to yen");
-      sendAndCheckWSAndPageContent("77,4 pln from byn");
-      sendAndCheckWSAndPageContent("10 USD is PLN");
-      sendAndCheckWSAndPageContent("Please, convert 7 uah to rub");
-      sendAndCheckWSAndPageContent("How are you?");
-      sendAndCheckWSAndPageContent("-7,5 xxx to rur");
-      sendAndCheckWSAndPageContent("repeat last");
+      integrationTest("hello");
+      integrationTest("start");
+      integrationTest("stop");
+      integrationTest("convert");
+      integrationTest("/help");
+      integrationTest("/clear");
+      integrationTest("/cancel");
+      integrationTest("14$ to eur");
+      integrationTest("sell 16 usd to eur");
+      integrationTest("107 dollars to yen");
+      integrationTest("77,4 pln from byn");
+      integrationTest("10 USD is PLN");
+      integrationTest("Please, convert 7 uah to rub");
+      integrationTest("How are you?");
+      integrationTest("-7,5 xxx to rur");
+      integrationTest("repeat last");
 
       //shows, that user sent non-text message
-      sendAndCheckWSAndPageContent(BotService.UNIQUE);
+      integrationTest(BotService.UNIQUE);
    }
 
    /**
@@ -211,7 +210,7 @@ public class WebSocketTest {
     * @param expectedMessage message received from user
     * @throws Exception if an error occurs
     */
-   private void sendAndCheckWSAndPageContent(String expectedMessage) throws Exception {
+   private void integrationTest(String expectedMessage) throws Exception {
       botService.onUpdateReceived(expectedMessage, user);
 
       List<Dialog> dialogs = dialogDao.getAll();
@@ -251,7 +250,6 @@ public class WebSocketTest {
     */
    private String getContentByMapping(String mapping) throws Exception {
       return mockMvc.perform(get(mapping))
-              .andDo(print())
               .andExpect(status().isOk())
               .andReturn()
               .getResponse()

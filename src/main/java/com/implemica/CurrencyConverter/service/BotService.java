@@ -2,7 +2,7 @@ package com.implemica.CurrencyConverter.service;
 
 
 import com.implemica.CurrencyConverter.dao.DialogDao;
-import com.implemica.CurrencyConverter.model.Converter;
+import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.validator.BotValidator;
@@ -226,9 +226,9 @@ public class BotService {
          Currency usersCurrency = Currency.getInstance(firstCurrency);
          count++;
          Currency desiredCurrency = Currency.getInstance(secondCurrency);
-         Converter converter = new Converter(usersCurrency, desiredCurrency, parseNumber(value));
+         UsersRequest usersRequest = new UsersRequest(usersCurrency, desiredCurrency, parseNumber(value));
 
-         Float convertedValue = converterService.convert(converter);
+         Float convertedValue = converterService.convert(usersRequest);
          message = value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
       } catch (CurrencyConverterException e) {
          message = e.getMessage() + CONVERT_MESSAGE;
