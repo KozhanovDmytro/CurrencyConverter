@@ -37,7 +37,7 @@ public class ConverterServiceTest {
    private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
 
    /** Array of available currencies that can be converted between themselves by {@link ConverterService}. */
-   private static String[] existingCurrency = new String[] {"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD",
+   private static String[] existingCurrency = new String[] {"UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "BRL",
            "RUB", "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD",
            "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
            "GTQ", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO", "AOA", "XAF",
@@ -47,11 +47,11 @@ public class ConverterServiceTest {
            "TZS", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS", "NGN", "SBD", "LKR",
            "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC", "SGD", "PYG", "JOD", "AFN",
            "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "UYU",
-           "MZN", "BRL"};
+           "MZN"};
 
    private Float ZERO = 0.0f;
 
-   private ThreadPoolExecutor executor = new ThreadPoolExecutor(145, 200, 2000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue(145));
+   private ThreadPoolExecutor executor = new ThreadPoolExecutor(145, 21025, 2000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue(145));
 
    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -562,12 +562,23 @@ public class ConverterServiceTest {
     *
     */
    @Test
-   @Disabled("this test takes 2 hours 25 min. ")
-   void checkConversionsWithAllPossibleCurrencies() {
-      for (int i = 0; i < existingCurrency.length; i++) {
-         for (int j = i; j < existingCurrency.length; j++) {
-            checkConvert(existingCurrency[i], existingCurrency[j]);
-         }
+   void checkConversionsWithAllPossibleCurrencies() throws InterruptedException {
+      for (String curr1: existingCurrency) {
+         executor.execute(() -> checkOneCurrencyWithAll(curr1));
+      }
+
+      shutDownExecutor(300);
+   }
+
+   private void checkOneCurrencyWithAll(String curr1) {
+      for (String curr2: existingCurrency) {
+         try {
+            assertNotNull(convert(curr1, curr2, 1.0f));
+         } catch (CurrencyConverterException e) {
+            throw new RuntimeException(e);
+         } catch (UnknownHostException e) {
+            e.printStackTrace();
+         };
       }
    }
 
@@ -594,10 +605,7 @@ public class ConverterServiceTest {
               Currency.getInstance(desiredCurrency),
               usersValue);
 
-      Float value = converterService.convert(usersRequest);
-
-      logger.info("converted");
-      return value;
+      return converterService.convert(usersRequest);
    }
 
 
