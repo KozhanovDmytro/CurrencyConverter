@@ -65,6 +65,7 @@ public class Dialog implements Serializable {
     * @return array with information about date, User, user's request to bot and bot's response to user
     */
    public String[] toCsv() {
+      botsResponse = botsResponse.replaceAll("\n","");
       return new String[]{df.format(date), Integer.toString(user.getUserId()), user.getUserFirstName(), user.getUserLastName()
               , user.getUserName(), usersRequest, botsResponse};
    }
