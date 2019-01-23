@@ -1,6 +1,7 @@
 package com.implemica.CurrencyConverter.controller;
 
 import com.implemica.CurrencyConverter.model.User;
+import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.implemica.CurrencyConverter.service.BotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
  * @author Daria S.
  * @version 11.01.2019 17:48
  * @see BotService
- * @see com.implemica.CurrencyConverter.model.Converter
+ * @see UsersRequest
  */
 @Component
 public class BotController extends TelegramLongPollingBot {

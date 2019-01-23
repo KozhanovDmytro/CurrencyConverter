@@ -14,15 +14,15 @@ import java.util.Currency;
  */
 @Getter
 @AllArgsConstructor
-public class Converter {
+public class UsersRequest {
 
    /** User's currency which will be converted. */
-   private Currency usersCurrency;
+   private Currency currencyFrom;
 
    /** Desired currency in which the conversion will be made. */
-   private Currency desiredCurrency;
+   private Currency currencyTo;
 
-   /** Amount of {@link #usersCurrency} */
+   /** Amount of {@link #currencyFrom} */
    private float value;
 
    /**
@@ -32,8 +32,8 @@ public class Converter {
     */
    @Override
    public String toString() {
-      return usersCurrency.getCurrencyCode() + " -> " +
-              desiredCurrency.getCurrencyCode() + " value: " +
+      return currencyFrom.getCurrencyCode() + " -> " +
+              currencyTo.getCurrencyCode() + " value: " +
               value;
    }
 }

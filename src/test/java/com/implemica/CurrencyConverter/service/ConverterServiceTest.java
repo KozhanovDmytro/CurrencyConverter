@@ -1,15 +1,20 @@
 package com.implemica.CurrencyConverter.service;
 
-import com.implemica.CurrencyConverter.model.Converter;
+import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Currency;
 import java.util.Random;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Daria S.
  * @see ConverterService
  */
-public class ConverterTest {
+public class ConverterServiceTest {
 
    /** Service, which uses for conversion. */
    private static ConverterService converterService;
@@ -32,17 +37,23 @@ public class ConverterTest {
    private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
 
    /** Array of available currencies that can be converted between themselves by {@link ConverterService}. */
-   private static String[] existingCurrency = new String[]{"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "RUB",
-           "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD", "CDF",
-           "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
-           "GTQ", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO",
-           "AOA", "XAF", "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP",
-           "SDG", "MUR", "VND", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "LRD",
-           "JPY", "NAD", "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "IRR", "GYD", "TWD", "ZMW", "XOF",
-           "MWK", "KMF", "KRW", "TZS", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS",
-           "NGN", "SBD", "LKR", "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC",
-           "SGD", "PYG", "JOD", "AFN", "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD",
-           "UZS", "EUR", "AED", "UYU", "MZN", "BRL"};
+   private static String[] existingCurrency = new String[] {"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD",
+           "RUB", "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD",
+           "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
+           "GTQ", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO", "AOA", "XAF",
+           "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP", "SDG", "MUR",
+           "VND", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "LRD", "JPY", "NAD",
+           "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "IRR", "GYD", "TWD", "ZMW", "XOF", "MWK", "KMF", "KRW",
+           "TZS", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS", "NGN", "SBD", "LKR",
+           "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC", "SGD", "PYG", "JOD", "AFN",
+           "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "UYU",
+           "MZN", "BRL"};
+
+   private Float ZERO = 0.0f;
+
+   private ThreadPoolExecutor executor = new ThreadPoolExecutor(145, 200, 2000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue(145));
+
+   private Logger logger = LoggerFactory.getLogger(this.getClass());
 
    /**
     * Initialisation of ConverterService
@@ -55,11 +66,9 @@ public class ConverterTest {
 
    /**
     * Function test popular currencies in Ukraine.
-    *
-    * @throws CurrencyConverterException if currency does not support.
     */
    @Test
-   void convertPopularCurrencies() throws CurrencyConverterException {
+   void convertPopularCurrencies() throws InterruptedException {
       checkConvert("UAH", "RUB");
 
       checkConvert("UAH", "UAH");
@@ -80,15 +89,15 @@ public class ConverterTest {
       checkConvert("USD", "UAH");
       checkConvert("USD", "EUR");
       checkConvert("USD", "USD");
+
+      shutDownExecutor(1);
    }
 
    /**
     * Test currency which can convert to USD. This list was taken by google.com
-    *
-    * @throws CurrencyConverterException if currency does not support.
     */
    @Test
-   void checkCurrencyTransferToUSD() throws CurrencyConverterException {
+   void checkCurrencyTransferToUSD() throws InterruptedException {
       checkConvert("PAB", "USD");
       checkConvert("SEK", "USD");
       checkConvert("XCD", "USD");
@@ -237,15 +246,14 @@ public class ConverterTest {
       checkConvert("TZS", "USD");
       checkConvert("IRR", "USD");
 
+      shutDownExecutor(30);
    }
 
    /**
     * Test currency which can convert from USD. This list was taken by google.com
-    *
-    * @throws CurrencyConverterException if currency does not support.
     */
    @Test
-   void checkCurrencyTransferFromUSD() throws CurrencyConverterException {
+   void checkCurrencyTransferFromUSD() throws InterruptedException {
       checkConvert("USD", "PAB");
       checkConvert("USD", "SEK");
       checkConvert("USD", "XCD");
@@ -393,15 +401,16 @@ public class ConverterTest {
       checkConvert("USD", "CHF");
       checkConvert("USD", "TZS");
       checkConvert("USD", "IRR");
+
+      shutDownExecutor(30);
    }
 
    /**
     * Test currency which can convert to UAH and doesn't contain in {@link #existingCurrency}.
     *
-    * @throws CurrencyConverterException if currency does not support.
     */
    @Test
-   void checkCurrencyTransferToUAH() throws CurrencyConverterException {
+   void checkCurrencyTransferToUAH() {
       checkConvert("MGA", "UAH");
       checkConvert("RSD", "UAH");
    }
@@ -409,10 +418,9 @@ public class ConverterTest {
    /**
     * Test currency which can convert from UAH and doesn't contain in {@link #existingCurrency}.
     *
-    * @throws CurrencyConverterException if currency does not support.
     */
    @Test
-   void checkCurrencyTransferFromUAH() throws CurrencyConverterException {
+   void checkCurrencyTransferFromUAH() {
       checkConvert("UAH", "MGA");
       checkConvert("UAH", "RSD");
    }
@@ -421,7 +429,7 @@ public class ConverterTest {
     * Tests currencies, which cannot be converted to USD.
     */
    @Test
-   void checkUnsupportedCurrency() {
+   void checkUnsupportedCurrency() throws InterruptedException {
       checkNonConvertibility("GWP", "USD");
       checkNonConvertibility("SKK", "USD");
       checkNonConvertibility("SIT", "USD");
@@ -489,28 +497,73 @@ public class ConverterTest {
       checkNonConvertibility("SHP", "USD");
       checkNonConvertibility("FKP", "USD");
       checkNonConvertibility("LTL", "USD");
+
+      shutDownExecutor(30);
+   }
+
+   @Test
+   void checkValueFromApis() throws CurrencyConverterException, IOException {
+      Currency eur = Currency.getInstance("EUR");
+      Currency usd = Currency.getInstance("USD");
+      float value = 1.0f;
+
+      UsersRequest usersRequest = new UsersRequest(eur, usd, value);
+
+      Float resultByBankUa = converterService.convertByBankUaCom(usersRequest);
+      Float resultByJavaMoney = converterService.convertByJavaMoney(usersRequest);
+      Float resultByFloatRatesCom = converterService.convertByFloatRatesCom(usersRequest);
+      Float resultByFreeCurrencyConverterApiCom = converterService.convertByFreeCurrencyConverterApiCom(usersRequest);
+
+
+      checkRange(resultByBankUa, 1.1f, 1.2f);
+      checkRange(resultByJavaMoney, 1.1f, 1.2f);
+      checkRange(resultByFloatRatesCom, 1.1f, 1.2f);
+      checkRange(resultByFreeCurrencyConverterApiCom, 1.1f, 1.2f);
    }
 
    /**
     * Tests, that if currency converts in itself, then amount of it doesn't change
-    *
-    * @throws CurrencyConverterException if currency does not support
     */
    @Test
-   void checkIdenticalCurrency() throws CurrencyConverterException {
-      for (Currency currency : Currency.getAvailableCurrencies()) {
-         checkConvertForIdenticalCurrencies(currency.getCurrencyCode(), new Random().nextFloat());
+   void checkIdenticalCurrency() throws InterruptedException {
+      for (String currency : existingCurrency) {
+         executor.execute(() -> checkConvertForIdenticalCurrencies(currency, new Random().nextFloat()));
+      }
+
+      shutDownExecutor(30);
+   }
+
+   @Test
+   void checkForZero() throws InterruptedException {
+      for (String currency : existingCurrency) {
+         executor.execute(() -> checkForZero(currency));
+      }
+
+      shutDownExecutor(30);
+   }
+
+   private void shutDownExecutor(long maxSeconds) throws InterruptedException {
+      executor.awaitTermination(maxSeconds, TimeUnit.SECONDS);
+      executor.shutdown();
+   }
+
+   private void checkForZero(String currency) {
+      try {
+         assertEquals(ZERO, convert(currency, "USD", 0.0f));
+      } catch (UnknownHostException e) {
+         e.printStackTrace();
+      } catch (CurrencyConverterException e) {
+         throw new RuntimeException(e);
       }
    }
 
    /**
     * Tests conversion all currencies from {@link #existingCurrency} between themselves
     *
-    * @throws CurrencyConverterException if currency does not support
     */
    @Test
    @Disabled("this test takes 2 hours 25 min. ")
-   void checkConversionsWithAllPossibleCurrencies() throws CurrencyConverterException {
+   void checkConversionsWithAllPossibleCurrencies() {
       for (int i = 0; i < existingCurrency.length; i++) {
          for (int j = i; j < existingCurrency.length; j++) {
             checkConvert(existingCurrency[i], existingCurrency[j]);
@@ -523,19 +576,30 @@ public class ConverterTest {
     *
     * @param userCurrency    currency  to convert from
     * @param desiredCurrency currency  to convert to
-    * @throws CurrencyConverterException if currency does not support
     */
-   private void checkConvert(String userCurrency, String desiredCurrency) throws CurrencyConverterException {
-      Converter converter = new Converter(Currency.getInstance(userCurrency),
-              Currency.getInstance(desiredCurrency),
-              1f);
-      try {
-         Float value = converterService.convert(converter);
-         assertNotNull(value);
-      } catch (IOException e) {
-         checkConvert(userCurrency, desiredCurrency);
-      }
+   private void checkConvert(String userCurrency, String desiredCurrency) {
+      executor.execute(() -> {
+         try {
+            assertNotNull(convert(userCurrency, desiredCurrency, 1.0f));
+         } catch (CurrencyConverterException e) {
+            throw new RuntimeException(e);
+         } catch (UnknownHostException e) {
+            e.printStackTrace();
+         }
+      });
    }
+
+   private Float convert(String userCurrency, String desiredCurrency, float usersValue) throws CurrencyConverterException, UnknownHostException {
+      UsersRequest usersRequest = new UsersRequest(Currency.getInstance(userCurrency),
+              Currency.getInstance(desiredCurrency),
+              usersValue);
+
+      Float value = converterService.convert(usersRequest);
+
+      logger.info("converted");
+      return value;
+   }
+
 
    /**
     * Asserts that one or both currencies are not supported
@@ -544,11 +608,20 @@ public class ConverterTest {
     * @param desiredCurrency currency  to convert to
     */
    private void checkNonConvertibility(String userCurrency, String desiredCurrency) {
-      try {
-         checkConvert(userCurrency, desiredCurrency);
-      } catch (CurrencyConverterException e) {
-         assertTrue(isRightMessage(e));
-      }
+      executor.execute(() -> {
+         try {
+            convert(userCurrency, desiredCurrency, 1.0f);
+         } catch (CurrencyConverterException e) {
+            assertTrue(isRightMessage(e));
+         } catch (UnknownHostException e) {
+            e.printStackTrace();
+         }
+      });
+   }
+
+   private void checkRange(Float result, Float from, Float to) {
+      assertTrue(from.compareTo(result) <= 0);
+      assertTrue(to.compareTo(result) >= 0);
    }
 
    /**
@@ -561,15 +634,17 @@ public class ConverterTest {
       return e.getMessage().contains(MESSAGE_UNSUPPORTED_CURRENCY) || e.getMessage().contains(API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY);
    }
 
-   private void checkConvertForIdenticalCurrencies(String userCurrency, Float expectedValue) throws CurrencyConverterException {
-      Converter converter = new Converter(Currency.getInstance(userCurrency),
+   private void checkConvertForIdenticalCurrencies(String userCurrency, Float expectedValue) {
+      UsersRequest usersRequest = new UsersRequest(Currency.getInstance(userCurrency),
               Currency.getInstance(userCurrency),
               expectedValue);
 
       try {
-         assertEquals(expectedValue, converterService.convert(converter));
+         assertEquals(expectedValue, converterService.convert(usersRequest));
       } catch (UnknownHostException e) {
          checkConvertForIdenticalCurrencies(userCurrency, expectedValue);
+      } catch (CurrencyConverterException e) {
+         throw new RuntimeException(e);
       }
    }
 }
