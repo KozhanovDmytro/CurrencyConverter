@@ -17,10 +17,7 @@ import javax.money.MonetaryAmount;
 import javax.money.convert.CurrencyConversion;
 import javax.money.convert.MonetaryConversions;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,7 +61,7 @@ public final class ConverterService {
 
       options.add(this::convertByFreeCurrencyConverterApiCom);    // has a limit - 100  requests per hour
       options.add(this::convertByCurrencyLayerCom);               // has a limit - 1000 requests per month
-      options.add(this::convertByJavaMoney);                      // unlimited, slow, does not work with multithreading
+//      options.add(this::convertByJavaMoney);                      // unlimited, slow, does not work with multithreading
    }
 
    /**
@@ -168,7 +165,10 @@ public final class ConverterService {
    private String getExceptionMessage(ArrayList<Exception> exceptions) {
       String message = MESSAGE_UNSUPPORTED_CURRENCY;
       for (Exception e : exceptions) {
-         if(isValidMessage(e)) {
+         if(e instanceof ConnectException) {
+            message = MESSAGE_PROBLEM_WITH_SERVER;
+            break;
+         } else if(isValidMessage(e)) {
             message = e.getMessage();
          }
       }
@@ -349,6 +349,7 @@ public final class ConverterService {
    private static final String API_NAME_FLOATRATES_COM = "floatrates.com";
 
    private static final String MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION = "Problem with internet connection.";
+   private static final String MESSAGE_PROBLEM_WITH_SERVER = "Server did not respond. Try again.";
    private static final String MESSAGE_EXCEPTION_WAS_THROWN = "exception was thrown: ";
    private static final String MESSAGE_UNSUPPORTED_CURRENCY = "One or two currencies not supported.";
 
