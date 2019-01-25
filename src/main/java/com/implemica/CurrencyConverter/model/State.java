@@ -44,7 +44,7 @@ public class State {
    /**
     * Stores all statesOfUsers, which use bot and their last command
     */
-   public static Map<User, State> statesOfUsers = new HashMap<>();
+   public static Map<Integer, State> statesOfUsers = new HashMap<>();
 
    /**
     * Stores user connection with his chat

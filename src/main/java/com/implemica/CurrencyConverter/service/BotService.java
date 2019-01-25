@@ -135,7 +135,7 @@ public class BotService {
    /**
     * Stores Users and their commands
     */
-   private Map<User, State> states = State.statesOfUsers;
+   private Map<Integer, State> states = State.statesOfUsers;
 
    /**
     * Converter for currencies
@@ -168,8 +168,8 @@ public class BotService {
    public String processCommand(String command, User user) {
       State state;
 
-      if (states.containsKey(user)) {
-         state = states.get(user);
+      if (states.containsKey(user.getUserId())) {
+         state = states.get(user.getUserId());
       } else {
          state = new State("", "", 0);
       }
@@ -243,7 +243,7 @@ public class BotService {
       }
 
       state = new State(firstCurrency, secondCurrency, convertStep);
-      states.put(user, state);
+      states.put(user.getUserId(), state);
 
       Date dateNow = new Date();
 

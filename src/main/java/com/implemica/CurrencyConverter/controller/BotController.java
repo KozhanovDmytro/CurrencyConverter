@@ -125,7 +125,6 @@ public class BotController extends TelegramLongPollingBot {
       if (isBot) {
          user = chooseUser(user);
       }
-      listOfChats.put(user, chatId);
 
       String response = bot.processCommand(command, user);
       sendMessage(message, response);
@@ -134,9 +133,16 @@ public class BotController extends TelegramLongPollingBot {
          SendMessage s = new SendMessage().setChatId(chatId).setText("Popular currencies: ");
          createKeyboard(s);
       }
-
+      listOfChats.put(user, chatId);
+      
    }
 
+   /**
+    * Returns command to processing
+    *
+    * @param message incoming message
+    * @return String command
+    */
    private String getCommand(Message message) {
       String command;
       chatId = message.getChatId();

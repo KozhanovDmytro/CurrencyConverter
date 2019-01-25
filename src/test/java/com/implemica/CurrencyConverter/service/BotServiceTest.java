@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Import;
 
 import java.text.DecimalFormat;
 import java.util.Random;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -110,15 +109,9 @@ public class BotServiceTest {
     * Array of available currencies that can be converted between themselves by {@link ConverterService}.
     */
    private static String[] existingCurrency = new String[]{"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD",
-           "RUB", "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD",
            "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
            "GTQ", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO", "AOA", "XAF",
            "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP", "SDG", "MUR",
-           "VND", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "LRD", "JPY", "NAD",
-           "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "IRR", "GYD", "TWD", "ZMW", "XOF", "MWK", "KMF", "KRW",
-           "TZS", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS", "NGN", "SBD", "LKR",
-           "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC", "SGD", "PYG", "JOD", "AFN",
-           "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "UYU",
            "MZN", "BRL"};
 
    /**
@@ -955,22 +948,9 @@ public class BotServiceTest {
     */
    private void withUnsupportedCurrency(String firstCurrency, String secondCurrency,
                                         String amount, boolean firstIsCorrect) {
-      rightScriptWithIncorrectCurrency(firstCurrency, secondCurrency, amount,
-              firstIsCorrect);
-   }
-
-   /**
-    * Checks, that bot's reaction in conversion for incorrect currencies is equal to expected
-    *
-    * @param firstCurrency  the currency to convert from
-    * @param secondCurrency the currency to convert to
-    * @param amount         amount of first currency
-    * @param firstIsCorrect true, if first currency is right
-    */
-   private void rightScriptWithIncorrectCurrency(String firstCurrency, String secondCurrency,
-                                                 String amount, boolean firstIsCorrect) {
       String startOfMessage = "Currency not supported: ";
       String wrongCurrency;
+
       if (firstIsCorrect) {
          wrongCurrency = secondCurrency;
       } else {
@@ -980,7 +960,6 @@ public class BotServiceTest {
       String message = startOfMessage + wrongCurrency.trim().toUpperCase() + CONVERT_MESSAGE;
 
       rightScriptWithWrongValue(firstCurrency, secondCurrency, amount, message);
-
    }
 
    /**
@@ -993,6 +972,7 @@ public class BotServiceTest {
    private void withWrongAmount(String firstCurrency, String secondCurrency, String amount) {
       String message = SORRY_BUT + amount + IS_NOT_A_VALID_NUMBER +
               THIRD_CONVERT_MESSAGE + firstCurrency.trim().toUpperCase() + " to " + secondCurrency.trim().toUpperCase();
+
       rightScriptWithWrongValue(firstCurrency, secondCurrency, amount, message);
    }
 
@@ -1029,7 +1009,8 @@ public class BotServiceTest {
    private void script(String firstCurrency, String secondCurrency) {
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency.trim().toUpperCase() + SECOND_CONVERT_MESSAGE_2);
-      assertCommand(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrency.trim().toUpperCase() + " to " + secondCurrency.trim().toUpperCase());
+      assertCommand(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrency.trim().toUpperCase() + " to "
+              + secondCurrency.trim().toUpperCase());
    }
 
    /**
@@ -1050,14 +1031,19 @@ public class BotServiceTest {
     */
    private void oneLineRequestWithWrongCurrency(String request, boolean firstIsCorrect, boolean isUnsupported) {
       String[] words = request.split("\\s+");
+
       String wrongCurrency = words[1];
+
       if (firstIsCorrect) {
          wrongCurrency = words[3];
       }
+
       String message = "Currency not supported: " + wrongCurrency.toUpperCase() + CONVERT_MESSAGE;
+
       if (!isUnsupported) {
          message = SORRY_BUT + wrongCurrency.toUpperCase() + IS_NOT_A_VALID_CURRENCY;
       }
+
       assertCommand(request, message);
    }
 
@@ -1072,9 +1058,6 @@ public class BotServiceTest {
    private void incorrectOneLineRequestAndCommand(String request, String response, String command, String commandResponse) {
       assertCommand(request, response);
       assertCommand(command, commandResponse);
-      if (command.equals(CONVERT)) {
-         testBotService.processCommand(STOP, testUser);
-      }
    }
 
    /**
@@ -1089,9 +1072,7 @@ public class BotServiceTest {
    private void commandAndIncorrectOneLineRequest(String command, String response, String request, String requestResponse) {
       assertCommand(command, response);
       assertCommand(request, requestResponse);
-      if (command.equals(CONVERT)) {
-         testBotService.processCommand(STOP, testUser);
-      }
+
    }
 
    /**
@@ -1104,11 +1085,14 @@ public class BotServiceTest {
     */
    private void commandAndOneLineRequest(String command, String response, String request) {
       assertCommand(command, response);
+
       if (!command.equals(CONVERT)) {
          oneLineRequest(request);
+
       } else {
          assertCommand(request, SECOND_CONVERT_MESSAGE_1 + request.replaceAll(" ", "").toUpperCase()
                  + SECOND_CONVERT_MESSAGE_2);
+
          testBotService.processCommand(STOP, testUser);
       }
    }
@@ -1123,9 +1107,6 @@ public class BotServiceTest {
    private void oneLineRequestAndCommand(String request, String command, String response) {
       oneLineRequest(request);
       assertCommand(command, response);
-      if (command.equals(CONVERT)) {
-         testBotService.processCommand(STOP, testUser);
-      }
    }
 
    /**
@@ -1146,12 +1127,16 @@ public class BotServiceTest {
     */
    private void oneLineRequest(String request) {
       String botsResponse = testBotService.processCommand(request, testUser);
+
       String[] words = request.split("\\s+");
       String start = words[0] + " " + words[1].toUpperCase() + " is ";
+
       assertTrue(botsResponse.startsWith(start));
       assertTrue(botsResponse.endsWith(words[3].toUpperCase()));
+
       String value = botsResponse.replace(start, "").replace(" " + words[3].toUpperCase(), "");
       Matcher matcher = isPositiveNumber.matcher(value);
+
       assertTrue(matcher.matches());
 
    }
@@ -1167,16 +1152,6 @@ public class BotServiceTest {
    }
 
    /**
-    * Checks, that bot's response for random user's request is correct
-    *
-    * @param usersMessage user's request to bot
-    * @param botsResponse expected bot's response to user
-    */
-   private void assertCommandFromRandomUser(String usersMessage, String botsResponse){
-      User user = new User(RANDOM.nextInt(1000), UUID.randomUUID().toString());
-      assertEquals(botsResponse, testBotService.processCommand(usersMessage, user));
-   }
-   /**
     * Checks, that on last step bot's response contains positive value
     *
     * @param firstCurrency  the currency to convert from
@@ -1186,12 +1161,17 @@ public class BotServiceTest {
    private void checkResult(String amount, String firstCurrency, String secondCurrency) {
       firstCurrency = firstCurrency.trim().toUpperCase();
       secondCurrency = secondCurrency.trim().toUpperCase();
+
       String start = amount + " " + firstCurrency + " is ";
+
       String botsResponse = testBotService.processCommand(amount, testUser);
+
       assertTrue(botsResponse.startsWith(start));
       assertTrue(botsResponse.endsWith(secondCurrency));
+
       String value = botsResponse.replace(start, "").replace(" " + secondCurrency, "");
       Matcher matcher = isPositiveNumber.matcher(value);
+
       assertTrue(matcher.matches());
    }
 
@@ -1214,7 +1194,9 @@ public class BotServiceTest {
     */
    private void wrongSecondCurrency(String firstCurrency, String secondCurrency) {
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+
       String message = SECOND_CONVERT_MESSAGE_1 + firstCurrency.trim().toUpperCase() + SECOND_CONVERT_MESSAGE_2;
+
       assertCommand(firstCurrency, message);
       assertCommand(secondCurrency, SORRY_BUT + secondCurrency + IS_NOT_A_VALID_CURRENCY + message);
    }
@@ -1229,6 +1211,7 @@ public class BotServiceTest {
       Float number = RANDOM.nextFloat() * 1000;
       String amount = Float.toString(number);
       String result = DECIMAL_FORMATTER.format(number);
+
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       assertCommand(currency, SECOND_CONVERT_MESSAGE_1 + currency + SECOND_CONVERT_MESSAGE_2);
       assertCommand(currency, THIRD_CONVERT_MESSAGE + currency + " to " + currency);
@@ -1243,6 +1226,7 @@ public class BotServiceTest {
     */
    private void zeroAmount(String firstCurrency, String secondCurrency) {
       String zero = "0";
+
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2);
       assertCommand(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency);
@@ -1257,10 +1241,13 @@ public class BotServiceTest {
    private void oneLineRequestWithIdenticalCurrency(String currency) {
       String[] words = {" in ", " to "};
       int n = RANDOM.nextInt(2);
+
       Float number = RANDOM.nextFloat() * 1000;
       String amount = Float.toString(number);
       String result = DECIMAL_FORMATTER.format(number);
+
       String request = amount + " " + currency + words[n] + currency;
+
       assertCommand(request, amount + " " + currency + " is " + result + " " + currency);
    }
 
@@ -1273,8 +1260,11 @@ public class BotServiceTest {
    private void zeroAmountOneLine(String firstCurrency, String secondCurrency) {
       String[] words = {" in ", " to "};
       int n = RANDOM.nextInt(2);
+
       String zero = "0";
+
       String request = zero + " " + firstCurrency + words[n] + secondCurrency;
+
       assertCommand(request, zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
    }
 }
