@@ -71,10 +71,6 @@ public class BotController extends TelegramLongPollingBot {
     */
    private long chatId;
 
-   public long getChatId() {
-      return chatId;
-   }
-
    /**
     * Stores users and id chats, where they communicate with bot
     */
