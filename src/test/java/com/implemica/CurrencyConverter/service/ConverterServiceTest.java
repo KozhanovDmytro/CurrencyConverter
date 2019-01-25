@@ -51,7 +51,8 @@ public class ConverterServiceTest {
 
    private Float ZERO = 0.0f;
 
-   private ThreadPoolExecutor executor = new ThreadPoolExecutor(145, 200, 2000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue(145));
+   private ThreadPoolExecutor executor = new ThreadPoolExecutor(145, 200, 2000,
+           TimeUnit.MILLISECONDS, new ArrayBlockingQueue(145));
 
    private Logger logger = LoggerFactory.getLogger(this.getClass());
 

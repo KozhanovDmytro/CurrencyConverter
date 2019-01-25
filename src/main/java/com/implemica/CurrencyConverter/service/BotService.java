@@ -36,8 +36,18 @@ public class BotService {
     * Unique string, which uses for messages, which has non text content.
     */
    public static final String UNIQUE = UUID.randomUUID().toString();
+
+   /**
+    * Start of message for users mistakes
+    */
    private static final String SORRY_BUT = "❗Sorry, but \"";
+   /**
+    * End of message about incorrect currency
+    */
    private static final String IS_NOT_A_VALID_CURRENCY = "\" is not a valid currency.\n\n";
+   /**
+    * End of message about incorrect amount
+    */
    private static final String IS_NOT_A_VALID_NUMBER = "\" is not a valid number.\n\n";
 
    /**
@@ -53,56 +63,56 @@ public class BotService {
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   public static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
+   private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
            " 1️⃣ with using /convert command\n\n 2️⃣ type me a request by single line " +
            "(Example: 10 USD in UAH)";
    /**
     * Greeting message to user
     */
-   public static final String START_MESSAGE = "Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
+   private static final String START_MESSAGE = "Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
    /**
     * Stop message to the user
     */
-   public static final String STOP_MESSAGE = "🆗." + CONVERT_MESSAGE;
+   private static final String STOP_MESSAGE = "🆗." + CONVERT_MESSAGE;
 
    /**
     * Bot's command to start conversation
     */
-   public static final String START = "/start";
+   private static final String START = "/start";
    /**
     * Bot's command to start convert currencies
     */
-   public static final String CONVERT = "/convert";
+   private static final String CONVERT = "/convert";
 
    /**
     * Bot's command to stop conversation
     */
-   public static final String STOP = "/stop";
+   private static final String STOP = "/stop";
    /**
     * Bot's response for /convert command
     */
-   public static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
+   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
    /**
     * Start of bot's response after entering first currency
     */
-   public static final String SECOND_CONVERT_MESSAGE_1 = "What currency do you want to convert from ";
+   private static final String SECOND_CONVERT_MESSAGE_1 = "What currency do you want to convert from ";
    /**
     * End of bot's response after entering first currency
     */
-   public static final String SECOND_CONVERT_MESSAGE_2 = " to? (example: EUR)";
+   private static final String SECOND_CONVERT_MESSAGE_2 = " to? (example: EUR)";
    /**
     * Bot's response after entering second currency
     */
-   public static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
+   private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
    /**
     * Bot's response for incorrect request from user
     */
-   public static final String INCORRECT_REQUEST_MESSAGE = "❗Sorry, but your request is incorrect." + CONVERT_MESSAGE;
+   private static final String INCORRECT_REQUEST_MESSAGE = "❗Sorry, but your request is incorrect." + CONVERT_MESSAGE;
 
    /**
     * Bot's response for non-text message
     */
-   public static final String INCORRECT_CONTENT_MESSAGE = "❗Sorry, but this message contains " +
+   private static final String INCORRECT_CONTENT_MESSAGE = "❗Sorry, but this message contains " +
            "incorrect content. Please, don't send me messages, which I can't handle." + CONVERT_MESSAGE;
    /**
     * Message for log, that user sent incorrect content
@@ -116,10 +126,6 @@ public class BotService {
     * The currency to convert to
     */
    private String secondCurrency = "";
-   /**
-    * Step of conversion
-    */
-   private int convertStep = 0;
 
    /**
     * Logger for this class
@@ -168,7 +174,10 @@ public class BotService {
       }
       firstCurrency = state.getFirstCurrency();
       secondCurrency = state.getSecondCurrency();
-      convertStep = state.getConvertStep();
+      /**
+       * Step of conversion
+       */
+      int convertStep = state.getConvertStep();
 
       String message;
       if (command.equals(UNIQUE)) {
