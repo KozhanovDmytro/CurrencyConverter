@@ -1,6 +1,7 @@
 package com.implemica.CurrencyConverter.model;
 
 import lombok.Data;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,26 +25,29 @@ public class State {
    /**
     * Stores step of conversion
     */
-   private int step;
+   private int convertStep;
 
    /**
     * Creates a state of dialog
     *
     * @param firstCurrency  state of {@link com.implemica.CurrencyConverter.service.BotService#firstCurrency}
     * @param secondCurrency state of {@link com.implemica.CurrencyConverter.service.BotService#secondCurrency}
-    * @param step           state of {@link com.implemica.CurrencyConverter.service.BotService#convertStep}
+    * @param convertStep    state of {@link com.implemica.CurrencyConverter.service.BotService#convertStep}
     */
-   public State(String firstCurrency, String secondCurrency, int step) {
+   public State(String firstCurrency, String secondCurrency, int convertStep) {
       this.firstCurrency = firstCurrency;
       this.secondCurrency = secondCurrency;
-      this.step = step;
+      this.convertStep = convertStep;
    }
 
 
    /**
     * Stores all statesOfUsers, which use bot and their last command
     */
-   public static Map<User, State> statesOfUsers = new HashMap<>();
+   public static Map<Integer, State> statesOfUsers = new HashMap<>();
 
-
+   /**
+    * Stores user connection with his chat
+    */
+   public static Map<User, Long> listOfChats = new HashMap<>();
 }

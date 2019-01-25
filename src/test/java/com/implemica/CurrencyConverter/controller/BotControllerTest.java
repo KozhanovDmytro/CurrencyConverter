@@ -97,7 +97,7 @@ public class BotControllerTest {
     * A dummy implementation for Telegram User class
     */
    @Mock
-   private org.telegram.telegrambots.meta.api.objects.User botUser;
+   private org.telegram.telegrambots.meta.api.objects.User telegramUser;
 
 
    /**
@@ -127,7 +127,7 @@ public class BotControllerTest {
    /**
     * Tests, that if user has all information about himself and his message contains specified text, and if method
     * {@link BotController#onUpdateReceived(Update)} is called, then methods {@link Update#getMessage()} and
-    * {@link BotService#onUpdateReceived(String, User)} is called with specified parameters
+    * {@link BotService#processCommand(String, User)} is called with specified parameters
     */
    @Test
    void onUpdateReceivedTest1() {
@@ -144,7 +144,7 @@ public class BotControllerTest {
    /**
     * Tests, that if information about user doesn't contain his last name and his message contains specified text,
     * and if method {@link BotController#onUpdateReceived(Update)} is called, then methods {@link Update#getMessage()}
-    * and {@link BotService#onUpdateReceived(String, User)} is called with specified parameters
+    * and {@link BotService#processCommand(String, User)} is called with specified parameters
     */
    @Test
    void onUpdateReceivedTest2() {
@@ -160,7 +160,7 @@ public class BotControllerTest {
    /**
     * Tests, that if information about user doesn't contain his username name and his message contains specified text,
     * and if method {@link BotController#onUpdateReceived(Update)} is called, then methods {@link Update#getMessage()}
-    * and {@link BotService#onUpdateReceived(String, User)} is called with specified parameters
+    * and {@link BotService#processCommand(String, User)} is called with specified parameters
     */
    @Test
    void onUpdateReceivedTest3() {
@@ -176,7 +176,7 @@ public class BotControllerTest {
    /**
     * Tests, that if information about user doesn't contain his last name and username, and his message contains specified text,
     * and if method {@link BotController#onUpdateReceived(Update)} is called, then methods {@link Update#getMessage()}
-    * and {@link BotService#onUpdateReceived(String, User)} is called with specified parameters
+    * and {@link BotService#processCommand(String, User)} is called with specified parameters
     */
    @Test
    void onUpdateReceivedTest4() {
@@ -192,7 +192,7 @@ public class BotControllerTest {
    /**
     * Tests, that if user has all information about himself and his message doesn't contains text, and if method
     * {@link BotController#onUpdateReceived(Update)} is called, then methods {@link Update#getMessage()} and
-    * {@link BotService#onUpdateReceived(String, User)} is called with specified parameters
+    * {@link BotService#processCommand(String, User)} is called with specified parameters
     */
    @Test
    void onUpdateReceivedTest5() {
@@ -210,45 +210,46 @@ public class BotControllerTest {
     * @param hasText     true, if message has correct content (text), false - otherwise
     */
    private void messageBehavior(String messageText, boolean hasText) {
+      when(update.hasMessage()).thenReturn(true);
       when(update.getMessage()).thenReturn(message);
       when(message.hasText()).thenReturn(hasText);
       if (hasText) {
          when(message.getText()).thenReturn(messageText);
       }
-      when(message.getFrom()).thenReturn(botUser);
+      when(message.getFrom()).thenReturn(telegramUser);
    }
 
    /**
     * Defines the return value when Telegram User methods of the mocked object is been called
     *
-    * @param id       users's id
+    * @param id       statesOfUsers's id
     * @param name     user's name
     * @param lastName user's last name
     * @param userName user's username
     */
    private void createUser(int id, String name, String lastName, String userName) {
-      when(botUser.getId()).thenReturn(id);
-      when(botUser.getFirstName()).thenReturn(name);
-      when(botUser.getLastName()).thenReturn(lastName);
-      when(botUser.getUserName()).thenReturn(userName);
+      when(telegramUser.getId()).thenReturn(id);
+      when(telegramUser.getFirstName()).thenReturn(name);
+      when(telegramUser.getLastName()).thenReturn(lastName);
+      when(telegramUser.getUserName()).thenReturn(userName);
    }
 
    /**
-    * Creates User. Defines the return value when onUpdateReceived method of the mocked object botService is been called.
+    * Creates User. Defines the return value when processCommand method of the mocked object botService is been called.
     * Calls {@link BotController#onUpdateReceived(Update)} method and verifies, that methods {@link Update#getMessage()}
-    * and {@link BotService#onUpdateReceived(String, User)} were called with specified parameters.
+    * and {@link BotService#processCommand(String, User)} were called with specified parameters.
     *
     * @param messageText  message from User
     * @param responseText response to User
     */
    private void verifyController(String messageText, String responseText) {
       User user = controller.getInformationAboutUser(message);
-      doReturn(responseText).when(botService).onUpdateReceived(messageText, user);
+      doReturn(responseText).when(botService).processCommand(messageText, user);
 
       controller.onUpdateReceived(update);
 
       verify(update).getMessage();
-      verify(botService).onUpdateReceived(messageText, user);
+      verify(botService).processCommand(messageText, user);
    }
 
 }

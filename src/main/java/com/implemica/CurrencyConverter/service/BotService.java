@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Currency;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.implemica.CurrencyConverter.validator.BotValidator.formatNumber;
 import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber;
@@ -56,8 +53,8 @@ public class BotService {
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   public static final String CONVERT_MESSAGE = "You can make a new currency conversion:\n\n" +
-           " 1️⃣ with using /convert command\n\n 2️⃣ type me a request by single line" +
+   public static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
+           " 1️⃣ with using /convert command\n\n 2️⃣ type me a request by single line " +
            "(Example: 10 USD in UAH)";
    /**
     * Greeting message to user
@@ -132,7 +129,8 @@ public class BotService {
    /**
     * Stores Users and their commands
     */
-   private Map<User, State> states = State.statesOfUsers;
+   private Map<Integer, State> states = State.statesOfUsers;
+
    /**
     * Converter for currencies
     */
@@ -161,14 +159,16 @@ public class BotService {
     * @param user    user, which sent message
     * @return bot's response to user
     */
-   public String onUpdateReceived(String command, User user) {
+   public String processCommand(String command, User user) {
       State state;
-      if (states.containsKey(user)) {
-         state = states.get(user);
-         firstCurrency = state.getFirstCurrency();
-         secondCurrency = state.getSecondCurrency();
-         convertStep = state.getStep();
+      if (states.containsKey(user.getUserId())) {
+         state = states.get(user.getUserId());
+      } else {
+         state = new State("", "", 0);
       }
+      firstCurrency = state.getFirstCurrency();
+      secondCurrency = state.getSecondCurrency();
+      convertStep = state.getConvertStep();
 
       String message;
       if (command.equals(UNIQUE)) {
@@ -220,7 +220,7 @@ public class BotService {
       }
 
       state = new State(firstCurrency, secondCurrency, convertStep);
-      states.put(user, state);
+      states.put(user.getUserId(), state);
 
       Date dateNow = new Date();
 
@@ -289,7 +289,7 @@ public class BotService {
       } catch (CurrencyConverterException e) {
          message = e.getMessage() + CONVERT_MESSAGE;
       } catch (ParseException e) {
-         message = SORRY_BUT + value + "\" is not a valid number. Conversion is impossible. " + CONVERT_MESSAGE;
+         message = SORRY_BUT + value + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE;
       } catch (IOException e) {
          logger.error(e.getMessage() + " is not responding.");
          message = "Server is not responding." + CONVERT_MESSAGE;
