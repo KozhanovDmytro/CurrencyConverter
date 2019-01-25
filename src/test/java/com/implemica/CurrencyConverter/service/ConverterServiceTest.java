@@ -46,17 +46,15 @@ public class ConverterServiceTest {
            "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "UYU",
            "MZN"};
 
-   private static String[] unsupportedCurrency = new String[] {"GWP", "SKK", "SIT", "MZM", "IEP", "NLG", "ZWN", "GHC",
+   /** Array of unsupported currencies which cannot be converted.  */
+   private static String[] unsupportedCurrency = new String[]{"GWP", "SKK", "SIT", "MZM", "IEP", "NLG", "ZWN", "GHC",
            "MGF", "ESP", "ZWR", "EEK", "USN", "TRL", "XBD", "CYP", "LUF", "SRG", "XPT", "ADP", "TPE", "COU", "BEF",
            "AFA", "ROL", "DEM", "BOV", "ATS", "XUA", "CHE", "PTE", "VEB", "AYM", "ZWD", "USS", "CSD", "XTS", "BYB",
            "XFU", "XSU", "TMM", "AZM", "XFO", "SDD", "YUM", "XTS", "MTL", "FIM", "CHW", "XBA", "XXX", "UYI", "XBC",
-           "GRD", "RUR", "XBB", "BGL" };
+           "GRD", "RUR", "XBB", "BGL"};
 
-   private ThreadPoolExecutor executor = new ThreadPoolExecutor(145, 21025, 2000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue(145));
-
-   private final Float ZERO = 0.0f;
-   private final String USD = "USD";
-   private final String UAH = "UAH";
+   /** Executor needed for speed up some tests by multithreading. */
+   private ThreadPoolExecutor executor = new ThreadPoolExecutor(145, 21025, 2000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(145));
 
 
    /**
@@ -99,7 +97,7 @@ public class ConverterServiceTest {
          tasks.add(() -> checkConvert(curr, USD));
       }
 
-      invokeAll(tasks);
+      invokeAllTasks(tasks);
 
       shutDownExecutor(35);
    }
@@ -115,14 +113,13 @@ public class ConverterServiceTest {
          tasks.add(() -> checkConvert(USD, curr));
       }
 
-      invokeAll(tasks);
+      invokeAllTasks(tasks);
 
       shutDownExecutor(30);
    }
 
    /**
     * Test currency which can convert to UAH and doesn't contain in {@link #existingCurrency}.
-    *
     */
    @Test
    void checkCurrencyTransferToUAH() throws CurrencyConverterException, UnknownHostException {
@@ -132,7 +129,6 @@ public class ConverterServiceTest {
 
    /**
     * Test currency which can convert from UAH and doesn't contain in {@link #existingCurrency}.
-    *
     */
    @Test
    void checkCurrencyTransferFromUAH() throws CurrencyConverterException, UnknownHostException {
@@ -151,7 +147,7 @@ public class ConverterServiceTest {
          tasks.add(() -> checkNonConvertibility(curr, USD));
       }
 
-      invokeAll(tasks);
+      invokeAllTasks(tasks);
 
       shutDownExecutor(35);
    }
@@ -169,15 +165,17 @@ public class ConverterServiceTest {
       Float resultByCurrencyLayer = converterService.convertByCurrencyLayerCom(usersRequest);
       Float resultByFloatRatesCom = converterService.convertByFloatRatesCom(usersRequest);
       Float resultByFreeCurrencyConverterApiCom = converterService.convertByFreeCurrencyConverterApiCom(usersRequest);
+      Float resultByWesternUnion = converterService.convertByWesternUnion(usersRequest);
 
       Float from = 0.86f;
-      Float to= 0.89f;
+      Float to = 0.89f;
 
       checkRange(resultByBankUa, from, to);
       checkRange(resultByJavaMoney, from, to);
       checkRange(resultByCurrencyLayer, from, to);
       checkRange(resultByFloatRatesCom, from, to);
       checkRange(resultByFreeCurrencyConverterApiCom, from, to);
+      checkRange(resultByWesternUnion, from, to);
    }
 
    /**
@@ -191,7 +189,7 @@ public class ConverterServiceTest {
          tasks.add(() -> checkConvertForIdenticalCurrencies(currency, new Random().nextFloat()));
       }
 
-      invokeAll(tasks);
+      invokeAllTasks(tasks);
 
       shutDownExecutor(30);
    }
@@ -204,14 +202,13 @@ public class ConverterServiceTest {
          tasks.add(() -> checkForZero(currency));
       }
 
-      invokeAll(tasks);
+      invokeAllTasks(tasks);
 
       shutDownExecutor(20);
    }
 
    /**
     * Tests conversion all currencies from {@link #existingCurrency} between themselves
-    *
     */
    @Test
    @Disabled("this test takes 15 min. ")
@@ -227,9 +224,9 @@ public class ConverterServiceTest {
          }
       }
 
-      invokeAll(tasks);
+      invokeAllTasks(tasks);
 
-      shutDownExecutor(300);
+      shutDownExecutor(900);
    }
 
    private Float checkForZero(String currency) throws CurrencyConverterException, UnknownHostException {
@@ -309,7 +306,7 @@ public class ConverterServiceTest {
       return result;
    }
 
-   private void invokeAll(List<Callable<Float>> tasks) throws InterruptedException, ExecutionException {
+   private void invokeAllTasks(List<Callable<Float>> tasks) throws InterruptedException, ExecutionException {
       List<Future<Float>> results = executor.invokeAll(tasks);
 
       for (Future<Float> result : results) {
@@ -317,8 +314,17 @@ public class ConverterServiceTest {
       }
    }
 
+   /**
+    * Waits for all threads and stops {@link this#executor}
+    */
    private void shutDownExecutor(long maxSeconds) throws InterruptedException {
       executor.shutdown();
       executor.awaitTermination(maxSeconds, TimeUnit.SECONDS);
    }
+
+   /* constants */
+
+   private final Float ZERO = 0.0f;
+   private final String USD = "USD";
+   private final String UAH = "UAH";
 }

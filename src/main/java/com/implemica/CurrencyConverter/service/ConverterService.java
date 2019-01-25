@@ -58,10 +58,12 @@ public final class ConverterService {
    {
       options.add(this::convertByBankUaCom);                      // unlimited
       options.add(this::convertByFloatRatesCom);                  // unlimited
+      options.add(this::convertByWesternUnion);                   // unlimited
 
       options.add(this::convertByFreeCurrencyConverterApiCom);    // has a limit - 100  requests per hour
       options.add(this::convertByCurrencyLayerCom);               // has a limit - 1000 requests per month
-//      options.add(this::convertByJavaMoney);                      // unlimited, slow, does not work with multithreading
+
+//      options.add(this::convertByJavaMoney);                      // unlimited, so slow
    }
 
    /**
@@ -77,7 +79,7 @@ public final class ConverterService {
        * @throws CurrencyConverterException if currency does not support.
        * @throws IOException if there is no internet connection.
        */
-      Float convert(UsersRequest usersRequest) throws CurrencyConverterException, IOException;
+      Float convert(UsersRequest usersRequest) throws Exception;
    }
 
    /**
@@ -292,6 +294,24 @@ public final class ConverterService {
    }
 
    /**
+    * Function connects to business.westernunion.com, gets json and parse it.
+    *
+    * @param usersRequest contains currencies and value for conversion.
+    * @throws IOException if didn't parse a json
+    * @return result of conversion.
+    */
+   Float convertByWesternUnion(UsersRequest usersRequest) throws IOException {
+      URL url = getUrlForWesternUnion(usersRequest);
+
+      JSONObject object = getJsonObjectByURL(url);
+
+      float result = (float) object.getDouble("Result");
+
+      writeToLog(API_NAME_WESTERN_UNION, usersRequest);
+      return result;
+   }
+
+   /**
     * Function converts {@link java.util.Currency} to {@link Currency}
     *
     * @param currency contains currencies and value for conversion.
@@ -303,8 +323,8 @@ public final class ConverterService {
    }
 
    /**
-    * Gets a json object by url. 
-    * 
+    * Gets a json object by url.
+    *
     * @param url address
     * @return an instance of {@link JSONObject}
     * @throws IOException if an I/O exception occurs.
@@ -313,6 +333,11 @@ public final class ConverterService {
       JSONTokener tokener = new JSONTokener(url.openStream());
 
       return new JSONObject(tokener);
+   }
+
+   private URL getUrlForWesternUnion(UsersRequest usersRequest) throws MalformedURLException {
+      String value = Float.toString(usersRequest.getValue()).replaceAll(",", ".");
+      return new URL(String.format(URL_WESTERN_UNION_COM, value, usersRequest.getCurrencyFrom(), usersRequest.getCurrencyTo()));
    }
 
    /**
@@ -341,10 +366,12 @@ public final class ConverterService {
    private static final String URL_CURRENCY_LAYER_COM = "http://apilayer.net/api/live?access_key=f91895130d9f009b167cd5299cdd923c&source=%s&currencies=%s&format=1";
    private static final String URL_FLOAT_RATES_COM = "http://www.floatrates.com/daily/%s.json";
    private static final String URL_GOOGLE_COM = "www.google.com";
+   private static final String URL_WESTERN_UNION_COM = "https://business.westernunion.com/api/converter/convert/%s/%s/%s";
 
    private static final String API_NAME_BANK_UA_COM = "bank-ua.com";
    private static final String API_NAME_JAVA_MONEY = "Java money api";
    private static final String API_NAME_FREE_CURRENCYAPI_COM = "free.currencyapi.com";
+   private static final String API_NAME_WESTERN_UNION = "business.westernunion.com";
    private static final String API_NAME_CURRENCYLAYER_COM = "currencylayer.com";
    private static final String API_NAME_FLOATRATES_COM = "floatrates.com";
 
