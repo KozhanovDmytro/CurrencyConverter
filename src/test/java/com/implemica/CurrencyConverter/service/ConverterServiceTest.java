@@ -166,7 +166,6 @@ public class ConverterServiceTest {
       Float resultByCurrencyLayer = converterService.convertByCurrencyLayerCom(usersRequest);
       Float resultByFloatRatesCom = converterService.convertByFloatRatesCom(usersRequest);
       Float resultByFreeCurrencyConverterApiCom = converterService.convertByFreeCurrencyConverterApiCom(usersRequest);
-      Float resultByWesternUnion = converterService.convertByWesternUnion(usersRequest);
 
       Float from = 0.86f;
       Float to = 0.89f;
@@ -176,7 +175,6 @@ public class ConverterServiceTest {
       checkRange(resultByCurrencyLayer, from, to);
       checkRange(resultByFloatRatesCom, from, to);
       checkRange(resultByFreeCurrencyConverterApiCom, from, to);
-      checkRange(resultByWesternUnion, from, to);
    }
 
    /**
