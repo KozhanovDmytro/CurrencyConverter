@@ -70,6 +70,11 @@ public class BotController extends TelegramLongPollingBot {
     * Id of chat
     */
    private long chatId;
+
+   public long getChatId() {
+      return chatId;
+   }
+
    /**
     * Stores users and id chats, where they communicate with bot
     */
@@ -120,6 +125,7 @@ public class BotController extends TelegramLongPollingBot {
       if (isBot) {
          user = chooseUser(user);
       }
+      listOfChats.put(user, chatId);
 
       String response = bot.processCommand(command, user);
       sendMessage(message, response);
@@ -129,7 +135,6 @@ public class BotController extends TelegramLongPollingBot {
          createKeyboard(s);
       }
 
-      listOfChats.put(user, chatId);
    }
 
    private String getCommand(Message message) {

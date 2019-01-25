@@ -1,5 +1,6 @@
 package com.implemica.CurrencyConverter.controller;
 
+import com.implemica.CurrencyConverter.model.State;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.service.BotService;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,8 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -27,39 +31,49 @@ public class BotControllerTest {
    /**
     * Start command
     */
-   private static final String message1Text = BotService.START;
+   private static final String message1Text = "/start";
    /**
     * Stop command
     */
-   private static final String message2Text = BotService.STOP;
+   private static final String message2Text = "/stop";
    /**
     * Convert command
     */
-   private static final String message3Text = BotService.CONVERT;
+   private static final String message3Text = "/convert";
    /**
     * Some non-command word
     */
    private static final String message4Text = "hello";
+
+   /**
+    * Message to the user with the suggestion of a new conversion
+    */
+   private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
+           " 1️⃣ with using /convert command\n\n 2️⃣ type me a request by single line " +
+           "(Example: 10 USD in UAH)";
    /**
     * Bot's response for start command
     */
-   private static final String startMessage = BotService.START_MESSAGE;
+   private static final String startMessage = "Hello! I can help you to convert currencies." +
+           CONVERT_MESSAGE;
+
    /**
     * Bot's response for stop command
     */
-   private static final String stopMessage = BotService.STOP_MESSAGE;
+   private static final String stopMessage = "🆗." + CONVERT_MESSAGE;
    /**
     * Bot's response for convert command
     */
-   private static final String firstConvertMessage = BotService.FIRST_CONVERT_MESSAGE;
+   private static final String firstConvertMessage = "Please, type in the currency to convert from (example: USD)";
    /**
     * Bot's response for non-command word
     */
-   private static final String wrongMessage = BotService.INCORRECT_REQUEST_MESSAGE;
+   private static final String wrongMessage = "❗Sorry, but your request is incorrect." + CONVERT_MESSAGE;
    /**
     * Bot's response for message, which contains incorrect content
     */
-   private static final String wrongContentMessage = BotService.INCORRECT_CONTENT_MESSAGE;
+   private static final String wrongContentMessage = "❗Sorry, but this message contains " +
+           "incorrect content. Please, don't send me messages, which I can't handle." + CONVERT_MESSAGE;
 
    /**
     * Bot name in Telegram.
@@ -80,24 +94,41 @@ public class BotControllerTest {
    private BotService botService;
 
    /**
-    * A dummy implementation for Update class, first incoming update from telegram user
+    * A dummy implementation for Update class, incoming update from telegram user
     */
    @Mock
    private Update update;
 
 
    /**
-    * A dummy implementation for Message class, first message from telegram user
+    * A dummy implementation for Message class, message from telegram user
     */
    @Mock
    private Message message;
 
+   /**
+    * A dummy implementation for CallbackQuery class, callback query from telegram user
+    */
+   @Mock
+   private CallbackQuery callbackQuery;
+
+
+   /**
+    * Stores users and id chats, where they communicate with bot
+    */
+   private static Map<User, Long> listOfChats = State.listOfChats;
 
    /**
     * A dummy implementation for Telegram User class
     */
    @Mock
    private org.telegram.telegrambots.meta.api.objects.User telegramUser;
+
+   /**
+    * A dummy implementation for Telegram bot
+    */
+   @Mock
+   private org.telegram.telegrambots.meta.api.objects.User bot;
 
 
    /**
@@ -113,7 +144,7 @@ public class BotControllerTest {
    @BeforeEach
    void setUp() {
       controller = new BotController(botService);
-     }
+   }
 
    /**
     * Tests, that methods returns bots username and token correctly
@@ -124,6 +155,7 @@ public class BotControllerTest {
       assertEquals(BOT_TOKEN, controller.getBotToken());
    }
 
+
    /**
     * Tests, that if user has all information about himself and his message contains specified text, and if method
     * {@link BotController#onUpdateReceived(Update)} is called, then methods {@link Update#getMessage()} and
@@ -132,10 +164,9 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest1() {
       //update1 from user1
-      messageBehavior(message1Text, true);
+      setMessageBehavior(message1Text, true);
 
       //user with all information
-
       createUser(145, "ludvig", "fourteenth", "fox");
 
       verifyController(message1Text, startMessage);
@@ -149,7 +180,7 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest2() {
       //update2 from user2
-      messageBehavior(message2Text, true);
+      setMessageBehavior(message2Text, true);
 
       //user without last name
       createUser(1289, "Laban", null, "fox");
@@ -165,7 +196,7 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest3() {
       //update3 from user3
-      messageBehavior(message3Text, true);
+      setMessageBehavior(message3Text, true);
 
       //user without username
       createUser(1111, "dad", "Larsson", null);
@@ -181,7 +212,7 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest4() {
       //update4 from user4
-      messageBehavior(message4Text, true);
+      setMessageBehavior(message4Text, true);
 
       //user without last name and username
       createUser(74, "squirrel", null, null);
@@ -197,10 +228,46 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest5() {
       //update5 from user5
-      messageBehavior(null, false);
+      setMessageBehavior(null, false);
 
       createUser(38210, "tutta", "carlson", "chicken");
       verifyController(BotService.UNIQUE, wrongContentMessage);
+   }
+
+   /**
+    * Tests reaction for inlineKeyboard press
+    */
+   @Test
+   void inlineKeyboardTest1() {
+      setCallbackQueryBehavior("USD");
+      verifyControllerWithKeyboard("USD", 124, 73281, "ann", null, null);
+   }
+
+   /**
+    * Tests reaction for inlineKeyboard press
+    */
+   @Test
+   void inlineKeyboardTest2() {
+      setCallbackQueryBehavior("EUR");
+      verifyControllerWithKeyboard("EUR", 13, 9821, "michael", "green", null);
+   }
+
+   /**
+    * Tests reaction for inlineKeyboard press
+    */
+   @Test
+   void inlineKeyboardTest3() {
+      setCallbackQueryBehavior("UAH");
+      verifyControllerWithKeyboard("UAH", 7801, 21809, "jake", "black", "lucky");
+   }
+
+   /**
+    * Tests reaction for inlineKeyboard press
+    */
+   @Test
+   void inlineKeyboardTest4() {
+      setCallbackQueryBehavior("RUB");
+      verifyControllerWithKeyboard("RUB", 89302, 588, "samanta", null, "sam");
    }
 
    /**
@@ -209,7 +276,7 @@ public class BotControllerTest {
     * @param messageText text of user's message
     * @param hasText     true, if message has correct content (text), false - otherwise
     */
-   private void messageBehavior(String messageText, boolean hasText) {
+   private void setMessageBehavior(String messageText, boolean hasText) {
       when(update.hasMessage()).thenReturn(true);
       when(update.getMessage()).thenReturn(message);
       when(message.hasText()).thenReturn(hasText);
@@ -218,6 +285,20 @@ public class BotControllerTest {
       }
       when(message.getFrom()).thenReturn(telegramUser);
    }
+
+   /**
+    * Defines the return value when update and callbackQuery methods of the mocked objects are been called
+    *
+    * @param text text which gets from callbackQuery
+    */
+   private void setCallbackQueryBehavior(String text) {
+      when(update.hasMessage()).thenReturn(false);
+      when(update.getCallbackQuery()).thenReturn(callbackQuery);
+      when(callbackQuery.getMessage()).thenReturn(message);
+      when(callbackQuery.getData()).thenReturn(text);
+      when(message.getFrom()).thenReturn(bot);
+   }
+
 
    /**
     * Defines the return value when Telegram User methods of the mocked object is been called
@@ -233,6 +314,20 @@ public class BotControllerTest {
       when(telegramUser.getLastName()).thenReturn(lastName);
       when(telegramUser.getUserName()).thenReturn(userName);
    }
+
+   /**
+    * Create bot for user by chatId
+    *
+    * @param chatId id of chat user with bot
+    */
+   private void createBot(long chatId) {
+      when(bot.getId()).thenReturn(555555);
+      when(bot.getFirstName()).thenReturn("bot");
+      when(bot.getLastName()).thenReturn(null);
+      when(bot.getUserName()).thenReturn(null);
+      when(message.getChatId()).thenReturn(chatId);
+   }
+
 
    /**
     * Creates User. Defines the return value when processCommand method of the mocked object botService is been called.
@@ -251,5 +346,31 @@ public class BotControllerTest {
       verify(update).getMessage();
       verify(botService).processCommand(messageText, user);
    }
+
+   /**
+    * Creates User. Defines the return value when processCommand method of the mocked object botService is been called.
+    * Calls {@link BotController#onUpdateReceived(Update)} method and verifies, that methods {@link Update#getMessage()}
+    * and {@link BotService#processCommand(String, User)} were called with specified parameters.
+    *
+    * @param messageText message from User
+    * @param chatId id of chat
+    * @param userId user's id
+    * @param firstName user's first name
+    * @param lastName user's last name
+    * @param userName user's username
+    */
+   private void verifyControllerWithKeyboard(String messageText, long chatId, int userId, String firstName, String lastName, String userName) {
+      createBot(chatId);
+      User user = new User(userId, firstName, lastName, userName);
+      listOfChats.put(user, chatId);
+
+      doReturn(BotControllerTest.wrongMessage).when(botService).processCommand(messageText, user);
+
+      controller.onUpdateReceived(update);
+
+      verify(update).getCallbackQuery();
+      verify(botService).processCommand(messageText, user);
+   }
+
 
 }

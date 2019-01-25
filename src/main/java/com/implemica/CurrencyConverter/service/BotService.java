@@ -135,7 +135,7 @@ public class BotService {
    /**
     * Stores Users and their commands
     */
-   private Map<Integer, State> states = State.statesOfUsers;
+   private Map<User, State> states = State.statesOfUsers;
 
    /**
     * Converter for currencies
@@ -167,61 +167,75 @@ public class BotService {
     */
    public String processCommand(String command, User user) {
       State state;
-      if (states.containsKey(user.getUserId())) {
-         state = states.get(user.getUserId());
+
+      if (states.containsKey(user)) {
+         state = states.get(user);
       } else {
          state = new State("", "", 0);
       }
+
       firstCurrency = state.getFirstCurrency();
       secondCurrency = state.getSecondCurrency();
-      /**
-       * Step of conversion
-       */
       int convertStep = state.getConvertStep();
 
       String message;
+
       if (command.equals(UNIQUE)) {
          command = NOT_TEXT_CONTENT;
          message = INCORRECT_CONTENT_MESSAGE;
          convertStep = 0;
+
       } else if (isOneLineRequest(command)) {
          message = convertByLine(command);
          convertStep = 0;
+
       } else if (command.equals(START)) {
          message = START_MESSAGE;
          convertStep = 0;
+
       } else if (command.equals(STOP)) {
          message = STOP_MESSAGE;
          convertStep = 0;
+
       } else if (command.equals(CONVERT)) {
          message = FIRST_CONVERT_MESSAGE;
          convertStep = 1;
+
       } else if (convertStep == 1) {
          firstCurrency = BotValidator.toUpperCase(command);
+
          if (isValidCurrency(firstCurrency)) {
             message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
             convertStep = 2;
+
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE;
             convertStep = 1;
+
          }
       } else if (convertStep == 2) {
          secondCurrency = BotValidator.toUpperCase(command);
+
          if (isValidCurrency(secondCurrency)) {
             message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
             convertStep = 3;
+
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_CURRENCY +
                     SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
             convertStep = 2;
+
          }
       } else if (convertStep == 3) {
+
          if (isValidAmount(command)) {
             message = convertValue(command);
             convertStep = 0;
+
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_NUMBER +
                     THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
+
          }
       } else {
          message = INCORRECT_REQUEST_MESSAGE;
@@ -229,7 +243,7 @@ public class BotService {
       }
 
       state = new State(firstCurrency, secondCurrency, convertStep);
-      states.put(user.getUserId(), state);
+      states.put(user, state);
 
       Date dateNow = new Date();
 
