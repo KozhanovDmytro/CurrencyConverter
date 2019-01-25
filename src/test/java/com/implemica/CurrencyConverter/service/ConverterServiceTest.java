@@ -53,6 +53,7 @@ public class ConverterServiceTest {
            "XFU", "XSU", "TMM", "AZM", "XFO", "SDD", "YUM", "XTS", "MTL", "FIM", "CHW", "XBA", "XXX", "UYI", "XBC",
            "GRD", "RUR", "XBB", "BGL"};
 
+  
    /** Executor needed for speed up some tests by multithreading. */
    private ThreadPoolExecutor executor = new ThreadPoolExecutor(145, 21025, 2000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(145));
 

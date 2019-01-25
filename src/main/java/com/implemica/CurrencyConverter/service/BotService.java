@@ -4,6 +4,7 @@ package com.implemica.CurrencyConverter.service;
 import com.implemica.CurrencyConverter.dao.DialogDao;
 import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.implemica.CurrencyConverter.model.Dialog;
+import com.implemica.CurrencyConverter.model.State;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.validator.BotValidator;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
@@ -16,9 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Currency;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 import static com.implemica.CurrencyConverter.validator.BotValidator.formatNumber;
 import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber;
@@ -39,6 +38,19 @@ public class BotService {
    public static final String UNIQUE = UUID.randomUUID().toString();
 
    /**
+    * Start of message for users mistakes
+    */
+   private static final String SORRY_BUT = "❗Sorry, but \"";
+   /**
+    * End of message about incorrect currency
+    */
+   private static final String IS_NOT_A_VALID_CURRENCY = "\" is not a valid currency.\n\n";
+   /**
+    * End of message about incorrect amount
+    */
+   private static final String IS_NOT_A_VALID_NUMBER = "\" is not a valid number.\n\n";
+
+   /**
     * Dialog with user
     */
    private final DialogDao dialogDao;
@@ -51,55 +63,56 @@ public class BotService {
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   public static final String CONVERT_MESSAGE = " You can use /convert command or type me a request " +
-           "(Example: 10 USD in UAH) to make me new convert currencies";
+   private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
+           " 1️⃣ with using /convert command\n\n 2️⃣ type me a request by single line " +
+           "(Example: 10 USD in UAH)";
    /**
     * Greeting message to user
     */
-   public static final String START_MESSAGE = "Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
+   private static final String START_MESSAGE = "Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
    /**
     * Stop message to the user
     */
-   public static final String STOP_MESSAGE = "OK." + CONVERT_MESSAGE;
+   private static final String STOP_MESSAGE = "🆗." + CONVERT_MESSAGE;
 
    /**
     * Bot's command to start conversation
     */
-   public static final String START = "/start";
+   private static final String START = "/start";
    /**
     * Bot's command to start convert currencies
     */
-   public static final String CONVERT = "/convert";
+   private static final String CONVERT = "/convert";
 
    /**
     * Bot's command to stop conversation
     */
-   public static final String STOP = "/stop";
+   private static final String STOP = "/stop";
    /**
     * Bot's response for /convert command
     */
-   public static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
+   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
    /**
     * Start of bot's response after entering first currency
     */
-   public static final String SECOND_CONVERT_MESSAGE_1 = "OK, you wish to convert from ";
+   private static final String SECOND_CONVERT_MESSAGE_1 = "What currency do you want to convert from ";
    /**
     * End of bot's response after entering first currency
     */
-   public static final String SECOND_CONVERT_MESSAGE_2 = " to what currency? (example: EUR)";
+   private static final String SECOND_CONVERT_MESSAGE_2 = " to? (example: EUR)";
    /**
     * Bot's response after entering second currency
     */
-   public static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
+   private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
    /**
     * Bot's response for incorrect request from user
     */
-   public static final String INCORRECT_REQUEST_MESSAGE = "Sorry, but your request is incorrect." + CONVERT_MESSAGE;
+   private static final String INCORRECT_REQUEST_MESSAGE = "❗Sorry, but your request is incorrect." + CONVERT_MESSAGE;
 
    /**
     * Bot's response for non-text message
     */
-   public static final String INCORRECT_CONTENT_MESSAGE = "Sorry, but this message contains " +
+   private static final String INCORRECT_CONTENT_MESSAGE = "❗Sorry, but this message contains " +
            "incorrect content. Please, don't send me messages, which I can't handle." + CONVERT_MESSAGE;
    /**
     * Message for log, that user sent incorrect content
@@ -113,15 +126,17 @@ public class BotService {
     * The currency to convert to
     */
    private String secondCurrency = "";
-   /**
-    * Step of conversion
-    */
-   private int convertStep = 0;
 
    /**
     * Logger for this class
     */
    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+
+   /**
+    * Stores Users and their commands
+    */
+   private Map<User, State> states = State.statesOfUsers;
+
    /**
     * Converter for currencies
     */
@@ -144,49 +159,97 @@ public class BotService {
    }
 
    /**
-    * Gets users input and processes it, writes conversation to .csv file and sends their to webSocket
+    * Gets statesOfUsers input and processes it, writes conversation to .csv file and sends their to webSocket
     *
     * @param command request from user
     * @param user    user, which sent message
     * @return bot's response to user
     */
-   public String onUpdateReceived(String command, User user) {
+   public String processCommand(String command, User user) {
+      State state;
+
+      if (states.containsKey(user)) {
+         state = states.get(user);
+      } else {
+         state = new State("", "", 0);
+      }
+
+      firstCurrency = state.getFirstCurrency();
+      secondCurrency = state.getSecondCurrency();
+      int convertStep = state.getConvertStep();
+
       String message;
+
       if (command.equals(UNIQUE)) {
          command = NOT_TEXT_CONTENT;
          message = INCORRECT_CONTENT_MESSAGE;
          convertStep = 0;
+
+      } else if (isOneLineRequest(command)) {
+         message = convertByLine(command);
+         convertStep = 0;
+
       } else if (command.equals(START)) {
          message = START_MESSAGE;
          convertStep = 0;
+
       } else if (command.equals(STOP)) {
          message = STOP_MESSAGE;
          convertStep = 0;
+
       } else if (command.equals(CONVERT)) {
          message = FIRST_CONVERT_MESSAGE;
          convertStep = 1;
+
       } else if (convertStep == 1) {
          firstCurrency = BotValidator.toUpperCase(command);
-         message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
-         convertStep = 2;
+
+         if (isValidCurrency(firstCurrency)) {
+            message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
+            convertStep = 2;
+
+         } else {
+            message = SORRY_BUT + command + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE;
+            convertStep = 1;
+
+         }
       } else if (convertStep == 2) {
          secondCurrency = BotValidator.toUpperCase(command);
-         message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
-         convertStep = 3;
+
+         if (isValidCurrency(secondCurrency)) {
+            message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
+            convertStep = 3;
+
+         } else {
+            message = SORRY_BUT + command + IS_NOT_A_VALID_CURRENCY +
+                    SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
+            convertStep = 2;
+
+         }
       } else if (convertStep == 3) {
-         message = convertValue(command);
-         convertStep = 0;
+
+         if (isValidAmount(command)) {
+            message = convertValue(command);
+            convertStep = 0;
+
+         } else {
+            message = SORRY_BUT + command + IS_NOT_A_VALID_NUMBER +
+                    THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
+
+         }
       } else {
-         message = convertByLine(command);
+         message = INCORRECT_REQUEST_MESSAGE;
          convertStep = 0;
       }
+
+      state = new State(firstCurrency, secondCurrency, convertStep);
+      states.put(user, state);
 
       Date dateNow = new Date();
 
       Dialog dialog = new Dialog(dateNow, user, command, message);
       dialogDao.write(dialog);
       sendToWebSocketFollowers(dialog);
-
       return message;
    }
 
@@ -198,19 +261,37 @@ public class BotService {
     */
    private String convertByLine(String line) {
       String[] request = line.split("\\s+");
-      int length = request.length;
       String message;
-      if (length != 4 || (!request[2].equalsIgnoreCase("to") && !request[2].equalsIgnoreCase("in"))) {
-         message = INCORRECT_REQUEST_MESSAGE;
-      } else {
-         firstCurrency = BotValidator.toUpperCase(request[1]);
+      firstCurrency = BotValidator.toUpperCase(request[1]);
+      if (isValidCurrency(firstCurrency)) {
          secondCurrency = BotValidator.toUpperCase(request[3]);
-         message = convertValue(request[0]);
+         if (isValidCurrency(secondCurrency)) {
+            String amount = request[0];
+            if (isValidAmount(amount)) {
+               message = convertValue(amount);
+            } else {
+               message = SORRY_BUT + amount + IS_NOT_A_VALID_NUMBER;
+            }
+         } else {
+            message = SORRY_BUT + secondCurrency + IS_NOT_A_VALID_CURRENCY;
+         }
+      } else {
+         message = SORRY_BUT + firstCurrency + IS_NOT_A_VALID_CURRENCY;
       }
-
       return message;
    }
 
+   /**
+    * Checks, that user's input may be one line request or not
+    *
+    * @param line user's input
+    * @return true, if line contains 4 words and correct binding word between currencies
+    */
+   private boolean isOneLineRequest(String line) {
+      String[] request = line.split("\\s+");
+      int length = request.length;
+      return length == 4 && (request[2].equalsIgnoreCase("to") || request[2].equalsIgnoreCase("in"));
+   }
 
    /**
     * Converts given currencies from first one to second.
@@ -221,10 +302,8 @@ public class BotService {
 
    private String convertValue(String value) {
       String message;
-      int count = 0;
       try {
          Currency usersCurrency = Currency.getInstance(firstCurrency);
-         count++;
          Currency desiredCurrency = Currency.getInstance(secondCurrency);
          UsersRequest usersRequest = new UsersRequest(usersCurrency, desiredCurrency, parseNumber(value));
 
@@ -233,15 +312,7 @@ public class BotService {
       } catch (CurrencyConverterException e) {
          message = e.getMessage() + CONVERT_MESSAGE;
       } catch (ParseException e) {
-         message = "Sorry, but \"" + value + "\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE;
-      } catch (IllegalArgumentException e) {
-         String wrongCurrency;
-         if (count == 0) {
-            wrongCurrency = firstCurrency;
-         } else {
-            wrongCurrency = secondCurrency;
-         }
-         message = "Sorry, but currency is not valid: " + wrongCurrency + CONVERT_MESSAGE;
+         message = SORRY_BUT + value + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE;
       } catch (IOException e) {
          logger.error(e.getMessage() + " is not responding.");
          message = "Server is not responding." + CONVERT_MESSAGE;
@@ -261,4 +332,33 @@ public class BotService {
       logger.info("send to web socket followers. ");
    }
 
+   /**
+    * Checks, that given String is a valid currency
+    *
+    * @param usersCurrency String, which has to be checked
+    * @return true, if usersCurrency can be convert to {@link Currency}, false - otherwise.
+    */
+   private boolean isValidCurrency(String usersCurrency) {
+      try {
+         Currency.getInstance(usersCurrency);
+      } catch (IllegalArgumentException ex) {
+         return false;
+      }
+      return true;
+   }
+
+   /**
+    * Checks, that given amount is correct number
+    *
+    * @param amount amount of currency, which has to be checked
+    * @return true, if amount is positive number or zero, false - otherwise.
+    */
+   private boolean isValidAmount(String amount) {
+      try {
+         parseNumber(amount);
+      } catch (ParseException e) {
+         return false;
+      }
+      return true;
+   }
 }

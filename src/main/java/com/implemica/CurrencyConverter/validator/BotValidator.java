@@ -63,7 +63,7 @@ public class BotValidator {
     * @return the String without spaces
     */
    private static String skipSpaces(String string) {
-      return string.replaceAll("\\s+", "");
+      return string.trim();
    }
 
    /**

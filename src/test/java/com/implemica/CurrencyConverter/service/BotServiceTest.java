@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
+import java.text.DecimalFormat;
+import java.util.Random;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,58 +40,63 @@ public class BotServiceTest {
     * Unique string, which uses for messages, which has non text content.
     */
    private static final String WRONG_CONTENT = BotService.UNIQUE;
-
-   /**
-    * Greeting message to user
-    */
-   private static final String START_MESSAGE = BotService.START_MESSAGE;
+   private static final String SORRY_BUT = "❗Sorry, but \"";
+   private static final String IS_NOT_A_VALID_CURRENCY = "\" is not a valid currency.\n\n";
+   private static final String IS_NOT_A_VALID_NUMBER = "\" is not a valid number.\n\n";
 
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   private static final String CONVERT_MESSAGE = BotService.CONVERT_MESSAGE;
+   private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
+           " 1️⃣ with using /convert command\n\n 2️⃣ type me a request by single line " +
+           "(Example: 10 USD in UAH)";
+   /**
+    * Greeting message to user
+    */
+   private static final String START_MESSAGE = "Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
    /**
     * Stop message to the user
     */
-   private static final String STOP_MESSAGE = BotService.STOP_MESSAGE;
+   private static final String STOP_MESSAGE = "🆗." + CONVERT_MESSAGE;
 
    /**
     * Bot's command to start conversation
     */
-   private static final String START = BotService.START;
+   private static final String START = "/start";
    /**
     * Bot's command to start convert currencies
     */
-   private static final String CONVERT = BotService.CONVERT;
+   private static final String CONVERT = "/convert";
    /**
     * Bot's command to stop conversation
     */
-   private static final String STOP = BotService.STOP;
+   private static final String STOP = "/stop";
    /**
     * Bot's response for /convert command
     */
-   private static final String FIRST_CONVERT_MESSAGE = BotService.FIRST_CONVERT_MESSAGE;
+   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
    /**
     * Start of bot's response after entering first currency
     */
-   private static final String SECOND_CONVERT_MESSAGE_1 = BotService.SECOND_CONVERT_MESSAGE_1;
+   private static final String SECOND_CONVERT_MESSAGE_1 = "What currency do you want to convert from ";
    /**
     * End of bot's response after entering first currency
     */
-   private static final String SECOND_CONVERT_MESSAGE_2 = BotService.SECOND_CONVERT_MESSAGE_2;
+   private static final String SECOND_CONVERT_MESSAGE_2 = " to? (example: EUR)";
    /**
     * Bot's response after entering second currency
     */
-   private static final String THIRD_CONVERT_MESSAGE = BotService.THIRD_CONVERT_MESSAGE;
+   private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
 
    /**
     * Bot's response for not-text requests
     */
-   private static final String UNREADABLE_CONTENT_MESSAGE = BotService.INCORRECT_CONTENT_MESSAGE;
+   private static final String UNREADABLE_CONTENT_MESSAGE = "❗Sorry, but this message contains " +
+           "incorrect content. Please, don't send me messages, which I can't handle." + CONVERT_MESSAGE;
    /**
     * Bot's response for incorrect request from user
     */
-   private static final String INCORRECT_REQUEST_MESSAGE = BotService.INCORRECT_REQUEST_MESSAGE;
+   private static final String INCORRECT_REQUEST_MESSAGE = "❗Sorry, but your request is incorrect." + CONVERT_MESSAGE;
    /**
     * Regular expression, which matches, that string contains only the positive number
     */
@@ -99,11 +107,32 @@ public class BotServiceTest {
    private static final Pattern isPositiveNumber = Pattern.compile(POSITIVE_NUMBER_REGEX);
 
    /**
+    * Array of available currencies that can be converted between themselves by {@link ConverterService}.
+    */
+   private static String[] existingCurrency = new String[]{"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD",
+           "RUB", "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD",
+           "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
+           "GTQ", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO", "AOA", "XAF",
+           "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP", "SDG", "MUR",
+           "VND", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "LRD", "JPY", "NAD",
+           "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "IRR", "GYD", "TWD", "ZMW", "XOF", "MWK", "KMF", "KRW",
+           "TZS", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS", "NGN", "SBD", "LKR",
+           "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC", "SGD", "PYG", "JOD", "AFN",
+           "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "UYU",
+           "MZN", "BRL"};
+
+   /**
+    * Format for amount of currency
+    */
+   private static final DecimalFormat DECIMAL_FORMATTER = new DecimalFormat("#.##");
+   private static final Random RANDOM = new Random();
+
+   /**
     * Tests, that bot's response to /start command is correct
     */
    @Test
    void startCommand() {
-      compute(START, START_MESSAGE);
+      assertCommand(START, START_MESSAGE);
    }
 
    /**
@@ -111,8 +140,22 @@ public class BotServiceTest {
     */
    @Test
    void stopCommand() {
-      compute(STOP, STOP_MESSAGE);
+      assertCommand(STOP, STOP_MESSAGE);
    }
+
+   /**
+    * Tests, that bot's response to users is correct, if they calls it at the same time
+    */
+   @Test
+   void twoUsersTest() {
+      User user1 = new User(123, "ludvig");
+      User user2 = new User(321, "darell");
+      assertEquals(FIRST_CONVERT_MESSAGE, testBotService.processCommand("/convert", user1));
+      assertEquals(INCORRECT_REQUEST_MESSAGE, testBotService.processCommand("usd", user2));
+      assertEquals(SECOND_CONVERT_MESSAGE_1 + "UAH" + SECOND_CONVERT_MESSAGE_2, testBotService.processCommand("uah", user1));
+      assertEquals(FIRST_CONVERT_MESSAGE, testBotService.processCommand("/convert", user2));
+   }
+
 
    /**
     * Tests, that bot's response to text, which is not command is correct
@@ -131,95 +174,141 @@ public class BotServiceTest {
    }
 
    /**
+    * Tests, that if both currencies and amount are correct, that bot's response is equal to expected
+    */
+   @Test
+   void rightScriptTest() {
+      rightScript("usd", "uah", "1");
+      rightScript("brl", "Usd", "77");
+      rightScript("uSd", "eUr", "10,5");
+      rightScript("ruB", "caD", "33");
+      rightScript("CnY", "CzK", "12000,75");
+      rightScript("DKk", "NZd", "13000000001");
+      rightScript("bGN", "tRY", "0.8");
+      rightScript("RUB", "UAH", "15");
+      rightScript("pln  ", "usd ", "55.4");
+      rightScript(" inR", "eUr ", "811");
+   }
+
+   @Test
+   void oneLineTest() {
+      oneLineRequest("10 usd to uah");
+      oneLineRequest("16 rub in usd");
+      oneLineRequest("7,4 pln to bob");
+      oneLineRequest("1000 bgn in jpy");
+      oneLineRequest("0 eur to lkr");
+      oneLineRequest("16872 inr in afn");
+      oneLineRequest("23.43 cad to xof");
+      oneLineRequest("9021,2 php in irr");
+      oneLineRequest("3821 irr to clp");
+      oneLineRequest("321 omr in tzs");
+   }
+
+   /**
+    * Tests that the same number is returned for the same currency
+    */
+   @Test
+   void rightScriptWithIdenticalCurrencyTest() {
+      for (String currency : existingCurrency) {
+         rightScriptWithIdenticalCurrency(currency);
+      }
+   }
+
+   /**
+    * Tests that the same number is returned for the same currency
+    */
+   @Test
+   void oneLineRequestWithIdenticalCurrencyTest() {
+      for (String currency : existingCurrency) {
+         oneLineRequestWithIdenticalCurrency(currency);
+      }
+   }
+
+   /**
+    * Tests, that if amount equals zero, then returned zero
+    */
+   @Test
+   void zeroTest() {
+      for (String currency : existingCurrency) {
+         zeroAmount(currency, existingCurrency[RANDOM.nextInt(existingCurrency.length)]);
+      }
+
+   }
+
+   /**
+    * Tests, that if amount equals zero, then returned zero
+    */
+   @Test
+   void zeroOneLineTest() {
+      for (String currency : existingCurrency) {
+         zeroAmountOneLine(currency, existingCurrency[RANDOM.nextInt(existingCurrency.length)]);
+      }
+
+   }
+
+   /**
     * Tests, that bot's response to incorrect content is correct, no matter what time it was sent
     */
    @Test
    void unreadableContent() {
       //wrong content
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       //wrong content after command
-      compute(START, START_MESSAGE);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      assertCommand(START, START_MESSAGE);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      compute(STOP, STOP_MESSAGE);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      assertCommand(STOP, STOP_MESSAGE);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       //wrong content after second conversion step
-      interruptConvertOnSecondStep("usd", "USD", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnSecondStep("xxx", "XXX", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnSecondStep("hello", "HELLO", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnSecondStep("usd", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnSecondStep("xxx", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       //wrong content after third conversion step
-      interruptConvertOnThirdStep("pln", "PLN", "uah", "UAH", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("cad", "CAD", "uss", "USS", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("mop", "MOP", "say", "SAY", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("pln", "uah", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("cad", "uss", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      interruptConvertOnThirdStep("sit", "SIT", "eur", "EUR", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("trl", "TRL", "xbb", "XBB", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("xbc", "XBC", "come", "COME", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("sit", "eur", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("trl", "xbb", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      interruptConvertOnThirdStep("how", "HOW", "rub", "RUB", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("are", "ARE", "afa", "AFA", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("you", "YOU", "talk", "TALK", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       //wrong content after conversion
-      rightScript("EUR", "EUR", "Usd", "USD", "30.6");
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      rightScript("EUR", "Usd", "30.6");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      withWrongAmount("Myr", "MYR", "KhR", "KHR", "-67");
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      withWrongAmount("Myr", "KhR", "-67");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      withUnsupportedCurrency("PLN", "PLN", "ITL", "ITL", "0.1", true);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      withUnsupportedCurrency("PLN", "ITL", "0.1", true);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      withWrongAmount("Gel", "GEL", "ITL", "ITL", "0.11,");
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      withWrongAmount("Gel", "ITL", "0.11,");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      withWrongCurrency("UAH", "UAH", "rubli", "RUBLI", "2000", true);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      wrongSecondCurrency("uah", "rubli");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      withWrongCurrency("Xof", "XOF", "hi", "HI", "abc", true);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      withUnsupportedCurrency("xts", "DOP", "301", false);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      withUnsupportedCurrency("xts", "XTS", "dop", "DOP", "301", false);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      withWrongAmount("cou", "ern", "-17");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      withWrongAmount("cou", "COU", "ern", "ERN", "-17");
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      withUnsupportedCurrency("xts", "csd", "804", false);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      withUnsupportedCurrency("xts", "XTS", "csd", "CSD", "804", false);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      withWrongAmount("mtl", "USS", "-10000");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      withWrongAmount("mtl", "MTL", "USS", "USS", "-10000");
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      wrongSecondCurrency("xxx", "val");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      withWrongCurrency("xxx", "XXX", "val", "VAL", "13.3", true);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongCurrency("xua", "XUA", "I", "I", "0 01", true);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongCurrency("russian", "RUSSIAN", "uah", "UAH", "300", false);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongCurrency("tttttttt", "TTTTTTTT", "isk", "ISK", "-34", false);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongCurrency("lalala", "LALALA", "tMM", "TMM", "21", false);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongCurrency("go", "GO", "xts", "XTS", "-0.1", false);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongCurrency("dog", "DOG", "bird", "BIRD", "100000", false);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongCurrency("spoon", "SPOON", "plate", "PLATE", "4 cups", false);
-      compute(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      wrongFirstCurrency("russian");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
    }
 
@@ -228,11 +317,7 @@ public class BotServiceTest {
     * Tests, that one line request works correctly
     */
    @Test
-   void oneLineRequestTest() {
-      //all is correct
-      oneLineRequest("10 usd to uah");
-      oneLineRequest("16 rub in usd");
-
+   void oneLineRequestWithMistakesTest() {
       //wrong amount
       oneLineRequestWithWrongAmount("-7 Dkk to Jpy");
       oneLineRequestWithWrongAmount("13p bob in mzn");
@@ -254,22 +339,22 @@ public class BotServiceTest {
       oneLineRequestWithWrongCurrency("a lkr in me", true, false);
 
       //wrong word between currencies
-      compute("17 php from eur", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("17 php from eur", INCORRECT_REQUEST_MESSAGE);
 
       //wrong word between currencies and wrong amount
-      compute("2.3. txr is xcd", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("2.3. txr is xcd", INCORRECT_REQUEST_MESSAGE);
 
       //wrong word between currencies and unsupported second currency
-      compute("18 jpy 1 php", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("18 jpy 1 php", INCORRECT_REQUEST_MESSAGE);
 
       //wrong word between currencies, unsupported second currency and wrong amount
-      compute("0..0 tzs ta luf", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("0..0 tzs ta luf", INCORRECT_REQUEST_MESSAGE);
 
       //wrong word between currencies and wrong second currency
-      compute("1 eur for cat", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("1 eur for cat", INCORRECT_REQUEST_MESSAGE);
 
       //word between currencies, second currency and amount are wrong
-      compute("m. zmw tto you", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("m. zmw tto you", INCORRECT_REQUEST_MESSAGE);
 
       //first currency is unsupported
       oneLineRequestWithWrongCurrency("34 XBB to RUB", false, true);
@@ -296,22 +381,22 @@ public class BotServiceTest {
       oneLineRequestWithWrongCurrency("56..0. CHE in Ukraine", true, false);
 
       //first currency is unsupported, wrong word between currencies
-      compute("21,1 PTE but usd", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("21,1 PTE but usd", INCORRECT_REQUEST_MESSAGE);
 
       //first currency is unsupported, wrong word between currencies, wrong amount
-      compute("-300 uss inn rub", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("-300 uss inn rub", INCORRECT_REQUEST_MESSAGE);
 
       //both currencies are unsupported, wrong word between currencies
-      compute("54 Rur are Xua", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("54 Rur are Xua", INCORRECT_REQUEST_MESSAGE);
 
       //both currencies are unsupported, wrong word between currencies, wrong amount
-      compute("from xbb 77 iep", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("from xbb 77 iep", INCORRECT_REQUEST_MESSAGE);
 
       //first currency is unsupported, wrong word between currencies, wrong second currency
-      compute("87.7 Xxx s currency", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("87.7 Xxx s currency", INCORRECT_REQUEST_MESSAGE);
 
       //first currency is unsupported, wrong word between currencies, wrong second currency, wrong amount
-      compute("-15..5 Che cv convert", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("-15..5 Che cv convert", INCORRECT_REQUEST_MESSAGE);
 
       //first currency is wrong
       oneLineRequestWithWrongCurrency("16 bird to RUB", false, false);
@@ -338,22 +423,22 @@ public class BotServiceTest {
       oneLineRequestWithWrongCurrency("89- thing in money", false, false);
 
       //first currency is wrong, wrong word between currencies
-      compute("43 parrots into lkr", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("43 parrots into lkr", INCORRECT_REQUEST_MESSAGE);
 
       //first currency is wrong, wrong word between currencies, wrong amount
-      compute("03.03.12 sunny and usd", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("03.03.12 sunny and usd", INCORRECT_REQUEST_MESSAGE);
 
       //first currency is wrong, second is unsupported, wrong word between currencies
-      compute("73,9 pieces with xxx", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("73,9 pieces with xxx", INCORRECT_REQUEST_MESSAGE);
 
       //first currency is wrong, second is unsupported , wrong word between currencies, wrong amount
-      compute("-12 kilos of pte", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("-12 kilos of pte", INCORRECT_REQUEST_MESSAGE);
 
       //both currencies are wrong, wrong word between currencies
-      compute("823.75 percent of 45", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("823.75 percent of 45", INCORRECT_REQUEST_MESSAGE);
 
       //all is wrong
-      compute("one letter for you", INCORRECT_REQUEST_MESSAGE);
+      assertCommand("one letter for you", INCORRECT_REQUEST_MESSAGE);
 
    }
 
@@ -397,16 +482,16 @@ public class BotServiceTest {
       oneLineRequestAndCommand("65.5 rub in php", "thanks", INCORRECT_REQUEST_MESSAGE);
       oneLineRequestAndCommand("511 brl to xcd", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      incorrectOneLineRequestAndCommand("-367 tzs in inr", "Sorry, but \"-367\" is not a valid number." +
-              " Conversion is impossible." + CONVERT_MESSAGE, START, START_MESSAGE);
-      incorrectOneLineRequestAndCommand("hundred rub to xxx", "Sorry, but \"hundred\" is not a valid number." +
-              " Conversion is impossible." + CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
-      incorrectOneLineRequestAndCommand("13$ usd in rur", "Sorry, but \"13$\" is not a valid number." +
-              " Conversion is impossible." + CONVERT_MESSAGE, STOP, STOP_MESSAGE);
-      incorrectOneLineRequestAndCommand("15..7 irr to php", "Sorry, but \"15..7\" is not a valid number." +
-              " Conversion is impossible." + CONVERT_MESSAGE, "hello", INCORRECT_REQUEST_MESSAGE);
-      incorrectOneLineRequestAndCommand("0.01. xof in xfo", "Sorry, but \"0.01.\" is not a valid number." +
-              " Conversion is impossible." + CONVERT_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      incorrectOneLineRequestAndCommand("-367 tzs in inr", SORRY_BUT + "-367" + IS_NOT_A_VALID_NUMBER,
+              START, START_MESSAGE);
+      incorrectOneLineRequestAndCommand("hundred rub to xxx", SORRY_BUT + "hundred" + IS_NOT_A_VALID_NUMBER,
+              CONVERT, FIRST_CONVERT_MESSAGE);
+      incorrectOneLineRequestAndCommand("13$ usd in rur", SORRY_BUT + "13$" + IS_NOT_A_VALID_NUMBER,
+              STOP, STOP_MESSAGE);
+      incorrectOneLineRequestAndCommand("15..7 irr to php", SORRY_BUT + "15..7" + IS_NOT_A_VALID_NUMBER,
+              "hello", INCORRECT_REQUEST_MESSAGE);
+      incorrectOneLineRequestAndCommand("0.01. xof in xfo", SORRY_BUT + "0.01." + IS_NOT_A_VALID_NUMBER,
+              WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       incorrectOneLineRequestAndCommand("44 xbb to xcd", "Currency not supported: XBB" + CONVERT_MESSAGE,
               START, START_MESSAGE);
@@ -419,16 +504,16 @@ public class BotServiceTest {
       incorrectOneLineRequestAndCommand("711 jpy to xxx", "Currency not supported: XXX" + CONVERT_MESSAGE,
               WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      incorrectOneLineRequestAndCommand("16 flowers in uah", "Sorry, but currency is not valid: FLOWERS" +
-              CONVERT_MESSAGE, START, START_MESSAGE);
-      incorrectOneLineRequestAndCommand("101.1 rub to dollars", "Sorry, but currency is not valid: DOLLARS" +
-              CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
-      incorrectOneLineRequestAndCommand("7,7 letter in book", "Sorry, but currency is not valid: LETTER" +
-              CONVERT_MESSAGE, STOP, STOP_MESSAGE);
-      incorrectOneLineRequestAndCommand("568 kitten to afn", "Sorry, but currency is not valid: KITTEN" +
-              CONVERT_MESSAGE, "hi", INCORRECT_REQUEST_MESSAGE);
-      incorrectOneLineRequestAndCommand("9,9 rain in cloud", "Sorry, but currency is not valid: RAIN" +
-              CONVERT_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      incorrectOneLineRequestAndCommand("16 flowers in uah", SORRY_BUT + "FLOWERS" +
+              IS_NOT_A_VALID_CURRENCY, START, START_MESSAGE);
+      incorrectOneLineRequestAndCommand("101.1 rub to dollars", SORRY_BUT + "DOLLARS" +
+              IS_NOT_A_VALID_CURRENCY, CONVERT, FIRST_CONVERT_MESSAGE);
+      incorrectOneLineRequestAndCommand("7,7 letter in book", SORRY_BUT + "LETTER" +
+              IS_NOT_A_VALID_CURRENCY, STOP, STOP_MESSAGE);
+      incorrectOneLineRequestAndCommand("568 kitten to afn", SORRY_BUT + "KITTEN" +
+              IS_NOT_A_VALID_CURRENCY, "hi", INCORRECT_REQUEST_MESSAGE);
+      incorrectOneLineRequestAndCommand("9,9 rain in cloud", SORRY_BUT + "RAIN" +
+              IS_NOT_A_VALID_CURRENCY, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       incorrectOneLineRequestAndCommand("12 uah convertTo usd", INCORRECT_REQUEST_MESSAGE, START, START_MESSAGE);
       incorrectOneLineRequestAndCommand("-213 irr from uer", INCORRECT_REQUEST_MESSAGE, STOP, STOP_MESSAGE);
@@ -439,47 +524,46 @@ public class BotServiceTest {
       //if line conversion after another command
       commandAndOneLineRequest(START, START_MESSAGE, "8,8 INR to BYN");
       commandAndOneLineRequest(STOP, STOP_MESSAGE, "32 usd in uah");
-      commandAndOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "15 rub to eur");
       commandAndOneLineRequest("say something", INCORRECT_REQUEST_MESSAGE, "80.6 pln in inr");
       commandAndOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "140.01 rub to rub");
 
-      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "-678 afn in usd", "Sorry, but " +
-              "\"-678\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "177.. xxx to xxx", "Sorry, but " +
-              "\"177..\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "one uss in lkr", SECOND_CONVERT_MESSAGE_1 +
-              "ONEUSSINLKR" + SECOND_CONVERT_MESSAGE_2);
+      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "-678 afn in usd", SORRY_BUT +
+              "-678" + IS_NOT_A_VALID_NUMBER);
+      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "177.. xxx to xxx", SORRY_BUT +
+              "177.." + IS_NOT_A_VALID_NUMBER);
+      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "one uss in lkr", SORRY_BUT +
+              "one" + IS_NOT_A_VALID_NUMBER);
       commandAndIncorrectOneLineRequest("conversion", INCORRECT_REQUEST_MESSAGE, "67h uah to omr",
-              "Sorry, but \"67h\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE);
+              SORRY_BUT + "67h" + IS_NOT_A_VALID_NUMBER);
       commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "0,.1 brl in pln",
-              "Sorry, but \"0,.1\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE);
+              SORRY_BUT + "0,.1" + IS_NOT_A_VALID_NUMBER);
 
       commandAndIncorrectOneLineRequest(START, START_MESSAGE, "37 Xua to Clp", "Currency not supported: XUA"
               + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "32,3 PLN in XBC", "Currency not supported: XBC"
               + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "3000 Inr to Xbb", SECOND_CONVERT_MESSAGE_1 +
-              "3000INRTOXBB" + SECOND_CONVERT_MESSAGE_2);
+      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "3000 Gbp to Xbb", "Currency not supported: XBB"
+              + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest("lucky", INCORRECT_REQUEST_MESSAGE, "209.9 rub in XFO",
               "Currency not supported: XFO" + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "459,2 uah to uss",
               "Currency not supported: USS" + CONVERT_MESSAGE);
 
-      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "56 ladies to eur", "Sorry, but " +
-              "currency is not valid: LADIES" + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "18 computers in office", "Sorry, but " +
-              "currency is not valid: COMPUTERS" + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "56 ladies to eur", SORRY_BUT +
+              "LADIES" + IS_NOT_A_VALID_CURRENCY);
+      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "18 computers in office", SORRY_BUT +
+              "COMPUTERS" + IS_NOT_A_VALID_CURRENCY);
       commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "21 uah to euro",
-              SECOND_CONVERT_MESSAGE_1 + "21UAHTOEURO" + SECOND_CONVERT_MESSAGE_2);
+              SORRY_BUT + "EURO" + IS_NOT_A_VALID_CURRENCY);
       commandAndIncorrectOneLineRequest("try", INCORRECT_REQUEST_MESSAGE, "888 flats in money",
-              "Sorry, but currency is not valid: FLATS" + CONVERT_MESSAGE);
+              SORRY_BUT + "FLATS" + IS_NOT_A_VALID_CURRENCY);
       commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "4,3 rows to text",
-              "Sorry, but currency is not valid: ROWS" + CONVERT_MESSAGE);
+              SORRY_BUT + "ROWS" + IS_NOT_A_VALID_CURRENCY);
 
       commandAndIncorrectOneLineRequest(START, START_MESSAGE, "16 rup fo 13 ua", INCORRECT_REQUEST_MESSAGE);
       commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "68721 mro convert in uah", INCORRECT_REQUEST_MESSAGE);
       commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "21.2. second of hour",
-              SECOND_CONVERT_MESSAGE_1 + "21.2.SECONDOFHOUR" + SECOND_CONVERT_MESSAGE_2);
+              SORRY_BUT + "21.2. second of hour" + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest("sorry", INCORRECT_REQUEST_MESSAGE, "777 cats on the table",
               INCORRECT_REQUEST_MESSAGE);
       commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "5 pln inn uah",
@@ -491,24 +575,21 @@ public class BotServiceTest {
     */
    @Test
    void interruptConvertOnSecondStepTest() {
-      //we can interrupt conversion only if we give new command
-
       //correct currency
-      interruptConvertOnSecondStep("uah", "UAH", START, START_MESSAGE);
-      interruptConvertOnSecondStep("Rub", "RUB", STOP, STOP_MESSAGE);
-      interruptConvertOnSecondStep("EUR", "EUR", CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //wrong currency
-      interruptConvertOnSecondStep("123", "123", START, START_MESSAGE);
-      interruptConvertOnSecondStep("ZZZ", "ZZZ", STOP, STOP_MESSAGE);
-      interruptConvertOnSecondStep("Bot", "BOT", CONVERT, FIRST_CONVERT_MESSAGE);
-
+      interruptConvertOnSecondStep("uah", START, START_MESSAGE);
+      interruptConvertOnSecondStep("Rub", STOP, STOP_MESSAGE);
+      interruptConvertOnSecondStep("EUR", CONVERT, FIRST_CONVERT_MESSAGE);
 
       //unsupported currency
-      interruptConvertOnSecondStep("tmm", "TMM", START, START_MESSAGE);
-      interruptConvertOnSecondStep("zwd", "ZWD", STOP, STOP_MESSAGE);
-      interruptConvertOnSecondStep("xua", "XUA", CONVERT, FIRST_CONVERT_MESSAGE);
+      interruptConvertOnSecondStep("tmm", START, START_MESSAGE);
+      interruptConvertOnSecondStep("zwd", STOP, STOP_MESSAGE);
+      interruptConvertOnSecondStep("xua", CONVERT, FIRST_CONVERT_MESSAGE);
+
+      //interrupt by one line request
+      interruptConvertOnSecondStepByOneLine("pln", "10 BGN in EUR");
+      interruptConvertOnSecondStepByOneLine("XXX", "10 INR in PHP");
+      interruptConvertOnSecondStepByOneLine("Cop", "10 Uah in Cad");
+
    }
 
    /**
@@ -516,60 +597,46 @@ public class BotServiceTest {
     */
    @Test
    void interruptConvertOnThirdStepTest() {
+      //it is possible, if both currency is valid
       //both correct currency
-      interruptConvertOnThirdStep("Pln", "PLN", "Eur", "EUR", START, START_MESSAGE);
-      interruptConvertOnThirdStep("BgN", "BGN", "TRy", "TRY", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("All", "ALL", "PHP", "PHP", CONVERT, FIRST_CONVERT_MESSAGE);
-
+      interruptConvertOnThirdStep("Pln", "Eur", START, START_MESSAGE);
+      interruptConvertOnThirdStep("BgN", "TRy", STOP, STOP_MESSAGE);
+      interruptConvertOnThirdStep("All", "PHP", CONVERT, FIRST_CONVERT_MESSAGE);
 
       //first correct, second unsupported
-      interruptConvertOnThirdStep("Cad", "CAD", "iep", "IEP", START, START_MESSAGE);
-      interruptConvertOnThirdStep("CZk", "CZK", "xbb", "XBB", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("IQD", "IQD", "N L G", "NLG", CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //first correct, second wrong
-      interruptConvertOnThirdStep("mxn", "MXN", "sun", "SUN", START, START_MESSAGE);
-      interruptConvertOnThirdStep("Uzs", "UZS", "java", "JAVA", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("MOP", "MOP", "Telegram", "TELEGRAM", CONVERT, FIRST_CONVERT_MESSAGE);
-
+      interruptConvertOnThirdStep("Cad", "iep", START, START_MESSAGE);
+      interruptConvertOnThirdStep("CZk", "xbb", STOP, STOP_MESSAGE);
+      interruptConvertOnThirdStep("IQD", "NLG", CONVERT, FIRST_CONVERT_MESSAGE);
 
       //first unsupported, second correct
-      interruptConvertOnThirdStep("Mtl", "MTL", "bif", "BIF", START, START_MESSAGE);
-      interruptConvertOnThirdStep("Eec", "EEC", "cop", "COP", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("Mgf", "MGF", "Ars", "ARS", CONVERT, FIRST_CONVERT_MESSAGE);
-
+      interruptConvertOnThirdStep("Mtl", "bif", START, START_MESSAGE);
+      interruptConvertOnThirdStep("Xbb", "cop", STOP, STOP_MESSAGE);
+      interruptConvertOnThirdStep("Mgf", "Ars", CONVERT, FIRST_CONVERT_MESSAGE);
 
       //both unsupported
-      interruptConvertOnThirdStep("Usn", "USN", "byb", "BYB", START, START_MESSAGE);
-      interruptConvertOnThirdStep("Fim", "FIM", "Trl", "TRL", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("CHW", "CHW", "USS", "USS", CONVERT, FIRST_CONVERT_MESSAGE);
+      interruptConvertOnThirdStep("Usn", "byb", START, START_MESSAGE);
+      interruptConvertOnThirdStep("Fim", "Trl", STOP, STOP_MESSAGE);
+      interruptConvertOnThirdStep("CHW", "USS", CONVERT, FIRST_CONVERT_MESSAGE);
+
+   }
+
+   @Test
+   void wrongFirstCurrencyTest() {
+      wrongFirstCurrency("gryvna");
+      wrongFirstCurrency("dollars");
+      wrongFirstCurrency("hello");
+      wrongFirstCurrency("u s d");
+      wrongFirstCurrency("plm");
+   }
 
 
-      //first unsupported, second wrong
-      interruptConvertOnThirdStep("Sit", "SIT", "rus", "RUS", START, START_MESSAGE);
-      interruptConvertOnThirdStep("Luf", "LUF", "eng", "ENG", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("A ZM", "AZM", "ua", "UA", CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //first wrong, second correct
-      interruptConvertOnThirdStep("shift", "SHIFT", "Uah", "UAH", START, START_MESSAGE);
-      interruptConvertOnThirdStep("10 usd", "10USD", "Usd", "USD", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("bought", "BOUGHT", "PLN", "PLN", CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //first wrong, second unsupported
-      interruptConvertOnThirdStep("hi", "HI", "Rur", "RUR", START, START_MESSAGE);
-      interruptConvertOnThirdStep("bye", "BYE", "Uyi", "UYI", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("111", "111", "Grd", "GRD", CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //both wrong
-      interruptConvertOnThirdStep("lets", "LETS", "oh", "OH", START, START_MESSAGE);
-      interruptConvertOnThirdStep("speak", "SPEAK", "no", "NO", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("english", "ENGLISH", "hurrah", "HURRAH", CONVERT, FIRST_CONVERT_MESSAGE);
-
-
+   @Test
+   void wrongSecondCurrencyTest() {
+      wrongSecondCurrency("uah", "why");
+      wrongSecondCurrency("Rub", "dollars");
+      wrongSecondCurrency("XBC", "u sd");
+      wrongSecondCurrency("Rur", "euro");
+      wrongSecondCurrency("Usd", "sdu");
    }
 
    /**
@@ -578,255 +645,157 @@ public class BotServiceTest {
    @Test
    void commandAfterConversionTest() {
       //with right currencies and right amount
-      rightScript("Pln", "PLN", "Usd", "USD", "30.6");
-      compute(START, START_MESSAGE);
+      rightScript("Pln", "Usd", "30.6");
+      assertCommand(START, START_MESSAGE);
 
-      rightScript("EUr", "EUR", "UAh", "UAH", "150,50");
-      compute(STOP, STOP_MESSAGE);
+      rightScript("EUr", "UAh", "150,50");
+      assertCommand(STOP, STOP_MESSAGE);
 
-      rightScript("Inr", "INR", "Rub", "RUB", "29");
+      rightScript("Inr", "Rub", "29");
       oneLineRequest("12 uah to eur");
 
-      rightScript("RUB", "RUB", "CAD", "CAD", "542");
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      rightScript("RUB", "CAD", "542");
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
 
       //with right currencies and wrong amount
-      withWrongAmount("Myr", "MYR", "KhR", "KHR", "-67");
-      compute(START, START_MESSAGE);
+      withWrongAmount("Myr", "KhR", "-67");
+      assertCommand(START, START_MESSAGE);
 
-      withWrongAmount("Mxv", "MXV", "XAU", "XAU", "one");
-      compute(STOP, STOP_MESSAGE);
+      withWrongAmount("Mxv", "XAU", "one");
+      assertCommand(STOP, STOP_MESSAGE);
 
-      withWrongAmount("php", "PHP", "uah", "UAH", "-1");
+      withWrongAmount("php", "uah", "-1");
       oneLineRequest("99 Pln in Uah");
 
-      withWrongAmount("LTL", "LTL", "QAR", "QAR", "167f");
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      withWrongAmount("LTL", "QAR", "167f");
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
 
       //first currency correct, second unsupported, right amount
-      withUnsupportedCurrency("PLN", "PLN", "ITL", "ITL", "0.1", true);
-      compute(START, START_MESSAGE);
+      withUnsupportedCurrency("PLN", "ITL", "0.1", true);
+      assertCommand(START, START_MESSAGE);
 
-      withUnsupportedCurrency("EUr", "EUR", "Bov", "BOV", "150,50", true);
-      compute(STOP, STOP_MESSAGE);
+      withUnsupportedCurrency("EUr", "Bov", "150,50", true);
+      assertCommand(STOP, STOP_MESSAGE);
 
-      withUnsupportedCurrency("pln", "PLN", "Iep", "IEP", "77.2",true);
+      withUnsupportedCurrency("pln", "Iep", "77.2", true);
       oneLineRequest("0.75 usd in rub");
 
-      withUnsupportedCurrency("UAH", "UAH", "XUA", "XUA", "542", true);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      withUnsupportedCurrency("UAH", "XUA", "542", true);
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
 
       //first currency correct, second unsupported, wrong amount
-      withWrongAmount("Gel", "GEL", "ITL", "ITL", "0.11,");
-      compute(START, START_MESSAGE);
+      withWrongAmount("Gel", "ITL", "0.11,");
+      assertCommand(START, START_MESSAGE);
 
-      withWrongAmount("Cny", "CNY", "Che", "CHE", "-98");
-      compute(STOP, STOP_MESSAGE);
+      withWrongAmount("Cny", "Che", "-98");
+      assertCommand(STOP, STOP_MESSAGE);
 
-      withWrongAmount("Xcd", "XCD", "XXX", "XXX", "4$");
+      withWrongAmount("Xcd", "XXX", "4$");
       oneLineRequest("100 eur to eur");
 
-      withWrongAmount("USD", "USD", "SRG", "SRG", "87$");
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      withWrongAmount("USD", "SRG", "87$");
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
 
-      //first currency correct, second wrong, right amount
-      withWrongCurrency("UAH", "UAH", "rubli", "RUBLI", "2000", true);
-      compute(START, START_MESSAGE);
+      //first currency correct, second wrong
+      wrongSecondCurrency("Inr", "rubli");
+      assertCommand(START, START_MESSAGE);
 
-      withWrongCurrency("bgn", "BGN", "uusd", "UUSD", "12000", true);
-      compute(STOP, STOP_MESSAGE);
+      wrongSecondCurrency("Bgn", "udd");
+      assertCommand(STOP, STOP_MESSAGE);
 
-      withWrongCurrency("Php", "PHP", "Rubli", "RUBLI", "13.2",true);
+      wrongSecondCurrency("Eur", "78");
       oneLineRequest("54.8 Inr in usd");
 
-      withWrongCurrency("Try", "TRY", "euro", "EURO", "10", true);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //first currency correct, second wrong, wrong amount
-      withWrongCurrency("Xof", "XOF", "hi", "HI", "abc", true);
-      compute(START, START_MESSAGE);
-
-      withWrongCurrency("SYP", "SYP", "big", "BIG", "-12", true);
-      compute(STOP, STOP_MESSAGE);
-
-      withWrongCurrency("Irr", "IRR", "mum", "MUM", "127h",true);
-      oneLineRequest("9.4 byn to xof");
-
-      withWrongCurrency("USD", "USD", "from", "FROM", "12.5%", true);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      wrongSecondCurrency("Uah", "usd$");
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
 
       //first currency unsupported, second correct, right amount
-      withUnsupportedCurrency("xts", "XTS", "dop", "DOP", "301", false);
-      compute(START, START_MESSAGE);
+      withUnsupportedCurrency("xts", "dop", "301", false);
+      assertCommand(START, START_MESSAGE);
 
-      withUnsupportedCurrency("SRG", "SRG", "UYU", "UYU", "7", false);
-      compute(STOP, STOP_MESSAGE);
+      withUnsupportedCurrency("SRG", "UYU", "7", false);
+      assertCommand(STOP, STOP_MESSAGE);
 
-      withUnsupportedCurrency("Rur", "RUR", "Rub", "RUB", "122",false);
+      withUnsupportedCurrency("Rur", "Rub", "122", false);
       oneLineRequest("2000 lsl in zmw");
 
-      withUnsupportedCurrency("zWR", "ZWR", "INR", "INR", "800", false);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      withUnsupportedCurrency("zWR", "INR", "800", false);
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
 
       //first currency unsupported, second correct, wrong amount
-      withWrongAmount("cou", "COU", "ern", "ERN", "-17");
-      compute(START, START_MESSAGE);
+      withWrongAmount("cou", "ern", "-17");
+      assertCommand(START, START_MESSAGE);
 
-      withWrongAmount("esp", "ESP", "lvl", "LVL", "a");
-      compute(STOP, STOP_MESSAGE);
+      withWrongAmount("esp", "lvl", "a");
+      assertCommand(STOP, STOP_MESSAGE);
 
-      withWrongAmount("Bef", "BEF", "Uah", "UAH", "2+1");
+      withWrongAmount("Bef", "Uah", "2+1");
       oneLineRequest("118 eur to php");
 
-      withWrongAmount("zWR", "ZWR", "INR", "INR", "111..");
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      withWrongAmount("zWR", "INR", "111..");
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
 
       //both currencies unsupported, right amount
-      withUnsupportedCurrency("xts", "XTS", "csd", "CSD", "804", false);
-      compute(START, START_MESSAGE);
+      withUnsupportedCurrency("xts", "csd", "804", false);
+      assertCommand(START, START_MESSAGE);
 
-      withUnsupportedCurrency("SRG", "SRG", "aym", "AYM", "90.7", false);
-      compute(STOP, STOP_MESSAGE);
+      withUnsupportedCurrency("SRG", "aym", "90.7", false);
+      assertCommand(STOP, STOP_MESSAGE);
 
-      withUnsupportedCurrency("Xua", "XUA", "Xbb", "XBB", "500.6",false);
+      withUnsupportedCurrency("Xua", "Xbb", "500.6", false);
       oneLineRequest("1 rub in pln");
 
-      withUnsupportedCurrency("zWR", "ZWR", "Iep", "IEP", "505,5", false);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      withUnsupportedCurrency("zWR", "Iep", "505,5", false);
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
 
       //both currencies unsupported, wrong amount
-      withWrongAmount("mtl", "MTL", "USS", "USS", "-10000");
-      compute(START, START_MESSAGE);
+      withWrongAmount("mtl", "USS", "-10000");
+      assertCommand(START, START_MESSAGE);
 
-      withWrongAmount("rol", "ROL", "RUr", "RUR", "12 6");
-      compute(STOP, STOP_MESSAGE);
+      withWrongAmount("rol", "RUr", "12 6");
+      assertCommand(STOP, STOP_MESSAGE);
 
-      withWrongAmount("Gwp", "GWP", "Che", "CHE", "211 219.");
+      withWrongAmount("Gwp", "Che", "211 219.");
       oneLineRequest("9,9 lkr to mzn");
 
-      withWrongAmount("sKK", "SKK", "Xbb", "XBB", "08,,1");
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      withWrongAmount("sKK", "Xbb", "08,,1");
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
 
       //first currency unsupported, second wrong, right amount
-      withWrongCurrency("xxx", "XXX", "val", "VAL", "13.3", true);
-      compute(START, START_MESSAGE);
+      wrongSecondCurrency("fim", "affa");
+      assertCommand(START, START_MESSAGE);
 
-      withWrongCurrency("Fim", "FIM", "little", "LITTLE", "444", true);
-      compute(STOP, STOP_MESSAGE);
+      wrongSecondCurrency("pte", "/help");
+      assertCommand(STOP, STOP_MESSAGE);
 
-      withWrongCurrency("pte", "PTE", "pet", "PET", "0",true);
+      wrongSecondCurrency("veb", "dollars");
       oneLineRequest("562 bob in pab");
 
-      withWrongCurrency("CSD", "CSD", "sad", "SAD", "222222222222", true);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      wrongSecondCurrency("zwn", "convert");
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
 
-      //first currency unsupported, second wrong, wrong amount
-      withWrongCurrency("xua", "XUA", "I", "I", "0 01", true);
-      compute(START, START_MESSAGE);
+      //first currency wrong
+      wrongFirstCurrency("start");
+      assertCommand(START, START_MESSAGE);
 
-      withWrongCurrency("Gwp", "GWP", "find", "FIND", "-10", true);
-      compute(STOP, STOP_MESSAGE);
+      wrongFirstCurrency("pounds");
+      assertCommand(STOP, STOP_MESSAGE);
 
-      withWrongCurrency("Fim", "FIM", "Film", "FILM", "-2a",true);
-      oneLineRequest("83 xcd to uah");
-
-      withWrongCurrency("Nlg", "NLG", "you", "YOU", "16p", true);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //first currency wrong, second correct, right amount
-      withWrongCurrency("russian", "RUSSIAN", "uah", "UAH", "300", false);
-      compute(START, START_MESSAGE);
-
-      withWrongCurrency("spanish", "SPANISH", "usd", "USD", "10.5", false);
-      compute(STOP, STOP_MESSAGE);
-
-      withWrongCurrency("star", "STAR", "eur", "EUR", "700",false);
-      oneLineRequest("111 irr in inr");
-
-      withWrongCurrency("canadian", "CANADIAN", "eur", "EUR", "600", false);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //first currency wrong, second correct, wrong amount
-      withWrongCurrency("tttttttt", "TTTTTTTT", "isk", "ISK", "-34", false);
-      compute(START, START_MESSAGE);
-
-      withWrongCurrency("aaaa", "AAAA", "tmt", "TMT", "7.7.", false);
-      compute(STOP, STOP_MESSAGE);
-
-      withWrongCurrency("treasure", "TREASURE", "CUP", "CUP", "-21.1",false);
-      oneLineRequest("843 cup to usd");
-
-      withWrongCurrency("Poln", "POLN", "pyg", "PYG", "9pln", false);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //first currency wrong, second unsupported, right amount
-      withWrongCurrency("lalala", "LALALA", "tMM", "TMM", "21", false);
-      compute(START, START_MESSAGE);
-
-      withWrongCurrency("tururu", "TURURU", "luf", "LUF", "18,40", false);
-      compute(STOP, STOP_MESSAGE);
-
-      withWrongCurrency("song", "SONG", "uss", "USS", "10",false);
-      oneLineRequest("782 jpy in eur");
-
-      withWrongCurrency("bah", "BAH", "azm", "AZM", "0.52", false);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //first currency wrong, second unsupported, wrong amount
-      withWrongCurrency("go", "GO", "xts", "XTS", "-0.1", false);
-      compute(START, START_MESSAGE);
-
-      withWrongCurrency("wait", "WAIT", "veb", "VEB", "veb", false);
-      compute(STOP, STOP_MESSAGE);
-
-      withWrongCurrency("pencil", "PENCIL", "XBC", "XBC", "44.4",false);
-      oneLineRequest("300 uah to rub");
-
-      withWrongCurrency("stop", "STOP", "eec", "EEC", "9 9", false);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //both currencies wrong, right amount
-      withWrongCurrency("dog", "DOG", "bird", "BIRD", "100000", false);
-      compute(START, START_MESSAGE);
-
-      withWrongCurrency("snow", "SNOW", "water", "WATER", "30", false);
-      compute(STOP, STOP_MESSAGE);
-
-      withWrongCurrency("question", "QUESTION", "answer", "ANSWER", "333.333",false);
-      oneLineRequest("28,7 omr in php");
-
-      withWrongCurrency("part", "PART", "whole", "WHOLE", "58", false);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //both currencies wrong, wrong amount
-      withWrongCurrency("spoon", "SPOON", "plate", "PLATE", "4 cups", false);
-      compute(START, START_MESSAGE);
-
-      withWrongCurrency("child", "CHILD", "man", "MAN", "-2", false);
-      compute(STOP, STOP_MESSAGE);
-
-      withWrongCurrency("nurse", "NURSE", "doctor", "DOCTOR", "-1", false);
+      wrongFirstCurrency("16$");
       oneLineRequest("78921 pln to lkr");
 
-      withWrongCurrency("notes", "NOTES", "book", "BOOK", "4000f", false);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
+      wrongFirstCurrency("25¥");
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
 
    }
 
@@ -835,140 +804,37 @@ public class BotServiceTest {
     */
    @Test
    void fewConvertCommand() {
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      rightScript("usd", "USD", "uah", "UAH", "10");
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      rightScript("usd", "uah", "10");
 
 
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      rightScript("rub", "RUB", "EUR", "EUR", "4");
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      rightScript("rub", "EUR", "4");
    }
 
-   /**
-    * Tests, that if both currencies and amount are correct, that bot's response is equal to expected
-    */
-   @Test
-   void rightScriptTest() {
-      rightScript("usd", "USD", "uah", "UAH", "1");
-      rightScript("brl", "BRL", "Usd", "USD", "77");
-      rightScript("uSd", "USD", "eUr", "EUR", "10,5");
-      rightScript("ruB", "RUB", "caD", "CAD", "33");
-      rightScript("CnY", "CNY", "CzK", "CZK", "12000,75");
-      rightScript("DKk", "DKK", "NZd", "NZD", "13000000001");
-      rightScript("bGN", "BGN", "tRY", "TRY", "0.8");
-      rightScript("RUB", "RUB", "UAH", "UAH", "15");
-      rightScript("p l n", "PLN", "u s d", "USD", "55.4");
-      rightScript("i  n   R", "INR", "e U r", "EUR", "811");
-   }
 
    /**
     * Tests, that if both currencies are correct and amount is wrong, that bot's response is equal to expected
     */
    @Test
    void wrongAmountTest() {
-      withWrongAmount("xof", "XOF", "hnl", "HNL", "-2");
-      withWrongAmount("Lak", "LAK", "Awg", "AWG", "-9,7");
-      withWrongAmount("gEl", "GEL", "aLl", "ALL", "-18.6");
-      withWrongAmount("zaR", "ZAR", "jmD", "JMD", "16f");
-      withWrongAmount("BAm", "BAM", "SZl", "SZL", "14u");
-      withWrongAmount("ItL", "ITL", "GnF", "GNF", "1,1,1");
-      withWrongAmount("sYP", "SYP", "mKD", "MKD", "4.3.4");
-      withWrongAmount("BZD", "BZD", "KWD", "KWD", "apple");
-      withWrongAmount(" Sll ", "SLL", "E tb", "ETB", "2+2");
-      withWrongAmount("A Z N", "AZN", "X P F", "XPF", "p0q");
+      withWrongAmount("xof", "hnl", "-2");
+      withWrongAmount("Lak", "Awg", "-9,7");
+      withWrongAmount("gEl", "aLl", "-18.6");
+      withWrongAmount("zaR", "jmD", "16f");
+      withWrongAmount("BAm", "SZl", "14u");
+      withWrongAmount("ItL", "GnF", "1,1,1");
+      withWrongAmount("sYP", "mKD", "4.3.4");
+      withWrongAmount("BZD", "KWD", "apple");
+      withWrongAmount(" Sll ", "Etb", "2+2");
+      withWrongAmount("AZN ", "XPF", "p0q");
    }
 
-   /**
-    * Tests, that if one or two currencies are wrong, that bot's response is equal to expected for wrong and right amount
-    */
-   @Test
-   void wrongCurrency() {
-      //wrong first currency, right amount
-      withWrongCurrency("sss", "SSS", "aed", "AED", "13", false);
-      withWrongCurrency("Hi", "HI", "Xau", "XAU", "7,5", false);
-      withWrongCurrency("heLLo", "HELLO", "aOa", "AOA", "123,69", false);
-      withWrongCurrency("applE", "APPLE", "sdG", "SDG", "9140000", false);
-      withWrongCurrency("ORAnge", "ORANGE", "MRo", "MRO", "1.1", false);
-      withWrongCurrency("333", "333", "DzD", "DZD", "165", false);
-      withWrongCurrency("NOW", "NOW", "tTD", "TTD", "102", false);
-      withWrongCurrency("COnvERT", "CONVERT", "DKK", "DKK", "54.5", false);
-      withWrongCurrency("Good bye", "GOODBYE", "S vc", "SVC", "99.99", false);
-      withWrongCurrency("PLEASE STOP", "PLEASESTOP", "KP W", "KPW", "87,7", false);
-
-      //wrong first currency, wrong amount
-      withWrongCurrency("sss", "SSS", "aed", "AED", "-2", false);
-      withWrongCurrency("Hi", "HI", "Xau", "XAU", "three", false);
-      withWrongCurrency("heLLo", "HELLO", "aOa", "AOA", "50 dollars", false);
-      withWrongCurrency("applE", "APPLE", "sdG", "SDG", "-4.3", false);
-      withWrongCurrency("ORAnge", "ORANGE", "MRo", "MRO", "7.3.", false);
-      withWrongCurrency("333", "333", "DzD", "DZD", "90f", false);
-      withWrongCurrency("NOW", "NOW", "tTD", "TTD", "11$", false);
-      withWrongCurrency("COnvERT", "CONVERT", "DKK", "DKK", "-9", false);
-      withWrongCurrency("Good bye", "GOODBYE", "S vc", "SVC", "45c", false);
-      withWrongCurrency("PLEASE STOP", "PLEASESTOP", "KP W", "KPW", "-75ru", false);
-
-
-      //wrong second currency, right amount
-      withWrongCurrency("brl", "BRL", "aaa", "AAA", "67", true);
-      withWrongCurrency("Cuc", "CUC", "Currency", "CURRENCY", "21.2", true);
-      withWrongCurrency("bOb", "BOB", "156", "156", "150", true);
-      withWrongCurrency("gtQ", "GTQ", "rtF", "RTF", "916,7", true);
-      withWrongCurrency("SOs", "SOS", "MIne", "MINE", "15000", true);
-      withWrongCurrency("JoD", "JOD", "DEfaUlt", "DEFAULT", "7000", true);
-      withWrongCurrency("iQD", "IQD", "seCOND", "SECOND", "35000,9", true);
-      withWrongCurrency("MWK", "MWK", "MMM", "MMM", "998.98", true);
-      withWrongCurrency("C L P", "CLP", "li s t", "LIST", "46.6", true);
-      withWrongCurrency("P l     n", "PLN", "stop", "STOP", "2", true);
-
-      //wrong second currency, wrong amount
-      withWrongCurrency("brl", "BRL", "aaa", "AAA", "14brl", true);
-      withWrongCurrency("Cuc", "CUC", "Currency", "CURRENCY", "-0", true);
-      withWrongCurrency("bOb", "BOB", "156", "156", "547.2.22", true);
-      withWrongCurrency("gtQ", "GTQ", "rtF", "RTF", "-12", true);
-      withWrongCurrency("SOs", "SOS", "MIne", "MINE", "043A", true);
-      withWrongCurrency("JoD", "JOD", "DEfaUlt", "DEFAULT", "----2", true);
-      withWrongCurrency("iQD", "IQD", "seCOND", "SECOND", "7+0", true);
-      withWrongCurrency("MWK", "MWK", "MMM", "MMM", "18*4", true);
-      withWrongCurrency("C L P", "CLP", "li s t", "LIST", "clp", true);
-      withWrongCurrency("P l     n", "PLN", "stop", "STOP", "amount", true);
-
-
-      //wrong both currencies, right amount
-      withWrongCurrency("pig", "PIG", "cat", "CAT", "26,5", false);
-      withWrongCurrency("Bag", "BAG", "Hat", "HAT", "1000000", false);
-      withWrongCurrency("aPp", "APP", "aPi", "API", "136.6", false);
-      withWrongCurrency("soME", "SOME", "thIS", "THIS", "199", false);
-      withWrongCurrency("NEw", "NEW", "OLd", "OLD", "35", false);
-      withWrongCurrency("MAN", "MAN", "WOMAN", "WOMAN", "88888", false);
-      withWrongCurrency("bitcoin", "BITCOIN", "etherium", "ETHERIUM", "133.33", false);
-      withWrongCurrency("MONEY", "MONEY", "COINS", "COINS", "87,777", false);
-      withWrongCurrency("B o o k", "BOOK", "P la ce", "PLACE", "914.7", false);
-      withWrongCurrency("  convert", "CONVERT", "uaa", "UAA", "0", false);
-
-      //wrong both currencies, wrong amount
-      withWrongCurrency("pig", "PIG", "cat", "CAT", "-500", false);
-      withWrongCurrency("Bag", "BAG", "Hat", "HAT", "$78", false);
-      withWrongCurrency("aPp", "APP", "aPi", "API", "16..5", false);
-      withWrongCurrency("soME", "SOME", "thIS", "THIS", "-", false);
-      withWrongCurrency("NEw", "NEW", "OLd", "OLD", "5%", false);
-      withWrongCurrency("MAN", "MAN", "WOMAN", "WOMAN", "1000-99", false);
-      withWrongCurrency("bitcoin", "BITCOIN", "etherium", "ETHERIUM", "B711.1", false);
-      withWrongCurrency("MONEY", "MONEY", "COINS", "COINS", "io", false);
-      withWrongCurrency("B o o k", "BOOK", "P la ce", "PLACE", "abc", false);
-      withWrongCurrency("  convert", "CONVERT", "uaa", "UAA", "82j", false);
-
-      //first currency is unsupported
-      withWrongCurrency("adp", "ADP", "000", "000", "6", true);
-      withWrongCurrency("Ats", "ATS", "opt", "OPT", "-9.6", true);
-
-      //second currency is unsupported
-      withWrongCurrency("007", "007", "AFA", "AFA", "5500", false);
-      withWrongCurrency("dog", "DOG", "p t e", "PTE", "-76", false);
-   }
 
    /**
     * Tests, that if one or two currencies are unsupported, that bot's response is equal to expected for wrong and right amount
@@ -976,61 +842,70 @@ public class BotServiceTest {
    @Test
    void unsupportedCurrency() {
       //first currency is unsupported, right amount
-      withUnsupportedCurrency("mzm", "MZM", "rub", "RUB", "1000", false);
-      withUnsupportedCurrency("Xpt", "XPT", "Usd", "USD", "2.5", false);
+      withUnsupportedCurrency("mzm", "rub", "1000", false);
+      withUnsupportedCurrency("Xpt", "Usd", "2.5", false);
 
       //first currency is unsupported, wrong amount
-      withWrongAmount("rol", "ROL", "rub", "RUB", "-34543");
-      withWrongAmount("Ghc", "GHC", "Usd", "USD", "511a");
+      withWrongAmount("rol", "rub", "-34543");
+      withWrongAmount("Ghc", "Usd", "511a");
 
 
       //second currency is unsupported, right amount
-      withUnsupportedCurrency("rub", "RUB", "skk", "SKK", "7,6", true);
-      withUnsupportedCurrency("Usd", "USD", "Xbc", "XBC", "762", true);
+      withUnsupportedCurrency("rub", "skk", "7,6", true);
+      withUnsupportedCurrency("Usd", "Xbc", "762", true);
 
       //second currency is unsupported, wrong amount
-      withWrongAmount("rub", "RUB", "veb", "VEB", "one hundred");
-      withWrongAmount("Usd", "USD", "Aym", "AYM", "-4.99q");
+      withWrongAmount("rub", "veb", "one hundred");
+      withWrongAmount("Usd", "Aym", "-4.99q");
 
 
       //both currencies is unsupported, right amount
-      withUnsupportedCurrency("Xbd", "XBD", "Bef", "BEF", "107.5", false);
-      withUnsupportedCurrency("CYP", "CYP", "XXX", "XXX", "20000", false);
+      withUnsupportedCurrency("Xbd", "Bef", "107.5", false);
+      withUnsupportedCurrency("CYP", "XXX", "20000", false);
 
       //both currencies is unsupported, wrong amount
-      withWrongAmount("Xsu", "XSU", "Dem", "DEM", "9*9");
-      withWrongAmount("Xfo", "XFO", "XBA", "XBA", "10+45");
+      withWrongAmount("Xsu", "Dem", "9*9");
+      withWrongAmount("Xfo", "XBA", "10+45");
    }
 
 
    /**
     * Checks, that bot's reaction for interruption conversion on third step by some command is equal to expected
     *
-    * @param firstCurrency             the currency to convert from
-    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
-    * @param secondCurrency            the currency to convert to
-    * @param secondCurrencyInUpperCase the currency to convert to in upper case
-    * @param command                   command after conversion
-    * @param response                  expected bot's response for command
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    * @param command        command after conversion
+    * @param response       expected bot's response for command
     */
-   private void interruptConvertOnThirdStep(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
-                                            String secondCurrencyInUpperCase, String command, String response) {
-      script(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase);
-      compute(command, response);
+   private void interruptConvertOnThirdStep(String firstCurrency, String secondCurrency,
+                                            String command, String response) {
+      script(firstCurrency, secondCurrency);
+      assertCommand(command, response);
+   }
+
+   /**
+    * Checks, that bot's reaction for interruption conversion on second step by one line command is equal to expected
+    *
+    * @param firstCurrency the currency to convert from
+    * @param request       correct one line request
+    */
+   private void interruptConvertOnSecondStepByOneLine(String firstCurrency, String request) {
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency.toUpperCase().trim() + SECOND_CONVERT_MESSAGE_2);
+      oneLineRequest(request);
    }
 
    /**
     * Checks, that bot's reaction for interruption conversion on second step by some command is equal to expected
     *
-    * @param firstCurrency            the currency to convert from
-    * @param firstCurrencyInUpperCase the currency to convert from in upper case
-    * @param command                  command after conversion
-    * @param response                 expected bot's response for command
+    * @param firstCurrency the currency to convert from
+    * @param command       command after conversion
+    * @param response      expected bot's response for command
     */
-   private void interruptConvertOnSecondStep(String firstCurrency, String firstCurrencyInUpperCase, String command, String response) {
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      compute(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrencyInUpperCase + SECOND_CONVERT_MESSAGE_2);
-      compute(command, response);
+   private void interruptConvertOnSecondStep(String firstCurrency, String command, String response) {
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency.trim().toUpperCase() + SECOND_CONVERT_MESSAGE_2);
+      assertCommand(command, response);
    }
 
    /**
@@ -1042,7 +917,7 @@ public class BotServiceTest {
     */
    private void wordAndCommand(String word, String command, String response) {
       enterOtherWords(word);
-      compute(command, response);
+      assertCommand(command, response);
    }
 
    /**
@@ -1053,7 +928,7 @@ public class BotServiceTest {
     * @param word     some word, which is not a command and gotten after command
     */
    private void commandAndWord(String command, String response, String word) {
-      compute(command, response);
+      assertCommand(command, response);
       enterOtherWords(word);
    }
 
@@ -1066,131 +941,95 @@ public class BotServiceTest {
     * @param secondResponse expected bot's response for next command
     */
    private void twoCommands(String firstCommand, String firstResponse, String secondCommand, String secondResponse) {
-      compute(firstCommand, firstResponse);
-      compute(secondCommand, secondResponse);
+      assertCommand(firstCommand, firstResponse);
+      assertCommand(secondCommand, secondResponse);
    }
 
    /**
     * Checks, that bot's reaction in conversion for unsupported currencies is equal to expected
     *
-    * @param firstCurrency             the currency to convert from
-    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
-    * @param secondCurrency            the currency to convert to
-    * @param secondCurrencyInUpperCase the currency to convert to in upper case
-    * @param amount                    amount of first currency
-    * @param firstIsCorrect            true, if first currency is right and supported, false otherwise
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    * @param amount         amount of first currency
+    * @param firstIsCorrect true, if first currency is right and supported, false otherwise
     */
-   private void withUnsupportedCurrency(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
-                                        String secondCurrencyInUpperCase, String amount, boolean firstIsCorrect) {
-      rightScriptWithIncorrectCurrency(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase, amount,
-              firstIsCorrect, true);
-   }
-
-   /**
-    * Checks, that bot's reaction in conversion for wrong currencies is equal to expected
-    *
-    * @param firstCurrency             the currency to convert from
-    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
-    * @param secondCurrency            the currency to convert to
-    * @param secondCurrencyInUpperCase the currency to convert to in upper case
-    * @param amount                    amount of first currency
-    * @param firstIsCorrect            false, if first currency is some non-currency word, true otherwise
-    */
-   private void withWrongCurrency(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
-                                  String secondCurrencyInUpperCase, String amount, boolean firstIsCorrect) {
-      rightScriptWithIncorrectCurrency(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase, amount,
-              firstIsCorrect, false);
+   private void withUnsupportedCurrency(String firstCurrency, String secondCurrency,
+                                        String amount, boolean firstIsCorrect) {
+      rightScriptWithIncorrectCurrency(firstCurrency, secondCurrency, amount,
+              firstIsCorrect);
    }
 
    /**
     * Checks, that bot's reaction in conversion for incorrect currencies is equal to expected
     *
-    * @param firstCurrency             the currency to convert from
-    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
-    * @param secondCurrency            the currency to convert to
-    * @param secondCurrencyInUpperCase the currency to convert to in upper case
-    * @param amount                    amount of first currency
-    * @param firstIsCorrect            true, if first currency is right
-    * @param isUnsupported             true,if one or two currencies are unsupported
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    * @param amount         amount of first currency
+    * @param firstIsCorrect true, if first currency is right
     */
-   private void rightScriptWithIncorrectCurrency(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
-                                                 String secondCurrencyInUpperCase, String amount, boolean firstIsCorrect, boolean isUnsupported) {
-      String startOfMessage = "Sorry, but currency is not valid: ";
+   private void rightScriptWithIncorrectCurrency(String firstCurrency, String secondCurrency,
+                                                 String amount, boolean firstIsCorrect) {
+      String startOfMessage = "Currency not supported: ";
       String wrongCurrency;
-      if (isUnsupported) {
-         startOfMessage = "Currency not supported: ";
-      }
       if (firstIsCorrect) {
-         wrongCurrency = secondCurrencyInUpperCase;
+         wrongCurrency = secondCurrency;
       } else {
-         wrongCurrency = firstCurrencyInUpperCase;
+         wrongCurrency = firstCurrency;
       }
 
-      String message = startOfMessage + wrongCurrency + CONVERT_MESSAGE;
+      String message = startOfMessage + wrongCurrency.trim().toUpperCase() + CONVERT_MESSAGE;
 
-      rightScriptWithWrongValue(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase, amount, message);
+      rightScriptWithWrongValue(firstCurrency, secondCurrency, amount, message);
 
    }
 
    /**
     * Checks, that bot's reaction in conversion for wrong amount is equal to expected
     *
-    * @param firstCurrency             the currency to convert from
-    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
-    * @param secondCurrency            the currency to convert to
-    * @param secondCurrencyInUpperCase the currency to convert to in upper case
-    * @param amount                    amount of first currency
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    * @param amount         amount of first currency
     */
-   private void withWrongAmount(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
-                                String secondCurrencyInUpperCase, String amount) {
-      String message = "Sorry, but \"" + amount + "\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE;
-      rightScriptWithWrongValue(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase, amount, message);
+   private void withWrongAmount(String firstCurrency, String secondCurrency, String amount) {
+      String message = SORRY_BUT + amount + IS_NOT_A_VALID_NUMBER +
+              THIRD_CONVERT_MESSAGE + firstCurrency.trim().toUpperCase() + " to " + secondCurrency.trim().toUpperCase();
+      rightScriptWithWrongValue(firstCurrency, secondCurrency, amount, message);
    }
 
    /**
     * Checks, that bot reaction for conversion, which contains wrong value is equal to expected
     *
-    * @param firstCurrency             the currency to convert from
-    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
-    * @param secondCurrency            the currency to convert to
-    * @param secondCurrencyInUpperCase the currency to convert to in upper case
-    * @param amount                    amount of first currency
-    * @param message                   expected bot's response for given amount
+    * @param firstCurrency the currency to convert from
+    * @param amount        amount of first currency
+    * @param message       expected bot's response for given amount
     */
-   private void rightScriptWithWrongValue(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
-                                          String secondCurrencyInUpperCase, String amount, String message) {
-      script(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase);
-      compute(amount, message);
+   private void rightScriptWithWrongValue(String firstCurrency, String secondCurrency, String amount, String message) {
+      script(firstCurrency, secondCurrency);
+      assertCommand(amount, message);
    }
 
    /**
     * Checks, that bot reaction for consecutive /convert command and last result are equal to expected
     *
-    * @param firstCurrency             the currency to convert from
-    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
-    * @param secondCurrency            the currency to convert to
-    * @param secondCurrencyInUpperCase the currency to convert to in upper case
-    * @param amount                    amount of first currency
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    * @param amount         amount of first currency
     */
-   private void rightScript(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
-                            String secondCurrencyInUpperCase, String amount) {
-      script(firstCurrency, firstCurrencyInUpperCase, secondCurrency, secondCurrencyInUpperCase);
-      checkResult(amount, firstCurrencyInUpperCase, secondCurrencyInUpperCase);
+   private void rightScript(String firstCurrency, String secondCurrency, String amount) {
+      script(firstCurrency, secondCurrency);
+      checkResult(amount, firstCurrency, secondCurrency);
    }
 
    /**
     * Checks, that bot's responses on conversion steps are equal to expected
     *
-    * @param firstCurrency             the currency to convert from
-    * @param firstCurrencyInUpperCase  the currency to convert from in upper case
-    * @param secondCurrency            the currency to convert to
-    * @param secondCurrencyInUpperCase the currency to convert to in upper case
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
     */
-   private void script(String firstCurrency, String firstCurrencyInUpperCase, String secondCurrency,
-                       String secondCurrencyInUpperCase) {
-      compute(CONVERT, FIRST_CONVERT_MESSAGE);
-      compute(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrencyInUpperCase + SECOND_CONVERT_MESSAGE_2);
-      compute(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrencyInUpperCase + " to " + secondCurrencyInUpperCase);
+   private void script(String firstCurrency, String secondCurrency) {
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency.trim().toUpperCase() + SECOND_CONVERT_MESSAGE_2);
+      assertCommand(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrency.trim().toUpperCase() + " to " + secondCurrency.trim().toUpperCase());
    }
 
    /**
@@ -1199,7 +1038,7 @@ public class BotServiceTest {
     * @param message some word, which is not a command
     */
    private void enterOtherWords(String message) {
-      compute(message, INCORRECT_REQUEST_MESSAGE);
+      assertCommand(message, INCORRECT_REQUEST_MESSAGE);
    }
 
    /**
@@ -1215,11 +1054,11 @@ public class BotServiceTest {
       if (firstIsCorrect) {
          wrongCurrency = words[3];
       }
-      String message = "Currency not supported: ";
+      String message = "Currency not supported: " + wrongCurrency.toUpperCase() + CONVERT_MESSAGE;
       if (!isUnsupported) {
-         message = "Sorry, but currency is not valid: ";
+         message = SORRY_BUT + wrongCurrency.toUpperCase() + IS_NOT_A_VALID_CURRENCY;
       }
-      compute(request, message + wrongCurrency.toUpperCase() + CONVERT_MESSAGE);
+      assertCommand(request, message);
    }
 
    /**
@@ -1231,10 +1070,10 @@ public class BotServiceTest {
     * @param commandResponse response to command
     */
    private void incorrectOneLineRequestAndCommand(String request, String response, String command, String commandResponse) {
-      compute(request, response);
-      compute(command, commandResponse);
+      assertCommand(request, response);
+      assertCommand(command, commandResponse);
       if (command.equals(CONVERT)) {
-         testBotService.onUpdateReceived(STOP, testUser);
+         testBotService.processCommand(STOP, testUser);
       }
    }
 
@@ -1248,10 +1087,10 @@ public class BotServiceTest {
     * @param requestResponse response to one line request
     */
    private void commandAndIncorrectOneLineRequest(String command, String response, String request, String requestResponse) {
-      compute(command, response);
-      compute(request, requestResponse);
+      assertCommand(command, response);
+      assertCommand(request, requestResponse);
       if (command.equals(CONVERT)) {
-         testBotService.onUpdateReceived(STOP, testUser);
+         testBotService.processCommand(STOP, testUser);
       }
    }
 
@@ -1264,13 +1103,13 @@ public class BotServiceTest {
     * @param request  currency request
     */
    private void commandAndOneLineRequest(String command, String response, String request) {
-      compute(command, response);
+      assertCommand(command, response);
       if (!command.equals(CONVERT)) {
          oneLineRequest(request);
       } else {
-         compute(request, SECOND_CONVERT_MESSAGE_1 + request.replaceAll(" ", "").toUpperCase()
+         assertCommand(request, SECOND_CONVERT_MESSAGE_1 + request.replaceAll(" ", "").toUpperCase()
                  + SECOND_CONVERT_MESSAGE_2);
-         testBotService.onUpdateReceived(STOP, testUser);
+         testBotService.processCommand(STOP, testUser);
       }
    }
 
@@ -1283,9 +1122,9 @@ public class BotServiceTest {
     */
    private void oneLineRequestAndCommand(String request, String command, String response) {
       oneLineRequest(request);
-      compute(command, response);
+      assertCommand(command, response);
       if (command.equals(CONVERT)) {
-         testBotService.onUpdateReceived(STOP, testUser);
+         testBotService.processCommand(STOP, testUser);
       }
    }
 
@@ -1297,7 +1136,7 @@ public class BotServiceTest {
    private void oneLineRequestWithWrongAmount(String request) {
       String[] words = request.split("\\s+");
       String amount = words[0];
-      compute(request, "Sorry, but \"" + amount + "\" is not a valid number. Conversion is impossible." + CONVERT_MESSAGE);
+      assertCommand(request, SORRY_BUT + amount + IS_NOT_A_VALID_NUMBER);
    }
 
    /**
@@ -1306,7 +1145,7 @@ public class BotServiceTest {
     * @param request currency request
     */
    private void oneLineRequest(String request) {
-      String botsResponse = testBotService.onUpdateReceived(request, testUser);
+      String botsResponse = testBotService.processCommand(request, testUser);
       String[] words = request.split("\\s+");
       String start = words[0] + " " + words[1].toUpperCase() + " is ";
       assertTrue(botsResponse.startsWith(start));
@@ -1323,10 +1162,20 @@ public class BotServiceTest {
     * @param usersMessage user's request to bot
     * @param botsResponse expected bot's response to user
     */
-   private void compute(String usersMessage, String botsResponse) {
-      assertEquals(botsResponse, testBotService.onUpdateReceived(usersMessage, testUser));
+   private void assertCommand(String usersMessage, String botsResponse) {
+      assertEquals(botsResponse, testBotService.processCommand(usersMessage, testUser));
    }
 
+   /**
+    * Checks, that bot's response for random user's request is correct
+    *
+    * @param usersMessage user's request to bot
+    * @param botsResponse expected bot's response to user
+    */
+   private void assertCommandFromRandomUser(String usersMessage, String botsResponse){
+      User user = new User(RANDOM.nextInt(1000), UUID.randomUUID().toString());
+      assertEquals(botsResponse, testBotService.processCommand(usersMessage, user));
+   }
    /**
     * Checks, that on last step bot's response contains positive value
     *
@@ -1335,8 +1184,10 @@ public class BotServiceTest {
     * @param amount         amount of first currency
     */
    private void checkResult(String amount, String firstCurrency, String secondCurrency) {
+      firstCurrency = firstCurrency.trim().toUpperCase();
+      secondCurrency = secondCurrency.trim().toUpperCase();
       String start = amount + " " + firstCurrency + " is ";
-      String botsResponse = testBotService.onUpdateReceived(amount, testUser);
+      String botsResponse = testBotService.processCommand(amount, testUser);
       assertTrue(botsResponse.startsWith(start));
       assertTrue(botsResponse.endsWith(secondCurrency));
       String value = botsResponse.replace(start, "").replace(" " + secondCurrency, "");
@@ -1345,4 +1196,85 @@ public class BotServiceTest {
    }
 
 
+   /**
+    * Checks, that if first currency is incorrect, that we come back to previous step
+    *
+    * @param firstCurrency the currency to convert from
+    */
+   private void wrongFirstCurrency(String firstCurrency) {
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(firstCurrency, SORRY_BUT + firstCurrency + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE);
+   }
+
+   /**
+    * Checks, that if second currency is incorrect, that we come back to previous step
+    *
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    */
+   private void wrongSecondCurrency(String firstCurrency, String secondCurrency) {
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      String message = SECOND_CONVERT_MESSAGE_1 + firstCurrency.trim().toUpperCase() + SECOND_CONVERT_MESSAGE_2;
+      assertCommand(firstCurrency, message);
+      assertCommand(secondCurrency, SORRY_BUT + secondCurrency + IS_NOT_A_VALID_CURRENCY + message);
+   }
+
+
+   /**
+    * Checks, that if we convert currency to itself, that we get the same amount
+    *
+    * @param currency currency, which has to be checked
+    */
+   private void rightScriptWithIdenticalCurrency(String currency) {
+      Float number = RANDOM.nextFloat() * 1000;
+      String amount = Float.toString(number);
+      String result = DECIMAL_FORMATTER.format(number);
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(currency, SECOND_CONVERT_MESSAGE_1 + currency + SECOND_CONVERT_MESSAGE_2);
+      assertCommand(currency, THIRD_CONVERT_MESSAGE + currency + " to " + currency);
+      assertCommand(amount, amount + " " + currency + " is " + result + " " + currency);
+   }
+
+   /**
+    * Checks, that if amount is zero, result of conversion would be zero
+    *
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    */
+   private void zeroAmount(String firstCurrency, String secondCurrency) {
+      String zero = "0";
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2);
+      assertCommand(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency);
+      assertCommand(zero, zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
+   }
+
+   /**
+    * Checks, that if we convert currency to itself, that we get the same amount
+    *
+    * @param currency currency, which has to be checked
+    */
+   private void oneLineRequestWithIdenticalCurrency(String currency) {
+      String[] words = {" in ", " to "};
+      int n = RANDOM.nextInt(2);
+      Float number = RANDOM.nextFloat() * 1000;
+      String amount = Float.toString(number);
+      String result = DECIMAL_FORMATTER.format(number);
+      String request = amount + " " + currency + words[n] + currency;
+      assertCommand(request, amount + " " + currency + " is " + result + " " + currency);
+   }
+
+   /**
+    * Checks, that if amount is zero, result of conversion would be zero
+    *
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    */
+   private void zeroAmountOneLine(String firstCurrency, String secondCurrency) {
+      String[] words = {" in ", " to "};
+      int n = RANDOM.nextInt(2);
+      String zero = "0";
+      String request = zero + " " + firstCurrency + words[n] + secondCurrency;
+      assertCommand(request, zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
+   }
 }

@@ -24,48 +24,49 @@ import static org.junit.Assert.assertTrue;
 public class DialogDaoImplTest {
 
    /**
-    * Greeting message to user
-    */
-   private static final String START_MESSAGE = BotService.START_MESSAGE;
-
-   /**
     * Message to the user with the suggestion of a new conversion
     */
-   private static final String CONVERT_MESSAGE = BotService.CONVERT_MESSAGE;
+   private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
+           " 1️⃣ with using /convert command\n\n 2️⃣ type me a request by single line " +
+           "(Example: 10 USD in UAH)";
+   /**
+    * Greeting message to user
+    */
+   private static final String START_MESSAGE = "Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
    /**
     * Stop message to the user
     */
-   private static final String STOP_MESSAGE = BotService.STOP_MESSAGE;
+   private static final String STOP_MESSAGE = "🆗." + CONVERT_MESSAGE;
 
    /**
     * Bot's command to start conversation
     */
-   private static final String START = BotService.START;
+   private static final String START = "/start";
    /**
     * Bot's command to start convert currencies
     */
-   private static final String CONVERT = BotService.CONVERT;
+   private static final String CONVERT = "/convert";
+
    /**
     * Bot's command to stop conversation
     */
-   private static final String STOP = BotService.STOP;
+   private static final String STOP = "/stop";
    /**
     * Bot's response for /convert command
     */
-   private static final String FIRST_CONVERT_MESSAGE = BotService.FIRST_CONVERT_MESSAGE;
+   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
    /**
     * Start of bot's response after entering first currency
     */
-   private static final String SECOND_CONVERT_MESSAGE_1 = BotService.SECOND_CONVERT_MESSAGE_1;
+   private static final String SECOND_CONVERT_MESSAGE_1 = "What currency do you want to convert from ";
    /**
     * End of bot's response after entering first currency
     */
-   private static final String SECOND_CONVERT_MESSAGE_2 = BotService.SECOND_CONVERT_MESSAGE_2;
+   private static final String SECOND_CONVERT_MESSAGE_2 = " to? (example: EUR)";
    /**
     * Bot's response after entering second currency
     */
-   private static final String THIRD_CONVERT_MESSAGE = BotService.THIRD_CONVERT_MESSAGE;
-
+   private static final String THIRD_CONVERT_MESSAGE = "Enter the amount to convert from ";
 
    /**
     * Temporary File, which stores written data

@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * The goal of this test is create webSocket follower - {@link ClientEndPoint},
- * call {@link BotService#onUpdateReceived(String, User)} method, it have to send
+ * call {@link BotService#processCommand(String, User)} method, it have to send
  * instance of {@link Dialog} to webSocket followers and catch it in {@link ClientEndPoint}
  *
  * @author Dmytro K.
@@ -204,14 +204,14 @@ public class WebSocketTest {
    }
 
    /**
-    * Call {@link BotService#onUpdateReceived(String, User)} which sends to
+    * Call {@link BotService#processCommand(String, User)} which sends to
     * webSocket followers and check it on the log page and in client end point.
     *
     * @param expectedMessage message received from user
     * @throws Exception if an error occurs
     */
    private void integrationTest(String expectedMessage) throws Exception {
-      botService.onUpdateReceived(expectedMessage, user);
+      botService.processCommand(expectedMessage, user);
 
       List<Dialog> dialogs = dialogDao.getAll();
       Dialog dialogFromFile = dialogs.get(dialogs.size() - 1);

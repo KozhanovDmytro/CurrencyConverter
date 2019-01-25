@@ -1,5 +1,6 @@
 package com.implemica.CurrencyConverter.controller;
 
+import com.implemica.CurrencyConverter.model.State;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.implemica.CurrencyConverter.service.BotService;
@@ -10,14 +11,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.*;
+
+import static java.lang.Math.toIntExact;
 
 
 /**
- * This class gets users input from telegram bot and processes it via Converter class
+ * This class gets statesOfUsers input from telegram bot and processes it via Converter class
  *
  * @author Daria S.
  * @version 11.01.2019 17:48
@@ -59,6 +67,20 @@ public class BotController extends TelegramLongPollingBot {
    private SendMessage sendMessage;
 
    /**
+    * Id of chat
+    */
+   private long chatId;
+
+   public long getChatId() {
+      return chatId;
+   }
+
+   /**
+    * Stores users and id chats, where they communicate with bot
+    */
+   private static Map<User, Long> listOfChats = State.listOfChats;
+
+   /**
     * Creates new telegram bot's controller
     *
     * @param bot stores bot's logic
@@ -70,27 +92,60 @@ public class BotController extends TelegramLongPollingBot {
    }
 
    /**
-    * Gets users input and processes it. Writes conversation to .csv file.
+    * Gets statesOfUsers input and processes it. Writes conversation to .csv file.
     *
     * @param update represents an incoming update from Telegram
     */
    @Override
    public void onUpdateReceived(Update update) {
-      Message request = update.getMessage();
-      String command = request.getText();
-      String response;
+      Message message;
+      User user;
+      String command;
+      boolean isBot = false;
 
-      //get information about user
-      User user = getInformationAboutUser(request);
+      if (update.hasMessage()) {
+         message = update.getMessage();
+         command = getCommand(message);
 
-      //dialog with user
-      if (!request.hasText()) {
-         command = UNIQUE;
+      } else {
+         CallbackQuery callbackQuery = update.getCallbackQuery();
+         command = callbackQuery.getData();
+
+         message = callbackQuery.getMessage();
+
+         long message_id = message.getMessageId();
+         chatId = message.getChatId();
+
+         isBot = true;
+         String answer = "You chose " + command;
+         sendEditMessage(message_id, answer);
       }
 
-      //response to user
-      response = bot.onUpdateReceived(command, user);
-      sendMessage(request, response);
+      user = getInformationAboutUser(message);
+      if (isBot) {
+         user = chooseUser(user);
+      }
+      listOfChats.put(user, chatId);
+
+      String response = bot.processCommand(command, user);
+      sendMessage(message, response);
+
+      if (command.equals("/convert") || response.endsWith("USD)") || response.endsWith("EUR)")) {
+         SendMessage s = new SendMessage().setChatId(chatId).setText("Popular currencies: ");
+         createKeyboard(s);
+      }
+
+   }
+
+   private String getCommand(Message message) {
+      String command;
+      chatId = message.getChatId();
+      if (message.hasText()) {
+         command = message.getText();
+      } else {
+         command = UNIQUE;
+      }
+      return command;
    }
 
    /**
@@ -126,6 +181,24 @@ public class BotController extends TelegramLongPollingBot {
    }
 
    /**
+    * Changes message's text to specified
+    *
+    * @param messageId id if message, which has to be changed
+    * @param text      new text of message
+    */
+   private void sendEditMessage(long messageId, String text) {
+      EditMessageText new_message = new EditMessageText()
+              .setChatId(chatId)
+              .setMessageId(toIntExact(messageId))
+              .setText(text);
+      try {
+         execute(new_message);
+      } catch (TelegramApiException e) {
+         logger.error(e.getMessage());
+      }
+   }
+
+   /**
     * User initialisation: id, name, last name, userName.
     *
     * @param message represents an incoming message from Telegram
@@ -154,5 +227,48 @@ public class BotController extends TelegramLongPollingBot {
       return user;
    }
 
+   /**
+    * Create inline keyboard with popular currencies
+    *
+    * @param sendMessage new sender messages to user
+    */
+   private void createKeyboard(SendMessage sendMessage) {
+      List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+
+      List<InlineKeyboardButton> row1 = new ArrayList<>();
+      row1.add(new InlineKeyboardButton().setText("USD").setCallbackData("USD"));
+      row1.add(new InlineKeyboardButton().setText("EUR").setCallbackData("EUR"));
+      buttons.add(row1);
+
+      List<InlineKeyboardButton> row2 = new ArrayList<>();
+      row2.add(new InlineKeyboardButton().setText("RUB").setCallbackData("RUB"));
+      row2.add(new InlineKeyboardButton().setText("UAH").setCallbackData("UAH"));
+      buttons.add(row2);
+
+      InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
+      markupKeyboard.setKeyboard(buttons);
+      sendMessage.setReplyMarkup(markupKeyboard);
+      try {
+         execute(sendMessage);
+      } catch (TelegramApiException e) {
+         logger.error(e.getMessage());
+      }
+   }
+
+   /**
+    * Finds user, which talk to bot
+    *
+    * @param user bot user
+    */
+   private User chooseUser(User user) {
+      Set<Map.Entry<User, Long>> entrySet = listOfChats.entrySet();
+      for (Map.Entry<User, Long> pair : entrySet) {
+         long id = pair.getValue();
+         if (chatId == id) {
+            user = pair.getKey();
+         }
+      }
+      return user;
+   }
 }
 
