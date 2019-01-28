@@ -39,7 +39,7 @@ public class BotService {
    public static final String UNIQUE = UUID.randomUUID().toString();
 
    /**
-    * Start of message for users mistakes
+    * Start of message for mistakes
     */
    private static final String SORRY_BUT = "❗Sorry, but \"";
    /**
@@ -264,20 +264,24 @@ public class BotService {
       String[] request = line.split("\\s+");
       String message;
       firstCurrency = BotValidator.toUpperCase(request[1]);
+
       if (isValidCurrency(firstCurrency)) {
          secondCurrency = BotValidator.toUpperCase(request[3]);
+
          if (isValidCurrency(secondCurrency)) {
             String amount = request[0];
+
             if (isValidAmount(amount)) {
                message = convertValue(amount);
+
             } else {
                message = SORRY_BUT + amount + IS_NOT_A_VALID_NUMBER;
             }
          } else {
-            message = SORRY_BUT + secondCurrency + IS_NOT_A_VALID_CURRENCY;
+            message = SORRY_BUT + secondCurrency + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE;
          }
       } else {
-         message = SORRY_BUT + firstCurrency + IS_NOT_A_VALID_CURRENCY;
+         message = SORRY_BUT + firstCurrency + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE;
       }
       return message;
    }
@@ -310,13 +314,16 @@ public class BotService {
 
          BigDecimal convertedValue = converterService.convert(usersRequest);
          message = "\uD83D\uDCB0" + value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
+
       } catch (CurrencyConverterException e) {
          message = "❗Sorry. " + e.getMessage() + "\n" + CONVERT_MESSAGE;
+
       } catch (ParseException e) {
          message = SORRY_BUT + value + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE;
+
       } catch (IOException e) {
          logger.error(e.getMessage() + " is not responding.");
-         message = "Server is not responding." + CONVERT_MESSAGE;
+         message = SORRY_BUT + "Server is not responding." + CONVERT_MESSAGE;
       }
       return message;
    }

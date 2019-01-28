@@ -40,8 +40,17 @@ public class BotServiceTest {
     * Unique string, which uses for messages, which has non text content.
     */
    private static final String WRONG_CONTENT = BotService.UNIQUE;
+   /**
+    * Start of message for mistakes
+    */
    private static final String SORRY_BUT = "❗Sorry, but \"";
+   /**
+    * End of message about incorrect currency
+    */
    private static final String IS_NOT_A_VALID_CURRENCY = "\" is not a valid currency.\n\n";
+   /**
+    * End of message about incorrect amount
+    */
    private static final String IS_NOT_A_VALID_NUMBER = "\" is not a valid number.\n\n";
 
    /**
@@ -514,15 +523,15 @@ public class BotServiceTest {
               WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       incorrectOneLineRequestAndCommand("16 flowers in uah", SORRY_BUT + "FLOWERS" +
-              IS_NOT_A_VALID_CURRENCY, START, START_MESSAGE);
+              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, START, START_MESSAGE);
       incorrectOneLineRequestAndCommand("101.1 rub to dollars", SORRY_BUT + "DOLLARS" +
-              IS_NOT_A_VALID_CURRENCY, CONVERT, FIRST_CONVERT_MESSAGE);
+              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
       incorrectOneLineRequestAndCommand("7,7 letter in book", SORRY_BUT + "LETTER" +
-              IS_NOT_A_VALID_CURRENCY, STOP, STOP_MESSAGE);
+              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, STOP, STOP_MESSAGE);
       incorrectOneLineRequestAndCommand("568 kitten to afn", SORRY_BUT + "KITTEN" +
-              IS_NOT_A_VALID_CURRENCY, "hi", INCORRECT_REQUEST_MESSAGE);
+              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, "hi", INCORRECT_REQUEST_MESSAGE);
       incorrectOneLineRequestAndCommand("9,9 rain in cloud", SORRY_BUT + "RAIN" +
-              IS_NOT_A_VALID_CURRENCY, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       incorrectOneLineRequestAndCommand("12 uah convertTo usd", INCORRECT_REQUEST_MESSAGE, START, START_MESSAGE);
       incorrectOneLineRequestAndCommand("-213 irr from uer", INCORRECT_REQUEST_MESSAGE, STOP, STOP_MESSAGE);
@@ -560,15 +569,15 @@ public class BotServiceTest {
               "❗Sorry. Currency not supported: USS\n" + CONVERT_MESSAGE);
 
       commandAndIncorrectOneLineRequest(START, START_MESSAGE, "56 ladies to eur", SORRY_BUT +
-              "LADIES" + IS_NOT_A_VALID_CURRENCY);
+              "LADIES" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "18 computers in office", SORRY_BUT +
-              "COMPUTERS" + IS_NOT_A_VALID_CURRENCY);
+              "COMPUTERS" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "21 uah to euro",
-              SORRY_BUT + "EURO" + IS_NOT_A_VALID_CURRENCY);
+              SORRY_BUT + "EURO" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest("try", INCORRECT_REQUEST_MESSAGE, "888 flats in money",
-              SORRY_BUT + "FLATS" + IS_NOT_A_VALID_CURRENCY);
+              SORRY_BUT + "FLATS" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "4,3 rows to text",
-              SORRY_BUT + "ROWS" + IS_NOT_A_VALID_CURRENCY);
+              SORRY_BUT + "ROWS" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
 
       commandAndIncorrectOneLineRequest(START, START_MESSAGE, "16 rup fo 13 ua", INCORRECT_REQUEST_MESSAGE);
       commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "68721 mro convert in uah", INCORRECT_REQUEST_MESSAGE);
@@ -1058,7 +1067,7 @@ public class BotServiceTest {
       String message = "❗Sorry. Currency not supported: " + wrongCurrency.toUpperCase() + "\n" + CONVERT_MESSAGE;
 
       if (!isUnsupported) {
-         message = SORRY_BUT + wrongCurrency.toUpperCase() + IS_NOT_A_VALID_CURRENCY;
+         message = SORRY_BUT + wrongCurrency.toUpperCase() + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE;
       }
 
       assertCommand(request, message);
