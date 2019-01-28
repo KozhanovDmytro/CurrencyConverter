@@ -50,20 +50,20 @@ public final class ConverterService {
    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
    /** The list stores links to functions which make conversion. */
-   private List<ConverterAPI> options = new ArrayList<>();
+   private List<ConverterAPI> converters = new ArrayList<>();
 
    /*
-    * Initialization scope for options. Note! In this
+    * Initialization scope for converters. Note! In this
     * order will be convert currency.
     */
    {
-      options.add(this::convertByBankUaCom);                      // unlimited
-      options.add(this::convertByFloatRatesCom);                  // unlimited
+      converters.add(this::convertByBankUaCom);                      // unlimited
+      converters.add(this::convertByFloatRatesCom);                  // unlimited
 
-      options.add(this::convertByFreeCurrencyConverterApiCom);    // has a limit - 100  requests per hour
-      options.add(this::convertByCurrencyLayerCom);               // has a limit - 1000 requests per month
+      converters.add(this::convertByFreeCurrencyConverterApiCom);    // has a limit - 100  requests per hour
+      converters.add(this::convertByCurrencyLayerCom);               // has a limit - 1000 requests per month
 
-//      options.add(this::convertByJavaMoney);                      // unlimited, so slow
+//      converters.add(this::convertByJavaMoney);                      // unlimited, so slow
    }
 
    /**
@@ -88,7 +88,7 @@ public final class ConverterService {
     *
     * Firstly function  checks  internet connection if this false then it
     * throws  {@link UnknownHostException},  then  it  calls all the APIs
-    * that are presented in the {@link #options}, if any API was able
+    * that are presented in the {@link #converters}, if any API was able
     * to  convert the currency,  the function returns the result,  if all
     * APIs  could  not  convert  the  currency,  the  function  throws an
     * exception.
@@ -107,7 +107,7 @@ public final class ConverterService {
       BigDecimal result = null;
       ArrayList<Exception> exceptions = new ArrayList<>();
 
-      for (ConverterAPI option : options) {
+      for (ConverterAPI option : converters) {
          try {
             result = option.convert(usersRequest);
             break;
@@ -139,7 +139,7 @@ public final class ConverterService {
 
    /**
     * Function makes a decision - result was returned from APIs
-    * or was not returned, if it false that it throws an exception.
+    * or was not, if it false that it throws an exception.
     *
     * @param exceptions exceptions, which could be thrown
     * @param result result of conversion
@@ -209,6 +209,17 @@ public final class ConverterService {
    }
 
    /**
+    * Function converts {@link java.util.Currency} to {@link Currency}
+    *
+    * @param currency contains currencies and value for conversion.
+    * @return instance of {@link Currency}
+    * @throws CurrencyNotSupportedException if currency does not support.
+    */
+   private Currency getCurrencyByUtilCurrency(java.util.Currency currency) throws CurrencyNotSupportedException {
+      return Currency.fromString(currency.getCurrencyCode());
+   }
+
+   /**
     * Converts by java money api.
     *
     * @return result of conversion.
@@ -267,6 +278,20 @@ public final class ConverterService {
    }
 
    /**
+    * Function for build URL.
+    *
+    * @param path url as string
+    * @param usersRequest contains currencies and value for conversion.
+    * @return An instance of URL.
+    * @throws MalformedURLException if no protocol is specified, or an
+    *               unknown protocol is found.
+    */
+   private URL buildURL(String path, UsersRequest usersRequest) throws MalformedURLException {
+      String url = String.format(path, usersRequest.getCurrencyFrom(), usersRequest.getCurrencyTo());
+      return new URL(url);
+   }
+
+   /**
     * Function connects to floatrates.com, gets json and parse it.
     *
     * @param usersRequest contains currencies and value for conversion.
@@ -288,17 +313,6 @@ public final class ConverterService {
    }
 
    /**
-    * Function converts {@link java.util.Currency} to {@link Currency}
-    *
-    * @param currency contains currencies and value for conversion.
-    * @return instance of {@link Currency}
-    * @throws CurrencyNotSupportedException if currency does not support.
-    */
-   private Currency getCurrencyByUtilCurrency(java.util.Currency currency) throws CurrencyNotSupportedException {
-      return Currency.fromString(currency.getCurrencyCode());
-   }
-
-   /**
     * Gets a json object by url.
     *
     * @param url address
@@ -311,20 +325,6 @@ public final class ConverterService {
       return new JSONObject(tokener);
    }
 
-   /**
-    * Function for build URL.
-    * 
-    * @param path url as string
-    * @param usersRequest contains currencies and value for conversion.
-    * @return An instance of URL. 
-    * @throws MalformedURLException if no protocol is specified, or an
-    *               unknown protocol is found.
-    */
-   private URL buildURL(String path, UsersRequest usersRequest) throws MalformedURLException {
-      String url = String.format(path, usersRequest.getCurrencyFrom(), usersRequest.getCurrencyTo());
-      return new URL(url);
-   }
-   
    private void writeToLog(String api, UsersRequest usersRequest) {
       logger.info("converted by " + api + ": " + usersRequest);
    }
