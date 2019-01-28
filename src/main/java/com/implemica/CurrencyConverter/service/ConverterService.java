@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -298,12 +299,14 @@ public final class ConverterService {
     * @throws IOException if didn't parse a json
     * @return result of conversion.
     */
-   BigDecimal convertByFloatRatesCom(UsersRequest usersRequest) throws IOException {
+   BigDecimal convertByFloatRatesCom(UsersRequest usersRequest) throws IOException, CurrencyConverterException {
       String url = String.format(URL_FLOAT_RATES_COM, usersRequest.getCurrencyFrom());
 
       JSONObject object = getJsonObjectByURL(new URL(url));
 
       String desiredCurrency = usersRequest.getCurrencyTo().getCurrencyCode();
+
+      checkLatestInfo(object.getJSONObject(desiredCurrency.toLowerCase()));
 
       double one = object.getJSONObject(desiredCurrency.toLowerCase())
               .getDouble("rate");
@@ -331,6 +334,16 @@ public final class ConverterService {
 
    private BigDecimal convertByOne(UsersRequest usersRequest, Float one) {
       return usersRequest.getValue().multiply(new BigDecimal(one));
+   }
+
+   private void checkLatestInfo(JSONObject object) throws CurrencyConverterException {
+      Date update = new Date(object.getString("date"));
+
+      Date today = new Date();
+
+      if (today.getTime() - update.getTime() > 1.21e9) {
+         throw new CurrencyConverterException("This info is old.");
+      }
    }
 
    /* constants */
