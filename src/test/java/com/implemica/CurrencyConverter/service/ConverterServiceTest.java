@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -92,7 +93,7 @@ public class ConverterServiceTest {
     */
    @Test
    void checkCurrencyTransferToUSD() throws InterruptedException, ExecutionException {
-      List<Callable<Float>> tasks = new ArrayList<>();
+      List<Callable<BigDecimal>> tasks = new ArrayList<>();
 
       for (String curr : existingCurrency) {
          tasks.add(() -> checkConvert(curr, USD));
@@ -108,7 +109,7 @@ public class ConverterServiceTest {
     */
    @Test
    void checkCurrencyTransferFromUSD() throws InterruptedException, ExecutionException {
-      List<Callable<Float>> tasks = new ArrayList<>();
+      List<Callable<BigDecimal>> tasks = new ArrayList<>();
 
       for (String curr : existingCurrency) {
          tasks.add(() -> checkConvert(USD, curr));
@@ -142,7 +143,7 @@ public class ConverterServiceTest {
     */
    @Test
    void checkUnsupportedCurrency() throws ExecutionException, InterruptedException {
-      List<Callable<Float>> tasks = new ArrayList<>();
+      List<Callable<BigDecimal>> tasks = new ArrayList<>();
 
       for (String curr : unsupportedCurrency) {
          tasks.add(() -> checkNonConvertibility(curr, USD));
@@ -157,15 +158,14 @@ public class ConverterServiceTest {
    void checkValueFromApis() throws CurrencyConverterException, IOException {
       Currency eur = Currency.getInstance("USD");
       Currency usd = Currency.getInstance("EUR");
-      float value = 1.0f;
 
-      UsersRequest usersRequest = new UsersRequest(eur, usd, value);
+      UsersRequest usersRequest = new UsersRequest(eur, usd, BigDecimal.ONE);
 
-      Float resultByBankUa = converterService.convertByBankUaCom(usersRequest);
-      Float resultByJavaMoney = converterService.convertByJavaMoney(usersRequest);
-      Float resultByCurrencyLayer = converterService.convertByCurrencyLayerCom(usersRequest);
-      Float resultByFloatRatesCom = converterService.convertByFloatRatesCom(usersRequest);
-      Float resultByFreeCurrencyConverterApiCom = converterService.convertByFreeCurrencyConverterApiCom(usersRequest);
+      BigDecimal resultByBankUa = converterService.convertByBankUaCom(usersRequest);
+      BigDecimal resultByJavaMoney = converterService.convertByJavaMoney(usersRequest);
+      BigDecimal resultByCurrencyLayer = converterService.convertByCurrencyLayerCom(usersRequest);
+      BigDecimal resultByFloatRatesCom = converterService.convertByFloatRatesCom(usersRequest);
+      BigDecimal resultByFreeCurrencyConverterApiCom = converterService.convertByFreeCurrencyConverterApiCom(usersRequest);
 
       Float from = 0.86f;
       Float to = 0.89f;
@@ -182,10 +182,11 @@ public class ConverterServiceTest {
     */
    @Test
    void checkIdenticalCurrency() throws InterruptedException, ExecutionException {
-      List<Callable<Float>> tasks = new ArrayList<>();
+      List<Callable<BigDecimal>> tasks = new ArrayList<>();
 
       for (String currency : existingCurrency) {
-         tasks.add(() -> checkConvertForIdenticalCurrencies(currency, new Random().nextFloat()));
+         BigDecimal random = new BigDecimal(new Random().nextFloat() * 1000);
+         tasks.add(() -> checkConvertForIdenticalCurrencies(currency, random));
       }
 
       invokeAllTasks(tasks);
@@ -195,7 +196,7 @@ public class ConverterServiceTest {
 
    @Test
    void checkForZero() throws InterruptedException, ExecutionException {
-      List<Callable<Float>> tasks = new ArrayList<>();
+      List<Callable<BigDecimal>> tasks = new ArrayList<>();
 
       for (String currency : existingCurrency) {
          tasks.add(() -> checkForZero(currency));
@@ -212,7 +213,7 @@ public class ConverterServiceTest {
    @Test
    @Disabled("this test takes 15 min. ")
    void checkConversionsWithAllPossibleCurrencies() throws InterruptedException, ExecutionException {
-      List<Callable<Float>> tasks = new ArrayList<>();
+      List<Callable<BigDecimal>> tasks = new ArrayList<>();
 
       for (int i = 0; i < existingCurrency.length; i++) {
          for (int j = i; j < existingCurrency.length; j++) {
@@ -228,10 +229,11 @@ public class ConverterServiceTest {
       shutDownExecutor(900);
    }
 
-   private Float checkForZero(String currency) throws CurrencyConverterException, UnknownHostException {
-      Float result = convert(currency, "USD", 0.0f);
+   private BigDecimal checkForZero(String currency) throws CurrencyConverterException, UnknownHostException {
+      BigDecimal result = convert(currency, "USD", BigDecimal.ZERO);
 
-      assertEquals(ZERO, result);
+      assertTrue(result.compareTo(new BigDecimal("1e-5")) <= 0);
+      assertTrue(result.compareTo(new BigDecimal("-1e-5")) >= 0);
 
       return result;
    }
@@ -242,15 +244,15 @@ public class ConverterServiceTest {
     * @param userCurrency    currency  to convert from
     * @param desiredCurrency currency  to convert to
     */
-   private Float checkConvert(String userCurrency, String desiredCurrency) throws CurrencyConverterException, UnknownHostException {
-      Float result = convert(userCurrency, desiredCurrency, 1.0f);
+   private BigDecimal checkConvert(String userCurrency, String desiredCurrency) throws CurrencyConverterException, UnknownHostException {
+      BigDecimal result = convert(userCurrency, desiredCurrency, BigDecimal.ONE);
 
       assertNotNull(result);
 
       return result;
    }
 
-   private Float convert(String userCurrency, String desiredCurrency, float usersValue) throws CurrencyConverterException, UnknownHostException {
+   private BigDecimal convert(String userCurrency, String desiredCurrency, BigDecimal usersValue) throws CurrencyConverterException, UnknownHostException {
       UsersRequest usersRequest = new UsersRequest(Currency.getInstance(userCurrency),
               Currency.getInstance(desiredCurrency),
               usersValue);
@@ -265,10 +267,10 @@ public class ConverterServiceTest {
     * @param userCurrency    currency  to convert from
     * @param desiredCurrency currency  to convert to
     */
-   private Float checkNonConvertibility(String userCurrency, String desiredCurrency) {
-      Float result = null;
+   private BigDecimal checkNonConvertibility(String userCurrency, String desiredCurrency) {
+      BigDecimal result = null;
       try {
-         result = convert(userCurrency, desiredCurrency, 1.0f);
+         result = convert(userCurrency, desiredCurrency, BigDecimal.ONE);
          throw new RuntimeException(userCurrency + " to " + desiredCurrency + " was converted. ");
       } catch (CurrencyConverterException e) {
          assertTrue(isRightMessage(e));
@@ -278,9 +280,9 @@ public class ConverterServiceTest {
       return result;
    }
 
-   private void checkRange(Float result, Float from, Float to) {
-      assertTrue(from.compareTo(result) <= 0);
-      assertTrue(to.compareTo(result) >= 0);
+   private void checkRange(BigDecimal result, Float from, Float to) {
+      assertTrue(result.compareTo(new BigDecimal(from)) >= 0);
+      assertTrue(result.compareTo(new BigDecimal(to)) <= 0);
    }
 
    /**
@@ -293,22 +295,22 @@ public class ConverterServiceTest {
       return e.getMessage().contains(MESSAGE_UNSUPPORTED_CURRENCY) || e.getMessage().contains(API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY);
    }
 
-   private Float checkConvertForIdenticalCurrencies(String userCurrency, Float expectedValue) throws CurrencyConverterException, UnknownHostException {
+   private BigDecimal checkConvertForIdenticalCurrencies(String userCurrency, BigDecimal expectedValue) throws CurrencyConverterException, UnknownHostException {
       UsersRequest usersRequest = new UsersRequest(Currency.getInstance(userCurrency),
               Currency.getInstance(userCurrency),
               expectedValue);
 
-      Float result = converterService.convert(usersRequest);
+      BigDecimal result = converterService.convert(usersRequest);
 
       assertEquals(expectedValue, result);
 
       return result;
    }
 
-   private void invokeAllTasks(List<Callable<Float>> tasks) throws InterruptedException, ExecutionException {
-      List<Future<Float>> results = executor.invokeAll(tasks);
+   private void invokeAllTasks(List<Callable<BigDecimal>> tasks) throws InterruptedException, ExecutionException {
+      List<Future<BigDecimal>> results = executor.invokeAll(tasks);
 
-      for (Future<Float> result : results) {
+      for (Future<BigDecimal> result : results) {
          result.get();
       }
    }
@@ -323,7 +325,5 @@ public class ConverterServiceTest {
 
    /* constants */
 
-   private final Float ZERO = 0.0f;
    private final String USD = "USD";
-   private final String UAH = "UAH";
 }

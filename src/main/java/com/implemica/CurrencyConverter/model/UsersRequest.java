@@ -4,6 +4,7 @@ package com.implemica.CurrencyConverter.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.util.Currency;
 
 /**
@@ -23,7 +24,7 @@ public class UsersRequest {
    private Currency currencyTo;
 
    /** Amount of {@link #currencyFrom} */
-   private float value;
+   private BigDecimal value;
 
    /**
     * Returns the string of information of conversion.

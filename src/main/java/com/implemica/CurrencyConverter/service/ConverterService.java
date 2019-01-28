@@ -17,6 +17,7 @@ import javax.money.MonetaryAmount;
 import javax.money.convert.CurrencyConversion;
 import javax.money.convert.MonetaryConversions;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,7 +79,7 @@ public final class ConverterService {
        * @throws CurrencyConverterException if currency does not support.
        * @throws IOException if there is no internet connection.
        */
-      Float convert(UsersRequest usersRequest) throws Exception;
+      BigDecimal convert(UsersRequest usersRequest) throws Exception;
    }
 
    /**
@@ -97,13 +98,13 @@ public final class ConverterService {
     * @throws CurrencyConverterException if currency does not support.
     * @throws UnknownHostException if there is no internet connection.
     */
-   public Float convert(UsersRequest usersRequest) throws CurrencyConverterException, UnknownHostException {
+   public BigDecimal convert(UsersRequest usersRequest) throws CurrencyConverterException, UnknownHostException {
       if(!checkConnection()) {
          logger.error(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
          throw new UnknownHostException(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
       }
 
-      Float result = null;
+      BigDecimal result = null;
       ArrayList<Exception> exceptions = new ArrayList<>();
 
       for (ConverterAPI option : options) {
@@ -145,7 +146,7 @@ public final class ConverterService {
     * @throws CurrencyConverterException if result wasn't returned from APIs
     * @return result of conversion.
     */
-   private Float analyzeResult(ArrayList<Exception> exceptions, Float result) throws CurrencyConverterException {
+   private BigDecimal analyzeResult(ArrayList<Exception> exceptions, BigDecimal result) throws CurrencyConverterException {
       if(result == null) {
          logger.error(MESSAGE_EXCEPTION_WAS_THROWN + Arrays.toString(exceptions.toArray()));
          throw new CurrencyConverterException(getExceptionMessage(exceptions));
@@ -195,16 +196,16 @@ public final class ConverterService {
     * @throws CurrencyConverterException if currency does not support.
     * @return result of conversion.
     */
-   Float convertByBankUaCom(UsersRequest usersRequest) throws CurrencyConverterException {
+   BigDecimal convertByBankUaCom(UsersRequest usersRequest) throws CurrencyConverterException {
       Currency usersCurrency = getCurrencyByUtilCurrency(usersRequest.getCurrencyFrom());
       Currency desiredCurrency = getCurrencyByUtilCurrency(usersRequest.getCurrencyTo());
 
       CurrencyConverter currencyConverter = new BankUaCom(usersCurrency, desiredCurrency);
 
-      Float result = currencyConverter.convertCurrency(usersRequest.getValue());
+      Float one = currencyConverter.convertCurrency(1.0f);
 
       writeToLog(API_NAME_BANK_UA_COM, usersRequest);
-      return result;
+      return convertByOne(usersRequest, one);
    }
 
    /**
@@ -213,18 +214,18 @@ public final class ConverterService {
     * @return result of conversion.
     * @param usersRequest contains currencies and value for conversion.
     */
-   Float convertByJavaMoney(UsersRequest usersRequest) {
+   BigDecimal convertByJavaMoney(UsersRequest usersRequest) {
       MonetaryAmount userMoney = Monetary.getDefaultAmountFactory()
               .setCurrency(usersRequest.getCurrencyFrom().getCurrencyCode())
-              .setNumber(usersRequest.getValue()).create();
+              .setNumber(1.0f).create();
 
       CurrencyConversion conversion = MonetaryConversions.getConversion(usersRequest.getCurrencyTo().getCurrencyCode());
       MonetaryAmount converted = userMoney.with(conversion);
 
-      Float result = converted.getNumber().floatValue();
+      Float one = converted.getNumber().floatValue();
 
       writeToLog(API_NAME_JAVA_MONEY, usersRequest);
-      return result;
+      return convertByOne(usersRequest, one);
    }
 
    /**
@@ -234,18 +235,16 @@ public final class ConverterService {
     * @throws IOException if didn't parse a json
     * @return result of conversion.
     */
-   Float convertByFreeCurrencyConverterApiCom(UsersRequest usersRequest) throws IOException {
+   BigDecimal convertByFreeCurrencyConverterApiCom(UsersRequest usersRequest) throws IOException {
       URL url = buildURL(URL_FREE_CURRENCY_CONVERTER_API_COM, usersRequest);
 
       JSONObject object = getJsonObjectByURL(url);
 
-      double value = object.getJSONObject(usersRequest.getCurrencyFrom() + "_" + usersRequest.getCurrencyTo())
+      double one = object.getJSONObject(usersRequest.getCurrencyFrom() + "_" + usersRequest.getCurrencyTo())
               .getDouble("val");
 
-      Float result = usersRequest.getValue() * (float) value;
-
       writeToLog(API_NAME_FREE_CURRENCYAPI_COM, usersRequest);
-      return result;
+      return convertByOne(usersRequest, (float) one);
    }
 
    /**
@@ -255,18 +254,16 @@ public final class ConverterService {
     * @throws IOException if didn't parse a json
     * @return result of conversion.
     */
-   Float convertByCurrencyLayerCom(UsersRequest usersRequest) throws IOException {
+   BigDecimal convertByCurrencyLayerCom(UsersRequest usersRequest) throws IOException {
       URL url = buildURL(URL_CURRENCY_LAYER_COM, usersRequest);
 
       JSONObject object = getJsonObjectByURL(url);
 
-      double value = object.getJSONObject("quotes")
+      double one = object.getJSONObject("quotes")
               .getDouble(usersRequest.getCurrencyFrom() + "" + usersRequest.getCurrencyTo());
 
-      Float result = usersRequest.getValue() * (float) value;
-
       writeToLog(API_NAME_CURRENCYLAYER_COM, usersRequest);
-      return result;
+      return convertByOne(usersRequest, (float) one);
    }
 
    /**
@@ -276,20 +273,18 @@ public final class ConverterService {
     * @throws IOException if didn't parse a json
     * @return result of conversion.
     */
-   Float convertByFloatRatesCom(UsersRequest usersRequest) throws IOException {
+   BigDecimal convertByFloatRatesCom(UsersRequest usersRequest) throws IOException {
       String url = String.format(URL_FLOAT_RATES_COM, usersRequest.getCurrencyFrom());
 
       JSONObject object = getJsonObjectByURL(new URL(url));
 
       String desiredCurrency = usersRequest.getCurrencyTo().getCurrencyCode();
 
-      double rate = object.getJSONObject(desiredCurrency.toLowerCase())
+      double one = object.getJSONObject(desiredCurrency.toLowerCase())
               .getDouble("rate");
 
-      Float result = usersRequest.getValue() * (float) rate;
-
       writeToLog(API_NAME_FLOATRATES_COM, usersRequest);
-      return result;
+      return convertByOne(usersRequest, (float) one);
    }
 
    /**
@@ -332,6 +327,10 @@ public final class ConverterService {
    
    private void writeToLog(String api, UsersRequest usersRequest) {
       logger.info("converted by " + api + ": " + usersRequest);
+   }
+
+   private BigDecimal convertByOne(UsersRequest usersRequest, Float one) {
+      return usersRequest.getValue().multiply(new BigDecimal(one));
    }
 
    /* constants */
