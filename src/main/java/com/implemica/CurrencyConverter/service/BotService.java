@@ -64,12 +64,12 @@ public class BotService {
     * Message to the user with the suggestion of a new conversion
     */
    private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
-           " 1️⃣ with using /convert command\n\n 2️⃣ type me a request by single line " +
+           "➡️with using /convert command or\n\n➡️type me a request by single line " +
            "(Example: 10 USD in UAH)";
    /**
     * Greeting message to user
     */
-   private static final String START_MESSAGE = "Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
+   private static final String START_MESSAGE = "\uD83D\uDC4B Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
    /**
     * Stop message to the user
     */
@@ -308,9 +308,9 @@ public class BotService {
          UsersRequest usersRequest = new UsersRequest(usersCurrency, desiredCurrency, parseNumber(value));
 
          Float convertedValue = converterService.convert(usersRequest);
-         message = value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
+         message = "\uD83D\uDCB0" + value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
       } catch (CurrencyConverterException e) {
-         message = e.getMessage() + CONVERT_MESSAGE;
+         message = "❗Sorry. " + e.getMessage() + "\n" + CONVERT_MESSAGE;
       } catch (ParseException e) {
          message = SORRY_BUT + value + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE;
       } catch (IOException e) {
