@@ -486,15 +486,15 @@ public class BotServiceTest {
       incorrectOneLineRequestAndCommand("0.01. xof in xfo", SORRY_BUT + "0.01." + IS_NOT_A_VALID_NUMBER,
               WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
-      incorrectOneLineRequestAndCommand("44 xbb to xcd", "Currency not supported: XBB" + CONVERT_MESSAGE,
+      incorrectOneLineRequestAndCommand("44 xbb to xcd", "❗Sorry. Currency not supported: XBB\n" + CONVERT_MESSAGE,
               START, START_MESSAGE);
-      incorrectOneLineRequestAndCommand("105.7 usd in uss", "Currency not supported: USS" + CONVERT_MESSAGE,
+      incorrectOneLineRequestAndCommand("105.7 usd in uss", "❗Sorry. Currency not supported: USS\n" + CONVERT_MESSAGE,
               CONVERT, FIRST_CONVERT_MESSAGE);
-      incorrectOneLineRequestAndCommand("58721 uah to gwp", "Currency not supported: GWP" + CONVERT_MESSAGE,
+      incorrectOneLineRequestAndCommand("58721 uah to gwp", "❗Sorry. Currency not supported: GWP\n" + CONVERT_MESSAGE,
               STOP, STOP_MESSAGE);
-      incorrectOneLineRequestAndCommand("65,3 iep in usn", "Currency not supported: IEP" + CONVERT_MESSAGE,
+      incorrectOneLineRequestAndCommand("65,3 iep in usn", "❗Sorry. Currency not supported: IEP\n" + CONVERT_MESSAGE,
               "convert", INCORRECT_REQUEST_MESSAGE);
-      incorrectOneLineRequestAndCommand("711 jpy to xxx", "Currency not supported: XXX" + CONVERT_MESSAGE,
+      incorrectOneLineRequestAndCommand("711 jpy to xxx", "❗Sorry. Currency not supported: XXX\n" + CONVERT_MESSAGE,
               WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
       incorrectOneLineRequestAndCommand("16 flowers in uah", SORRY_BUT + "FLOWERS" +
@@ -510,9 +510,10 @@ public class BotServiceTest {
 
       incorrectOneLineRequestAndCommand("12 uah convertTo usd", INCORRECT_REQUEST_MESSAGE, START, START_MESSAGE);
       incorrectOneLineRequestAndCommand("-213 irr from uer", INCORRECT_REQUEST_MESSAGE, STOP, STOP_MESSAGE);
-      incorrectOneLineRequestAndCommand("100 php of java", INCORRECT_REQUEST_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
-      incorrectOneLineRequestAndCommand("0.001 like on profile", INCORRECT_REQUEST_MESSAGE, "moon", INCORRECT_REQUEST_MESSAGE);
+      incorrectOneLineRequestAndCommand("0.001 likes on profile", INCORRECT_REQUEST_MESSAGE, "moon", INCORRECT_REQUEST_MESSAGE);
       incorrectOneLineRequestAndCommand("78,9 bob of inr", INCORRECT_REQUEST_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      incorrectOneLineRequestAndCommand("100 php of java", INCORRECT_REQUEST_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
+
 
       //if line conversion after another command
       commandAndOneLineRequest(START, START_MESSAGE, "8,8 INR to BYN");
@@ -531,16 +532,16 @@ public class BotServiceTest {
       commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "0,.1 brl in pln",
               SORRY_BUT + "0,.1" + IS_NOT_A_VALID_NUMBER);
 
-      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "37 Xua to Clp", "Currency not supported: XUA"
+      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "37 Xua to Clp", "❗Sorry. Currency not supported: XUA\n"
               + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "32,3 PLN in XBC", "Currency not supported: XBC"
+      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "32,3 PLN in XBC", "❗Sorry. Currency not supported: XBC\n"
               + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "3000 Gbp to Xbb", "Currency not supported: XBB"
+      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "3000 Gbp to Xbb", "❗Sorry. Currency not supported: XBB\n"
               + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest("lucky", INCORRECT_REQUEST_MESSAGE, "209.9 rub in XFO",
-              "Currency not supported: XFO" + CONVERT_MESSAGE);
+              "❗Sorry. Currency not supported: XFO\n" + CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "459,2 uah to uss",
-              "Currency not supported: USS" + CONVERT_MESSAGE);
+              "❗Sorry. Currency not supported: USS\n" + CONVERT_MESSAGE);
 
       commandAndIncorrectOneLineRequest(START, START_MESSAGE, "56 ladies to eur", SORRY_BUT +
               "LADIES" + IS_NOT_A_VALID_CURRENCY);
@@ -555,10 +556,10 @@ public class BotServiceTest {
 
       commandAndIncorrectOneLineRequest(START, START_MESSAGE, "16 rup fo 13 ua", INCORRECT_REQUEST_MESSAGE);
       commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "68721 mro convert in uah", INCORRECT_REQUEST_MESSAGE);
-      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "21.2. second of hour",
-              SORRY_BUT + "21.2. second of hour" + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest("sorry", INCORRECT_REQUEST_MESSAGE, "777 cats on the table",
               INCORRECT_REQUEST_MESSAGE);
+      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "21.2. second of hour",
+              SORRY_BUT + "21.2. second of hour" + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE);
       commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "5 pln inn uah",
               INCORRECT_REQUEST_MESSAGE);
    }
@@ -948,7 +949,7 @@ public class BotServiceTest {
     */
    private void withUnsupportedCurrency(String firstCurrency, String secondCurrency,
                                         String amount, boolean firstIsCorrect) {
-      String startOfMessage = "Currency not supported: ";
+      String startOfMessage = "❗Sorry. Currency not supported: ";
       String wrongCurrency;
 
       if (firstIsCorrect) {
@@ -957,7 +958,7 @@ public class BotServiceTest {
          wrongCurrency = firstCurrency;
       }
 
-      String message = startOfMessage + wrongCurrency.trim().toUpperCase() + CONVERT_MESSAGE;
+      String message = startOfMessage + wrongCurrency.trim().toUpperCase() +"\n" + CONVERT_MESSAGE;
 
       rightScriptWithWrongValue(firstCurrency, secondCurrency, amount, message);
    }
@@ -1129,7 +1130,7 @@ public class BotServiceTest {
       String botsResponse = testBotService.processCommand(request, testUser);
 
       String[] words = request.split("\\s+");
-      String start = words[0] + " " + words[1].toUpperCase() + " is ";
+      String start = "\uD83D\uDCB0" + words[0] + " " + words[1].toUpperCase() + " is ";
 
       assertTrue(botsResponse.startsWith(start));
       assertTrue(botsResponse.endsWith(words[3].toUpperCase()));
@@ -1162,7 +1163,7 @@ public class BotServiceTest {
       firstCurrency = firstCurrency.trim().toUpperCase();
       secondCurrency = secondCurrency.trim().toUpperCase();
 
-      String start = amount + " " + firstCurrency + " is ";
+      String start = "\uD83D\uDCB0" + amount + " " + firstCurrency + " is ";
 
       String botsResponse = testBotService.processCommand(amount, testUser);
 
@@ -1215,7 +1216,7 @@ public class BotServiceTest {
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       assertCommand(currency, SECOND_CONVERT_MESSAGE_1 + currency + SECOND_CONVERT_MESSAGE_2);
       assertCommand(currency, THIRD_CONVERT_MESSAGE + currency + " to " + currency);
-      assertCommand(amount, amount + " " + currency + " is " + result + " " + currency);
+      assertCommand(amount, "\uD83D\uDCB0"+amount + " " + currency + " is " + result + " " + currency);
    }
 
    /**
@@ -1230,7 +1231,7 @@ public class BotServiceTest {
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2);
       assertCommand(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency);
-      assertCommand(zero, zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
+      assertCommand(zero, "\uD83D\uDCB0" +zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
    }
 
    /**
@@ -1248,7 +1249,7 @@ public class BotServiceTest {
 
       String request = amount + " " + currency + words[n] + currency;
 
-      assertCommand(request, amount + " " + currency + " is " + result + " " + currency);
+      assertCommand(request, "\uD83D\uDCB0"+amount + " " + currency + " is " + result + " " + currency);
    }
 
    /**
@@ -1265,6 +1266,6 @@ public class BotServiceTest {
 
       String request = zero + " " + firstCurrency + words[n] + secondCurrency;
 
-      assertCommand(request, zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
+      assertCommand(request, "\uD83D\uDCB0" +zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
    }
 }

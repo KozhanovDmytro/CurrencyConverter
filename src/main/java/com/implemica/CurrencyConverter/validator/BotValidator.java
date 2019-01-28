@@ -1,6 +1,7 @@
 package com.implemica.CurrencyConverter.validator;
 
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
@@ -73,7 +74,7 @@ public class BotValidator {
     * @throws ParseException if value is not a number
     * @return Float number of given String
     */
-   public static Float parseNumber(String value) throws ParseException {
+   public static BigDecimal parseNumber(String value) throws ParseException {
       Matcher matcher = isPositiveNumber.matcher(value);
       if (!matcher.matches()) {
          throw new ParseException("Invalid number: " + value, 0);
@@ -88,7 +89,8 @@ public class BotValidator {
       DecimalFormatSymbols symbols = new DecimalFormatSymbols();
       symbols.setDecimalSeparator(separator);
       DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
-      return DECIMAL_FORMATTER.parse(value).floatValue();
+      DECIMAL_FORMATTER.setParseBigDecimal(true);
+      return (BigDecimal) DECIMAL_FORMATTER.parse(value);
    }
 
    /**
@@ -97,7 +99,7 @@ public class BotValidator {
     * @param number float number, which has to be converted to String
     * @return the String of given number
     */
-   public static String formatNumber(Float number) {
+   public static String formatNumber(BigDecimal number) {
       DecimalFormatSymbols s = new DecimalFormatSymbols();
       s.setDecimalSeparator(POINT);
       DECIMAL_FORMATTER.setDecimalFormatSymbols(s);

@@ -15,6 +15,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -307,7 +308,7 @@ public class BotService {
          Currency desiredCurrency = Currency.getInstance(secondCurrency);
          UsersRequest usersRequest = new UsersRequest(usersCurrency, desiredCurrency, parseNumber(value));
 
-         Float convertedValue = converterService.convert(usersRequest);
+         BigDecimal convertedValue = converterService.convert(usersRequest);
          message = "\uD83D\uDCB0" + value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
       } catch (CurrencyConverterException e) {
          message = "❗Sorry. " + e.getMessage() + "\n" + CONVERT_MESSAGE;
