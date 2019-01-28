@@ -49,13 +49,12 @@ public class BotControllerTest {
     * Message to the user with the suggestion of a new conversion
     */
    private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
-           " 1️⃣ with using /convert command\n\n 2️⃣ type me a request by single line " +
+           "➡️with using /convert command or\n\n➡️type me a request by single line " +
            "(Example: 10 USD in UAH)";
    /**
     * Bot's response for start command
     */
-   private static final String startMessage = "Hello! I can help you to convert currencies." +
-           CONVERT_MESSAGE;
+   private static final String startMessage = "\uD83D\uDC4B Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
 
    /**
     * Bot's response for stop command

@@ -47,12 +47,12 @@ public class BotServiceTest {
     * Message to the user with the suggestion of a new conversion
     */
    private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
-           " 1️⃣ with using /convert command\n\n 2️⃣ type me a request by single line " +
+           "➡️with using /convert command or\n\n➡️type me a request by single line " +
            "(Example: 10 USD in UAH)";
    /**
     * Greeting message to user
     */
-   private static final String START_MESSAGE = "Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
+   private static final String START_MESSAGE = "\uD83D\uDC4B Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
    /**
     * Stop message to the user
     */
@@ -1038,7 +1038,7 @@ public class BotServiceTest {
          wrongCurrency = words[3];
       }
 
-      String message = "Currency not supported: " + wrongCurrency.toUpperCase() + CONVERT_MESSAGE;
+      String message = "❗Sorry. Currency not supported: " + wrongCurrency.toUpperCase() + "\n" + CONVERT_MESSAGE;
 
       if (!isUnsupported) {
          message = SORRY_BUT + wrongCurrency.toUpperCase() + IS_NOT_A_VALID_CURRENCY;
