@@ -126,7 +126,7 @@ public class BotController extends TelegramLongPollingBot {
       sendMessage(message, response);
 
       if (command.equals("/convert") || response.endsWith("USD)") || response.endsWith("EUR)")) {
-         SendMessage s = new SendMessage().setChatId(chatId).setText("Popular currencies: ");
+         SendMessage s = new SendMessage().setChatId(chatId).setText("You can choose popular currencies: ");
          createKeyboard(s);
       }
       listOfChats.put(user, chatId);
@@ -237,15 +237,13 @@ public class BotController extends TelegramLongPollingBot {
    private void createKeyboard(SendMessage sendMessage) {
       List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
 
-      List<InlineKeyboardButton> row1 = new ArrayList<>();
-      row1.add(new InlineKeyboardButton().setText("USD").setCallbackData("USD"));
-      row1.add(new InlineKeyboardButton().setText("EUR").setCallbackData("EUR"));
-      buttons.add(row1);
+      List<InlineKeyboardButton> row = new ArrayList<>();
 
-      List<InlineKeyboardButton> row2 = new ArrayList<>();
-      row2.add(new InlineKeyboardButton().setText("RUB").setCallbackData("RUB"));
-      row2.add(new InlineKeyboardButton().setText("UAH").setCallbackData("UAH"));
-      buttons.add(row2);
+      row.add(new InlineKeyboardButton().setText("USD").setCallbackData("USD"));
+      row.add(new InlineKeyboardButton().setText("EUR").setCallbackData("EUR"));
+      row.add(new InlineKeyboardButton().setText("RUB").setCallbackData("RUB"));
+      row.add(new InlineKeyboardButton().setText("UAH").setCallbackData("UAH"));
+      buttons.add(row);
 
       InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
       markupKeyboard.setKeyboard(buttons);
