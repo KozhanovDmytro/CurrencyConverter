@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -303,6 +304,21 @@ public class BotServiceTest {
       wrongFirstCurrency("russian");
       assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
 
+   }
+
+   /**
+    * Tests, that result of conversion stable currencies lies between given borders
+    */
+   @Test
+   void stableCurrencyTest() {
+      checkStableCurrency("usd", "eur", "0.86", "0.89");
+      checkStableCurrency("eur", "usd", "1.12", "1.26");
+      checkStableCurrency("kwd", "usd", "3.28", "3.31");
+      checkStableCurrency("usd", "kwd", "0.29", "0.3044");
+      checkStableCurrency("gbp", "usd", "1.25", "1.33");
+      checkStableCurrency("usd", "gbp", "0.75", "0.8");
+      checkStableCurrency("usd", "cad", "1.28", "1.36");
+      checkStableCurrency("cad", "usd", "0.73", "0.78");
    }
 
 
@@ -958,7 +974,7 @@ public class BotServiceTest {
          wrongCurrency = firstCurrency;
       }
 
-      String message = startOfMessage + wrongCurrency.trim().toUpperCase() +"\n" + CONVERT_MESSAGE;
+      String message = startOfMessage + wrongCurrency.trim().toUpperCase() + "\n" + CONVERT_MESSAGE;
 
       rightScriptWithWrongValue(firstCurrency, secondCurrency, amount, message);
    }
@@ -1216,7 +1232,7 @@ public class BotServiceTest {
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       assertCommand(currency, SECOND_CONVERT_MESSAGE_1 + currency + SECOND_CONVERT_MESSAGE_2);
       assertCommand(currency, THIRD_CONVERT_MESSAGE + currency + " to " + currency);
-      assertCommand(amount, "\uD83D\uDCB0"+amount + " " + currency + " is " + result + " " + currency);
+      assertCommand(amount, "\uD83D\uDCB0" + amount + " " + currency + " is " + result + " " + currency);
    }
 
    /**
@@ -1231,7 +1247,7 @@ public class BotServiceTest {
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2);
       assertCommand(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency);
-      assertCommand(zero, "\uD83D\uDCB0" +zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
+      assertCommand(zero, "\uD83D\uDCB0" + zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
    }
 
    /**
@@ -1249,7 +1265,7 @@ public class BotServiceTest {
 
       String request = amount + " " + currency + words[n] + currency;
 
-      assertCommand(request, "\uD83D\uDCB0"+amount + " " + currency + " is " + result + " " + currency);
+      assertCommand(request, "\uD83D\uDCB0" + amount + " " + currency + " is " + result + " " + currency);
    }
 
    /**
@@ -1266,6 +1282,43 @@ public class BotServiceTest {
 
       String request = zero + " " + firstCurrency + words[n] + secondCurrency;
 
-      assertCommand(request, "\uD83D\uDCB0" +zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
+      assertCommand(request, "\uD83D\uDCB0" + zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
+   }
+
+   /**
+    * Checks, that result of conversion lies between given borders. Amount is equal 1.
+    *
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    * @param leftBorder     left border of the interval
+    * @param rightBorder    right border of the interval
+    */
+   private void checkStableCurrency(String firstCurrency, String secondCurrency, String leftBorder, String rightBorder) {
+      String value = getValue(testBotService.processCommand("1 " + firstCurrency + " to " + secondCurrency, testUser));
+      checkInterval(value, leftBorder, rightBorder);
+   }
+
+   /**
+    * Gets amount of currency after conversion
+    *
+    * @param result result of conversion
+    */
+   private String getValue(String result) {
+      return result.split("\\s+")[3];
+   }
+
+   /**
+    * Checks, that given value lies between left border and right border
+    *
+    * @param value       given number
+    * @param leftBorder  left border of the interval
+    * @param rightBorder right border of the interval
+    */
+   private void checkInterval(String value, String leftBorder, String rightBorder) {
+      BigDecimal v = new BigDecimal(value);
+      BigDecimal left = new BigDecimal(leftBorder);
+      BigDecimal right = new BigDecimal(rightBorder);
+
+      assertTrue(v.compareTo(left) >= 0 && v.compareTo(right) <= 0);
    }
 }
