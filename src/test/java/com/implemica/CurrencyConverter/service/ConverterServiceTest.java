@@ -154,27 +154,40 @@ public class ConverterServiceTest {
       shutDownExecutor(35);
    }
 
+   /**
+    * Test request to APIs and his response with big numbers.
+    */
    @Test
-   void checkValueFromApis() throws CurrencyConverterException, IOException {
+   void bigRequestValuesTest() throws CurrencyConverterException, IOException {
       Currency eur = Currency.getInstance("USD");
       Currency usd = Currency.getInstance("EUR");
 
-      UsersRequest usersRequest = new UsersRequest(eur, usd, BigDecimal.ONE);
+      BigDecimal result = BigDecimal.ONE;
 
-      BigDecimal resultByBankUa = converterService.convertByBankUaCom(usersRequest);
-      BigDecimal resultByJavaMoney = converterService.convertByJavaMoney(usersRequest);
-      BigDecimal resultByCurrencyLayer = converterService.convertByCurrencyLayerCom(usersRequest);
-      BigDecimal resultByFloatRatesCom = converterService.convertByFloatRatesCom(usersRequest);
-      BigDecimal resultByFreeCurrencyConverterApiCom = converterService.convertByFreeCurrencyConverterApiCom(usersRequest);
+      BigDecimal from = new BigDecimal(0.86);
+      BigDecimal to = new BigDecimal(0.89);
 
-      Float from = 0.86f;
-      Float to = 0.89f;
+      BigDecimal coefficient = new BigDecimal(1000000000);
 
-      checkRange(resultByBankUa, from, to);
-      checkRange(resultByJavaMoney, from, to);
-      checkRange(resultByCurrencyLayer, from, to);
-      checkRange(resultByFloatRatesCom, from, to);
-      checkRange(resultByFreeCurrencyConverterApiCom, from, to);
+      for (int i = 0; i < 10; i++) {
+         UsersRequest usersRequest = new UsersRequest(eur, usd, result);
+
+         BigDecimal resultByBankUa = converterService.convertByBankUaCom(usersRequest);
+         BigDecimal resultByJavaMoney = converterService.convertByJavaMoney(usersRequest);
+         BigDecimal resultByCurrencyLayer = converterService.convertByCurrencyLayerCom(usersRequest);
+         BigDecimal resultByFloatRatesCom = converterService.convertByFloatRatesCom(usersRequest);
+         BigDecimal resultByFreeCurrencyConverterApiCom = converterService.convertByFreeCurrencyConverterApiCom(usersRequest);
+
+         checkRange(resultByBankUa, from, to);
+         checkRange(resultByJavaMoney, from, to);
+         checkRange(resultByCurrencyLayer, from, to);
+         checkRange(resultByFloatRatesCom, from, to);
+         checkRange(resultByFreeCurrencyConverterApiCom, from, to);
+
+         from = from.multiply(coefficient);
+         to = to.multiply(coefficient);
+         result = result.multiply(coefficient);
+      }
    }
 
    /**
@@ -194,6 +207,9 @@ public class ConverterServiceTest {
       shutDownExecutor(30);
    }
 
+   /**
+    * Tests for zero.
+    */
    @Test
    void checkForZero() throws InterruptedException, ExecutionException {
       List<Callable<BigDecimal>> tasks = new ArrayList<>();
@@ -229,6 +245,14 @@ public class ConverterServiceTest {
       shutDownExecutor(900);
    }
 
+   /**
+    * Tests that result of conversion will be close to zero.
+    *
+    * @param currency code of currency
+    * @return result of conversion.
+    * @throws CurrencyConverterException problem with conversion.
+    * @throws UnknownHostException troubles with internet connection.
+    */
    private BigDecimal checkForZero(String currency) throws CurrencyConverterException, UnknownHostException {
       BigDecimal result = convert(currency, "USD", BigDecimal.ZERO);
 
@@ -280,9 +304,9 @@ public class ConverterServiceTest {
       return result;
    }
 
-   private void checkRange(BigDecimal result, Float from, Float to) {
-      assertTrue(result.compareTo(new BigDecimal(from)) >= 0);
-      assertTrue(result.compareTo(new BigDecimal(to)) <= 0);
+   private void checkRange(BigDecimal result, BigDecimal from, BigDecimal to) {
+      assertTrue(result.compareTo(from) >= 0);
+      assertTrue(result.compareTo(to) <= 0);
    }
 
    /**
@@ -307,6 +331,13 @@ public class ConverterServiceTest {
       return result;
    }
 
+   /**
+    * Run all tasks and get result of all tasks.
+    *
+    * @param tasks conversion
+    * @throws InterruptedException if problem with threads was occur.
+    * @throws ExecutionException problem with conversion.
+    */
    private void invokeAllTasks(List<Callable<BigDecimal>> tasks) throws InterruptedException, ExecutionException {
       List<Future<BigDecimal>> results = executor.invokeAll(tasks);
 
