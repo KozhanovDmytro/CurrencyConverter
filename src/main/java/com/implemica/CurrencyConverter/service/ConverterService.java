@@ -89,7 +89,7 @@ public final class ConverterService {
     *
     * Firstly function  checks  internet connection if this false then it
     * throws  {@link UnknownHostException},  then  it  calls all the APIs
-    * that are presented in the {@link #converters}, if any API was able
+    * that are presented in  the {@link #converters}, if any API was able
     * to  convert the currency,  the function returns the result,  if all
     * APIs  could  not  convert  the  currency,  the  function  throws an
     * exception.
@@ -100,6 +100,14 @@ public final class ConverterService {
     * @throws UnknownHostException if there is no internet connection.
     */
    public BigDecimal convert(UsersRequest usersRequest) throws CurrencyConverterException, UnknownHostException {
+      if(isIdenticalCurrencies(usersRequest)) {
+         return usersRequest.getValue();
+      }
+
+      if(isUsersRequestIsZero(usersRequest)) {
+         return BigDecimal.ZERO;
+      }
+
       if(!checkConnection()) {
          logger.error(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
          throw new UnknownHostException(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
@@ -118,6 +126,14 @@ public final class ConverterService {
       }
 
       return analyzeResult(exceptions, result);
+   }
+
+   private boolean isUsersRequestIsZero(UsersRequest usersRequest) {
+      return usersRequest.getValue().compareTo(BigDecimal.ZERO) == 0;
+   }
+
+   private boolean isIdenticalCurrencies(UsersRequest usersRequest) {
+      return usersRequest.getCurrencyFrom() == usersRequest.getCurrencyTo();
    }
 
    /**
@@ -341,7 +357,7 @@ public final class ConverterService {
 
       Date today = new Date();
 
-      if (today.getTime() - update.getTime() > 1.21e9) {
+      if (today.getTime() - update.getTime() > TWO_WEEKS) {
          throw new CurrencyConverterException("This info is old.");
       }
    }
@@ -349,6 +365,7 @@ public final class ConverterService {
    /* constants */
 
    private static final int TIMEOUT_FOR_CONNECTION = 3000;
+   private static final double TWO_WEEKS = 1.21e9;
 
    private static final String URL_FREE_CURRENCY_CONVERTER_API_COM = "http://free.currencyconverterapi.com/api/v5/convert?q=%s_%s&compact=y";
    private static final String URL_CURRENCY_LAYER_COM = "http://apilayer.net/api/live?access_key=f91895130d9f009b167cd5299cdd923c&source=%s&currencies=%s&format=1";

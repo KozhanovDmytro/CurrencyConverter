@@ -164,8 +164,8 @@ public class ConverterServiceTest {
 
       BigDecimal result = BigDecimal.ONE;
 
-      BigDecimal from = new BigDecimal(0.86);
-      BigDecimal to = new BigDecimal(0.89);
+      BigDecimal from = new BigDecimal(1.0);
+      BigDecimal to = new BigDecimal(0.7);
 
       BigDecimal coefficient = new BigDecimal(1000000000);
 
@@ -194,33 +194,21 @@ public class ConverterServiceTest {
     * Tests, that if currency converts in itself, then amount of it doesn't change
     */
    @Test
-   void checkIdenticalCurrency() throws InterruptedException, ExecutionException {
-      List<Callable<BigDecimal>> tasks = new ArrayList<>();
-
+   void checkIdenticalCurrency() throws CurrencyConverterException, UnknownHostException {
       for (String currency : existingCurrency) {
          BigDecimal random = new BigDecimal(new Random().nextFloat() * 1000);
-         tasks.add(() -> checkConvertForIdenticalCurrencies(currency, random));
+         checkConvertForIdenticalCurrencies(currency, random);
       }
-
-      invokeAllTasks(tasks);
-
-      shutDownExecutor(30);
    }
 
    /**
     * Tests for zero.
     */
    @Test
-   void checkForZero() throws InterruptedException, ExecutionException {
-      List<Callable<BigDecimal>> tasks = new ArrayList<>();
-
+   void checkForZero() throws CurrencyConverterException, UnknownHostException {
       for (String currency : existingCurrency) {
-         tasks.add(() -> checkForZero(currency));
+         checkForZero(currency);
       }
-
-      invokeAllTasks(tasks);
-
-      shutDownExecutor(20);
    }
 
    /**
