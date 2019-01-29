@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -118,16 +119,17 @@ public class BotServiceTest {
    /**
     * Array of available currencies that can be converted between themselves by {@link ConverterService}.
     */
-   private static String[] existingCurrency = new String[]{"LAK", "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD",
-           "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
-           "GTQ", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO", "AOA", "XAF",
-           "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP", "SDG", "MUR",
-           "MZN", "BRL"};
+   private static String[] existingCurrency = new String[]{"AUD", "GBP", "HUF", "DKK", "EUR",
+           "KZT", "INR", "IDR", "CAD", "CNY", "MYR", "MXN", "NZD", "NOK", "PKR", "PLN", "RUB", "SGD",
+           "USD", "TWD", "THB", "TRY", "PHP", "CZK", "CLP", "SEK", "CHF", "ZAR", "JPY", "UAH", "KWD"};
 
    /**
     * Format for amount of currency
     */
    private static final DecimalFormat DECIMAL_FORMATTER = new DecimalFormat("#.##");
+   /**
+    * For creating random numbers
+    */
    private static final Random RANDOM = new Random();
 
    /**
@@ -153,6 +155,7 @@ public class BotServiceTest {
    void twoUsersTest() {
       User user1 = new User(123, "ludvig");
       User user2 = new User(321, "darell");
+
       assertEquals(FIRST_CONVERT_MESSAGE, testBotService.processCommand("/convert", user1));
       assertEquals(INCORRECT_REQUEST_MESSAGE, testBotService.processCommand("usd", user2));
       assertEquals(SECOND_CONVERT_MESSAGE_1 + "UAH" + SECOND_CONVERT_MESSAGE_2, testBotService.processCommand("uah", user1));
@@ -663,6 +666,7 @@ public class BotServiceTest {
     */
    @Test
    void commandAfterConversionTest() {
+
       //with right currencies and right amount
       rightScript("Pln", "Usd", "30.6");
       assertCommand(START, START_MESSAGE);
@@ -1234,6 +1238,8 @@ public class BotServiceTest {
     * @param currency currency, which has to be checked
     */
    private void rightScriptWithIdenticalCurrency(String currency) {
+      DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
+
       Float number = RANDOM.nextFloat() * 1000;
       String amount = Float.toString(number);
       String result = DECIMAL_FORMATTER.format(number);
@@ -1270,6 +1276,8 @@ public class BotServiceTest {
 
       Float number = RANDOM.nextFloat() * 1000;
       String amount = Float.toString(number);
+
+      DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
       String result = DECIMAL_FORMATTER.format(number);
 
       String request = amount + " " + currency + words[n] + currency;
@@ -1324,6 +1332,7 @@ public class BotServiceTest {
     * @param rightBorder right border of the interval
     */
    private void checkInterval(String value, String leftBorder, String rightBorder) {
+
       BigDecimal v = new BigDecimal(value);
       BigDecimal left = new BigDecimal(leftBorder);
       BigDecimal right = new BigDecimal(rightBorder);

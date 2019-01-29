@@ -2,6 +2,7 @@ package com.implemica.CurrencyConverter.validator;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
@@ -47,24 +48,13 @@ public class BotValidator {
 
    /**
     * Converts all of the characters in given String to upper case.
-    * Calls {@link #skipSpaces(String)} to skip spaces
     *
     * @param string string, all letters of which is has to be in the upper case
     * @return the String, converted to uppercase.
     */
    public static String toUpperCase(String string) {
-      string = skipSpaces(string);
+      string = string.trim();
       return string.toUpperCase();
-   }
-
-   /**
-    * Skips all spaces in given String
-    *
-    * @param string string, which can contain some spaces
-    * @return the String without spaces
-    */
-   private static String skipSpaces(String string) {
-      return string.trim();
    }
 
    /**
@@ -79,17 +69,22 @@ public class BotValidator {
       if (!matcher.matches()) {
          throw new ParseException("Invalid number: " + value, 0);
       }
+
       matcher = hasComma.matcher(value);
       char separator;
+
       if (matcher.matches()) {
          separator = COMMA;
       } else {
          separator = POINT;
       }
+
       DecimalFormatSymbols symbols = new DecimalFormatSymbols();
       symbols.setDecimalSeparator(separator);
+
       DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
       DECIMAL_FORMATTER.setParseBigDecimal(true);
+
       return (BigDecimal) DECIMAL_FORMATTER.parse(value);
    }
 
@@ -101,8 +96,12 @@ public class BotValidator {
     */
    public static String formatNumber(BigDecimal number) {
       DecimalFormatSymbols s = new DecimalFormatSymbols();
+
       s.setDecimalSeparator(POINT);
+
       DECIMAL_FORMATTER.setDecimalFormatSymbols(s);
+      DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
+
       return DECIMAL_FORMATTER.format(number);
    }
 }
