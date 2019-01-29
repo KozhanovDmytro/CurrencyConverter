@@ -2,9 +2,8 @@ package com.implemica.CurrencyConverter.controller;
 
 
 import com.implemica.CurrencyConverter.configuration.SpringConfiguration;
+import com.implemica.CurrencyConverter.configuration.WebSecurityConfig;
 import com.implemica.CurrencyConverter.configuration.WebSocketConfiguration;
-import com.implemica.CurrencyConverter.controller.util.ClientEndPoint;
-import com.implemica.CurrencyConverter.controller.util.TestSecurityConfiguration;
 import com.implemica.CurrencyConverter.dao.DialogDao;
 import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.User;
@@ -15,43 +14,29 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.messaging.WebSocketStompClient;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
-import org.springframework.web.socket.sockjs.client.Transport;
-import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * The goal of this test is create webSocket follower - {@link ClientEndPoint},
+ * The goal of this test is create webSocket follower - {@link },
  * call {@link BotService#processCommand(String, User)} method, it have to send
- * instance of {@link Dialog} to webSocket followers and catch it in {@link ClientEndPoint}
+ * instance of {@link Dialog} to webSocket followers and catch it in {@link }
  *
  * @author Dmytro K.
  * @author Daria S.
- * @see ClientEndPoint
  * @see Dialog
  * @see BotService
  */
@@ -59,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
 @EnableAutoConfiguration
-@ContextConfiguration(classes = {SpringConfiguration.class, WebSocketConfiguration.class, TestSecurityConfiguration.class})
+@ContextConfiguration(classes = {SpringConfiguration.class, WebSocketConfiguration.class, WebSecurityConfig.class})
 public class WebSocketTest {
 
    /** Representational of row in HTML table. */
@@ -75,22 +60,11 @@ public class WebSocketTest {
 
    private static final String SELENIUM_FORMAT = "%s %d %s %s %s %s %s";
 
-   private Logger logger = LoggerFactory.getLogger(WebSocketTest.class.getName());
-
-   /** WebSocket URL. */
-   private static final String URL = "ws://localhost:8080/monitor-bot";
-
-   /** Path for listening webSocket. */
-   private static final String URL_SUBSCRIBE = "/listen/bot";
-
    /** Test user. */
    private User user = new User(1234234,
            "testFirstName",
            "testLastName",
            "testUserName");
-
-   /** Client end point which catch message from webSocket. */
-   private ClientEndPoint clientEndPoint = new ClientEndPoint();
 
    /** Date formatter for check date format. */
    private DateFormat df = BotService.SIMPLE_DATE_FORMAT;
@@ -124,35 +98,31 @@ public class WebSocketTest {
 
    /**
     * Settings for client end point.
-    *
-    * @throws ExecutionException   if the computation threw an exception
-    * @throws InterruptedException if the current thread was interrupted while waiting
-    * @throws TimeoutException     if the wait timed out
     */
    @BeforeEach
-   void setUp() throws InterruptedException, ExecutionException, TimeoutException {
+   void setUp() {
+      chromeDriver.get("localhost:8080/login");
+
+      chromeDriver.findElementById("username").sendKeys(ADMIN_LOGIN);
+      chromeDriver.findElementById("password").sendKeys(ADMIN_PASSWORD);
+      chromeDriver.findElementById("submit").click();
+
       chromeDriver.get("localhost:8080/monitor");
       chromeDriver.findElementById("connect").click();
 
-      List<Transport> transports = new ArrayList<>(1);
-      transports.add(new WebSocketTransport(new StandardWebSocketClient()));
-      WebSocketClient transport = new SockJsClient(transports);
-      WebSocketStompClient stompClient = new WebSocketStompClient(transport);
+      try {
+         Thread.sleep(500);
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+      }
 
-      stompClient.setMessageConverter(new MappingJackson2MessageConverter());
-
-      StompSession session = stompClient.connect(URL, clientEndPoint)
-              .get(1, SECONDS);
-
-      session.subscribe(URL_SUBSCRIBE, clientEndPoint);
-
-      logger.info("connected: " + session.isConnected());
    }
 
    /**
     * Tests, that content, which was sent to page is present on the page
     */
    @Test
+   @WithMockUser
    void integrationTest() throws Exception {
 
       //non-valid data
@@ -215,24 +185,6 @@ public class WebSocketTest {
 
       List<Dialog> dialogs = dialogDao.getAll();
       Dialog dialogFromFile = dialogs.get(dialogs.size() - 1);
-
-      try {
-         Thread.sleep(500);
-      } catch (InterruptedException e) {
-         e.printStackTrace();
-      }
-
-      assertNotNull(clientEndPoint.getReceivedDialog());
-
-      Dialog receivedDialogFromWS = clientEndPoint.getReceivedDialog();
-
-      // sets null here is important for next tests
-      // it needed for check in next tests if data
-      // was received from webSocket or not.
-      clientEndPoint.setReceivedDialog(null);
-
-      // check WS
-      assertEquals(dialogFromFile, receivedDialogFromWS);
 
       String expectedRow = getExpectedRow(dialogFromFile);
       String expectedRowForSelenium = getExpectedDataForSelenium(dialogFromFile);

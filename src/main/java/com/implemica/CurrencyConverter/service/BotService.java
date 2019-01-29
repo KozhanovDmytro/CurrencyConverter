@@ -2,12 +2,13 @@ package com.implemica.CurrencyConverter.service;
 
 
 import com.implemica.CurrencyConverter.dao.DialogDao;
-import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.implemica.CurrencyConverter.model.Dialog;
 import com.implemica.CurrencyConverter.model.State;
 import com.implemica.CurrencyConverter.model.User;
+import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.implemica.CurrencyConverter.validator.BotValidator;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
+import org.knowm.xchange.currency.Currency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
 
 import static com.implemica.CurrencyConverter.validator.BotValidator.formatNumber;
 import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber;
@@ -348,9 +351,9 @@ public class BotService {
     */
    private boolean isValidCurrency(String usersCurrency) {
       try {
-         Currency.getInstance(usersCurrency);
+         java.util.Currency.getInstance(usersCurrency);
       } catch (IllegalArgumentException ex) {
-         return false;
+         return Currency.getAvailableCurrencyCodes().contains(usersCurrency.toUpperCase());
       }
       return true;
    }

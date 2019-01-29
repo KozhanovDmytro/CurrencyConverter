@@ -4,12 +4,12 @@ import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.knowm.xchange.currency.Currency;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
@@ -241,13 +241,11 @@ public class ConverterServiceTest {
     * @throws CurrencyConverterException problem with conversion.
     * @throws UnknownHostException troubles with internet connection.
     */
-   private BigDecimal checkForZero(String currency) throws CurrencyConverterException, UnknownHostException {
+   private void checkForZero(String currency) throws CurrencyConverterException, UnknownHostException {
       BigDecimal result = convert(currency, "USD", BigDecimal.ZERO);
 
       assertTrue(result.compareTo(new BigDecimal("1e-5")) <= 0);
       assertTrue(result.compareTo(new BigDecimal("-1e-5")) >= 0);
-
-      return result;
    }
 
    /**
@@ -307,7 +305,7 @@ public class ConverterServiceTest {
       return e.getMessage().contains(MESSAGE_UNSUPPORTED_CURRENCY) || e.getMessage().contains(API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY);
    }
 
-   private BigDecimal checkConvertForIdenticalCurrencies(String userCurrency, BigDecimal expectedValue) throws CurrencyConverterException, UnknownHostException {
+   private void checkConvertForIdenticalCurrencies(String userCurrency, BigDecimal expectedValue) throws CurrencyConverterException, UnknownHostException {
       UsersRequest usersRequest = new UsersRequest(Currency.getInstance(userCurrency),
               Currency.getInstance(userCurrency),
               expectedValue);
@@ -315,8 +313,6 @@ public class ConverterServiceTest {
       BigDecimal result = converterService.convert(usersRequest);
 
       assertEquals(expectedValue, result);
-
-      return result;
    }
 
    /**

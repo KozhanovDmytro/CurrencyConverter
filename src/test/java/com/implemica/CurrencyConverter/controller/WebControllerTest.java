@@ -52,7 +52,7 @@ public class WebControllerTest {
               .andExpect(status().isOk())
               .andExpect(content().string(containsString("WELCOME!")))
               .andExpect(content().string(containsString("to currency converter")))
-              .andExpect(content().string(containsString("designed by Dasha S. and Dmytro K.")))
+              .andExpect(content().string(containsString("designed by Daria S. and Dmytro K.")))
               .andExpect(content().string(containsString("show log")))
               .andExpect(content().string(containsString("monitor bot")));
    }
@@ -96,7 +96,7 @@ public class WebControllerTest {
               .andExpect(status().isOk())
               .andExpect(content().string(containsString("WELCOME!")))
               .andExpect(content().string(containsString("to currency converter")))
-              .andExpect(content().string(containsString("designed by Dasha S. and Dmytro K.")))
+              .andExpect(content().string(containsString("designed by Daria S. and Dmytro K.")))
               .andExpect(content().string(containsString("show log")))
               .andExpect(content().string(containsString("monitor bot")));
    }

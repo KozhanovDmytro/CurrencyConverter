@@ -133,8 +133,11 @@ public final class ConverterService {
    }
 
    private boolean isIdenticalCurrencies(UsersRequest usersRequest) {
-      return usersRequest.getCurrencyFrom() == usersRequest.getCurrencyTo();
+      return usersRequest.getCurrencyFrom().getCurrencyCode()
+              .equals(usersRequest.getCurrencyTo().getCurrencyCode());
    }
+
+
 
    /**
     * Function checks connection.
@@ -232,7 +235,7 @@ public final class ConverterService {
     * @return instance of {@link Currency}
     * @throws CurrencyNotSupportedException if currency does not support.
     */
-   private Currency getCurrencyByUtilCurrency(java.util.Currency currency) throws CurrencyNotSupportedException {
+   private Currency getCurrencyByUtilCurrency(org.knowm.xchange.currency.Currency currency) throws CurrencyNotSupportedException {
       return Currency.fromString(currency.getCurrencyCode());
    }
 

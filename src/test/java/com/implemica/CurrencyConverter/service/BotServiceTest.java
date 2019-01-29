@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -419,7 +420,7 @@ public class BotServiceTest {
 
 
       //first currency wrong
-      wrongFirstCurrency("start");
+      wrongFirstCurrency("starting");
       assertCommand(START, START_MESSAGE);
 
       wrongFirstCurrency("pounds");
@@ -1250,6 +1251,9 @@ public class BotServiceTest {
     */
    private void rightScriptWithIdenticalCurrency(String currency) {
       DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
+      DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+      symbols.setDecimalSeparator('.');
+      DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
 
       Float number = RANDOM.nextFloat() * 1000;
       String amount = Float.toString(number);
@@ -1288,6 +1292,9 @@ public class BotServiceTest {
       Float number = RANDOM.nextFloat() * 1000;
       String amount = Float.toString(number);
 
+      DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+      symbols.setDecimalSeparator('.');
+      DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
       DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
       String result = DECIMAL_FORMATTER.format(number);
 
