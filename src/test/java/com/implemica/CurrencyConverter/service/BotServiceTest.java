@@ -48,22 +48,23 @@ public class BotServiceTest {
    /**
     * End of message about incorrect currency
     */
-   private static final String IS_NOT_A_VALID_CURRENCY = "\" is not a valid currency.\n\n";
+   private static final String IS_NOT_A_VALID_CURRENCY = "\" is not a valid currency.";
    /**
     * End of message about incorrect amount
     */
-   private static final String IS_NOT_A_VALID_NUMBER = "\" is not a valid number.\n\n";
+   private static final String IS_NOT_A_VALID_NUMBER = "\" is not a valid number.";
 
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
-           "➡️with using /convert command or\n\n➡️type me a request by single line " +
-           "(Example: 10 USD in UAH)";
+   private static final String CONVERT_MESSAGE = "\nYou can make a new currency conversion:\n\n" +
+           "➡️ using /convert command\nor\n➡️ single line command " +
+           "(E. g. : 10 USD in UAH)";
    /**
     * Greeting message to user
     */
-   private static final String START_MESSAGE = "\uD83D\uDC4B Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
+   private static final String START_MESSAGE = "\uD83D\uDC4B Hello! I can help you to convert currencies."
+           + CONVERT_MESSAGE + "\n\nSo, how can I help you?";
    /**
     * Stop message to the user
     */
@@ -84,7 +85,7 @@ public class BotServiceTest {
    /**
     * Bot's response for /convert command
     */
-   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
+   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (E. g. : USD)";
    /**
     * Start of bot's response after entering first currency
     */
@@ -92,7 +93,7 @@ public class BotServiceTest {
    /**
     * End of bot's response after entering first currency
     */
-   private static final String SECOND_CONVERT_MESSAGE_2 = " to? (example: EUR)";
+   private static final String SECOND_CONVERT_MESSAGE_2 = " to? (E. g. : EUR)";
    /**
     * Bot's response after entering second currency
     */
@@ -120,8 +121,8 @@ public class BotServiceTest {
     * Array of available currencies that can be converted between themselves by {@link ConverterService}.
     */
    private static String[] existingCurrency = new String[]{"AUD", "GBP", "HUF", "DKK", "EUR",
-           "KZT", "INR", "IDR", "CAD", "CNY", "MYR", "MXN", "NZD", "NOK", "PKR", "PLN", "RUB", "SGD",
-           "USD", "TWD", "THB", "TRY", "PHP", "CZK", "CLP", "SEK", "CHF", "ZAR", "JPY", "UAH", "KWD"};
+           "KZT", "IDR", "CAD", "CNY", "MYR", "MXN", "NZD", "NOK", "PKR", "PLN", "RUB", "SGD",
+           "USD", "TWD", "THB", "TRY", "PHP", "CZK", "CLP", "SEK", "CHF", "JPY", "UAH", "KWD"};
 
    /**
     * Format for amount of currency
@@ -211,6 +212,24 @@ public class BotServiceTest {
    }
 
    /**
+    * Tests, that result of conversion stable currencies lies between given borders
+    */
+   @Test
+   void stableCurrencyTest() {
+      checkStableCurrency("usd", "eur", "0.7", "1");
+      checkStableCurrency("eur", "usd", "1", "1.5");
+
+      checkStableCurrency("kwd", "usd", "3", "3.5");
+      checkStableCurrency("usd", "kwd", "0.1", "0.5");
+
+      checkStableCurrency("gbp", "usd", "1", "1.5");
+      checkStableCurrency("usd", "gbp", "0.6", "1");
+
+      checkStableCurrency("usd", "cad", "1", "1.5");
+      checkStableCurrency("cad", "usd", "0.5", "1");
+   }
+
+   /**
     * Tests that the same number is returned for the same currency
     */
    @Test
@@ -252,414 +271,6 @@ public class BotServiceTest {
 
    }
 
-   /**
-    * Tests, that bot's response to incorrect content is correct, no matter what time it was sent
-    */
-   @Test
-   void unreadableContent() {
-      //wrong content
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      //wrong content after command
-      assertCommand(START, START_MESSAGE);
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      assertCommand(STOP, STOP_MESSAGE);
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      //wrong content after second conversion step
-      interruptConvertOnSecondStep("usd", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnSecondStep("xxx", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      //wrong content after third conversion step
-      interruptConvertOnThirdStep("pln", "uah", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("cad", "uss", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      interruptConvertOnThirdStep("sit", "eur", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      interruptConvertOnThirdStep("trl", "xbb", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-
-      //wrong content after conversion
-      rightScript("EUR", "Usd", "30.6");
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongAmount("Myr", "KhR", "-67");
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withUnsupportedCurrency("PLN", "ITL", "0.1", true);
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongAmount("Gel", "ITL", "0.11,");
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      wrongSecondCurrency("uah", "rubli");
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withUnsupportedCurrency("xts", "DOP", "301", false);
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongAmount("cou", "ern", "-17");
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withUnsupportedCurrency("xts", "csd", "804", false);
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      withWrongAmount("mtl", "USS", "-10000");
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      wrongSecondCurrency("xxx", "val");
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      wrongFirstCurrency("russian");
-      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-   }
-
-   /**
-    * Tests, that result of conversion stable currencies lies between given borders
-    */
-   @Test
-   void stableCurrencyTest() {
-      checkStableCurrency("usd", "eur", "0.86", "0.89");
-      checkStableCurrency("eur", "usd", "1.12", "1.26");
-      checkStableCurrency("kwd", "usd", "3.28", "3.31");
-      checkStableCurrency("usd", "kwd", "0.29", "0.3044");
-      checkStableCurrency("gbp", "usd", "1.25", "1.33");
-      checkStableCurrency("usd", "gbp", "0.75", "0.8");
-      checkStableCurrency("usd", "cad", "1.28", "1.36");
-      checkStableCurrency("cad", "usd", "0.73", "0.78");
-   }
-
-
-   /**
-    * Tests, that one line request works correctly
-    */
-   @Test
-   void oneLineRequestWithMistakesTest() {
-      //wrong amount
-      oneLineRequestWithWrongAmount("-7 Dkk to Jpy");
-      oneLineRequestWithWrongAmount("13p bob in mzn");
-
-      //second currency is unsupported
-      oneLineRequestWithWrongCurrency("17,9 byr to xxx", true, true);
-      oneLineRequestWithWrongCurrency("10000 pln in adp", true, true);
-
-      //second currency is unsupported and wrong amount
-      oneLineRequestWithWrongAmount("-125 eur to fim");
-      oneLineRequestWithWrongAmount("one xcd in che");
-
-      //second currency is wrong
-      oneLineRequestWithWrongCurrency("16.5 pln to dollars", true, false);
-      oneLineRequestWithWrongCurrency("3 uah in apple", true, false);
-
-      //second currency and amount are wrong
-      oneLineRequestWithWrongCurrency("-82 mro to credit", true, false);
-      oneLineRequestWithWrongCurrency("a lkr in me", true, false);
-
-      //wrong word between currencies
-      assertCommand("17 php from eur", INCORRECT_REQUEST_MESSAGE);
-
-      //wrong word between currencies and wrong amount
-      assertCommand("2.3. txr is xcd", INCORRECT_REQUEST_MESSAGE);
-
-      //wrong word between currencies and unsupported second currency
-      assertCommand("18 jpy 1 php", INCORRECT_REQUEST_MESSAGE);
-
-      //wrong word between currencies, unsupported second currency and wrong amount
-      assertCommand("0..0 tzs ta luf", INCORRECT_REQUEST_MESSAGE);
-
-      //wrong word between currencies and wrong second currency
-      assertCommand("1 eur for cat", INCORRECT_REQUEST_MESSAGE);
-
-      //word between currencies, second currency and amount are wrong
-      assertCommand("m. zmw tto you", INCORRECT_REQUEST_MESSAGE);
-
-      //first currency is unsupported
-      oneLineRequestWithWrongCurrency("34 XBB to RUB", false, true);
-      oneLineRequestWithWrongCurrency("52.9 Xfo in Usd", false, true);
-
-      //first currency is unsupported and wrong amount
-      oneLineRequestWithWrongAmount("seven IEP to INR");
-      oneLineRequestWithWrongAmount("-16 uss in zmw");
-
-      //both currencies are unsupported
-      oneLineRequestWithWrongCurrency("0,5 xua to rur", false, true);
-      oneLineRequestWithWrongCurrency("2 adp in luf", false, true);
-
-      //both currencies are unsupported and wrong amount
-      oneLineRequestWithWrongAmount("37m gwp to uss");
-      oneLineRequestWithWrongAmount("2$ usn in xbb");
-
-      //first currency is unsupported, second is wrong
-      oneLineRequestWithWrongCurrency("64 rur to $", true, false);
-      oneLineRequestWithWrongCurrency("7.0 xfo in xxfo", true, false);
-
-      //first currency is unsupported, second is wrong and wrong amount
-      oneLineRequestWithWrongCurrency("78.. IEP to PLAN", true, false);
-      oneLineRequestWithWrongCurrency("56..0. CHE in Ukraine", true, false);
-
-      //first currency is unsupported, wrong word between currencies
-      assertCommand("21,1 PTE but usd", INCORRECT_REQUEST_MESSAGE);
-
-      //first currency is unsupported, wrong word between currencies, wrong amount
-      assertCommand("-300 uss inn rub", INCORRECT_REQUEST_MESSAGE);
-
-      //both currencies are unsupported, wrong word between currencies
-      assertCommand("54 Rur are Xua", INCORRECT_REQUEST_MESSAGE);
-
-      //both currencies are unsupported, wrong word between currencies, wrong amount
-      assertCommand("from xbb 77 iep", INCORRECT_REQUEST_MESSAGE);
-
-      //first currency is unsupported, wrong word between currencies, wrong second currency
-      assertCommand("87.7 Xxx s currency", INCORRECT_REQUEST_MESSAGE);
-
-      //first currency is unsupported, wrong word between currencies, wrong second currency, wrong amount
-      assertCommand("-15..5 Che cv convert", INCORRECT_REQUEST_MESSAGE);
-
-      //first currency is wrong
-      oneLineRequestWithWrongCurrency("16 bird to RUB", false, false);
-      oneLineRequestWithWrongCurrency("90000,6 man in Usd", false, false);
-
-      //first currency is wrong and wrong amount
-      oneLineRequestWithWrongCurrency("two people to PLN", false, false);
-      oneLineRequestWithWrongCurrency("-2 ticket in Mro", false, false);
-
-      //first currency is wrong, second is unsupported
-      oneLineRequestWithWrongCurrency("64 rur to $", true, false);
-      oneLineRequestWithWrongCurrency("7.0 xfo in xxfo", true, false);
-
-      //first currency is wrong, second is unsupported and wrong amount
-      oneLineRequestWithWrongCurrency("78.. IEP to PLAN", true, false);
-      oneLineRequestWithWrongCurrency("56..0. CHE in Ukraine", true, false);
-
-      //both currencies are wrong
-      oneLineRequestWithWrongCurrency("107 butterfly to flower", false, false);
-      oneLineRequestWithWrongCurrency("66 leaf in tree", false, false);
-
-      //both currencies are wrong and wrong amount
-      oneLineRequestWithWrongCurrency("4.. bear to wolf", false, false);
-      oneLineRequestWithWrongCurrency("89- thing in money", false, false);
-
-      //first currency is wrong, wrong word between currencies
-      assertCommand("43 parrots into lkr", INCORRECT_REQUEST_MESSAGE);
-
-      //first currency is wrong, wrong word between currencies, wrong amount
-      assertCommand("03.03.12 sunny and usd", INCORRECT_REQUEST_MESSAGE);
-
-      //first currency is wrong, second is unsupported, wrong word between currencies
-      assertCommand("73,9 pieces with xxx", INCORRECT_REQUEST_MESSAGE);
-
-      //first currency is wrong, second is unsupported , wrong word between currencies, wrong amount
-      assertCommand("-12 kilos of pte", INCORRECT_REQUEST_MESSAGE);
-
-      //both currencies are wrong, wrong word between currencies
-      assertCommand("823.75 percent of 45", INCORRECT_REQUEST_MESSAGE);
-
-      //all is wrong
-      assertCommand("one letter for you", INCORRECT_REQUEST_MESSAGE);
-
-   }
-
-
-   /**
-    * Tests, that bot reaction for two consecutive commands is correct
-    */
-   @Test
-   void twoCommandsTest() {
-
-      twoCommands(START, START_MESSAGE, START, START_MESSAGE);
-      twoCommands(START, START_MESSAGE, STOP, STOP_MESSAGE);
-      twoCommands(START, START_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
-      commandAndWord(START, START_MESSAGE, "start");
-      commandAndWord(START, START_MESSAGE, "stop");
-      commandAndWord(START, START_MESSAGE, "convert");
-      commandAndWord(START, START_MESSAGE, "word");
-      commandAndWord(START, START_MESSAGE, "10 euro convert to rub");
-
-      twoCommands(STOP, STOP_MESSAGE, START, START_MESSAGE);
-      twoCommands(STOP, STOP_MESSAGE, STOP, STOP_MESSAGE);
-      twoCommands(STOP, STOP_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
-      commandAndWord(STOP, STOP_MESSAGE, "start");
-      commandAndWord(STOP, STOP_MESSAGE, "stop");
-      commandAndWord(STOP, STOP_MESSAGE, "convert");
-      commandAndWord(STOP, STOP_MESSAGE, "hello");
-      commandAndWord(STOP, STOP_MESSAGE, "500 dollars convert to euro");
-
-      wordAndCommand("start", START, START_MESSAGE);
-      wordAndCommand("hello", STOP, STOP_MESSAGE);
-
-      twoCommands(CONVERT, FIRST_CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
-      twoCommands(CONVERT, FIRST_CONVERT_MESSAGE, START, START_MESSAGE);
-      twoCommands(CONVERT, FIRST_CONVERT_MESSAGE, STOP, STOP_MESSAGE);
-      //if after '/convert' we type not command word, then we go to next conversion step. See wrongCurrencyTest
-
-      //if line conversion before another command
-      oneLineRequestAndCommand("18 usd to pln", START, START_MESSAGE);
-      oneLineRequestAndCommand("400 IRR in EUR", CONVERT, FIRST_CONVERT_MESSAGE);
-      oneLineRequestAndCommand("12,3 jpy to irr", STOP, STOP_MESSAGE);
-      oneLineRequestAndCommand("65.5 rub in php", "thanks", INCORRECT_REQUEST_MESSAGE);
-      oneLineRequestAndCommand("511 brl to xcd", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      incorrectOneLineRequestAndCommand("-367 tzs in inr", SORRY_BUT + "-367" + IS_NOT_A_VALID_NUMBER,
-              START, START_MESSAGE);
-      incorrectOneLineRequestAndCommand("hundred rub to xxx", SORRY_BUT + "hundred" + IS_NOT_A_VALID_NUMBER,
-              CONVERT, FIRST_CONVERT_MESSAGE);
-      incorrectOneLineRequestAndCommand("13$ usd in rur", SORRY_BUT + "13$" + IS_NOT_A_VALID_NUMBER,
-              STOP, STOP_MESSAGE);
-      incorrectOneLineRequestAndCommand("15..7 irr to php", SORRY_BUT + "15..7" + IS_NOT_A_VALID_NUMBER,
-              "hello", INCORRECT_REQUEST_MESSAGE);
-      incorrectOneLineRequestAndCommand("0.01. xof in xfo", SORRY_BUT + "0.01." + IS_NOT_A_VALID_NUMBER,
-              WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      incorrectOneLineRequestAndCommand("44 xbb to xcd", "❗Sorry. Currency not supported: XBB\n" + CONVERT_MESSAGE,
-              START, START_MESSAGE);
-      incorrectOneLineRequestAndCommand("105.7 usd in uss", "❗Sorry. Currency not supported: USS\n" + CONVERT_MESSAGE,
-              CONVERT, FIRST_CONVERT_MESSAGE);
-      incorrectOneLineRequestAndCommand("58721 uah to gwp", "❗Sorry. Currency not supported: GWP\n" + CONVERT_MESSAGE,
-              STOP, STOP_MESSAGE);
-      incorrectOneLineRequestAndCommand("65,3 iep in usn", "❗Sorry. Currency not supported: IEP\n" + CONVERT_MESSAGE,
-              "convert", INCORRECT_REQUEST_MESSAGE);
-      incorrectOneLineRequestAndCommand("711 jpy to xxx", "❗Sorry. Currency not supported: XXX\n" + CONVERT_MESSAGE,
-              WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      incorrectOneLineRequestAndCommand("16 flowers in uah", SORRY_BUT + "FLOWERS" +
-              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, START, START_MESSAGE);
-      incorrectOneLineRequestAndCommand("101.1 rub to dollars", SORRY_BUT + "DOLLARS" +
-              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
-      incorrectOneLineRequestAndCommand("7,7 letter in book", SORRY_BUT + "LETTER" +
-              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, STOP, STOP_MESSAGE);
-      incorrectOneLineRequestAndCommand("568 kitten to afn", SORRY_BUT + "KITTEN" +
-              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, "hi", INCORRECT_REQUEST_MESSAGE);
-      incorrectOneLineRequestAndCommand("9,9 rain in cloud", SORRY_BUT + "RAIN" +
-              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-
-      incorrectOneLineRequestAndCommand("12 uah convertTo usd", INCORRECT_REQUEST_MESSAGE, START, START_MESSAGE);
-      incorrectOneLineRequestAndCommand("-213 irr from uer", INCORRECT_REQUEST_MESSAGE, STOP, STOP_MESSAGE);
-      incorrectOneLineRequestAndCommand("0.001 likes on profile", INCORRECT_REQUEST_MESSAGE, "moon", INCORRECT_REQUEST_MESSAGE);
-      incorrectOneLineRequestAndCommand("78,9 bob of inr", INCORRECT_REQUEST_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
-      incorrectOneLineRequestAndCommand("100 php of java", INCORRECT_REQUEST_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
-
-
-      //if line conversion after another command
-      commandAndOneLineRequest(START, START_MESSAGE, "8,8 INR to BYN");
-      commandAndOneLineRequest(STOP, STOP_MESSAGE, "32 usd in uah");
-      commandAndOneLineRequest("say something", INCORRECT_REQUEST_MESSAGE, "80.6 pln in inr");
-      commandAndOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "140.01 rub to rub");
-
-      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "-678 afn in usd", SORRY_BUT +
-              "-678" + IS_NOT_A_VALID_NUMBER);
-      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "177.. xxx to xxx", SORRY_BUT +
-              "177.." + IS_NOT_A_VALID_NUMBER);
-      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "one uss in lkr", SORRY_BUT +
-              "one" + IS_NOT_A_VALID_NUMBER);
-      commandAndIncorrectOneLineRequest("conversion", INCORRECT_REQUEST_MESSAGE, "67h uah to omr",
-              SORRY_BUT + "67h" + IS_NOT_A_VALID_NUMBER);
-      commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "0,.1 brl in pln",
-              SORRY_BUT + "0,.1" + IS_NOT_A_VALID_NUMBER);
-
-      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "37 Xua to Clp", "❗Sorry. Currency not supported: XUA\n"
-              + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "32,3 PLN in XBC", "❗Sorry. Currency not supported: XBC\n"
-              + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "3000 Gbp to Xbb", "❗Sorry. Currency not supported: XBB\n"
-              + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest("lucky", INCORRECT_REQUEST_MESSAGE, "209.9 rub in XFO",
-              "❗Sorry. Currency not supported: XFO\n" + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "459,2 uah to uss",
-              "❗Sorry. Currency not supported: USS\n" + CONVERT_MESSAGE);
-
-      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "56 ladies to eur", SORRY_BUT +
-              "LADIES" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "18 computers in office", SORRY_BUT +
-              "COMPUTERS" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "21 uah to euro",
-              SORRY_BUT + "EURO" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest("try", INCORRECT_REQUEST_MESSAGE, "888 flats in money",
-              SORRY_BUT + "FLATS" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "4,3 rows to text",
-              SORRY_BUT + "ROWS" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
-
-      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "16 rup fo 13 ua", INCORRECT_REQUEST_MESSAGE);
-      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "68721 mro convert in uah", INCORRECT_REQUEST_MESSAGE);
-      commandAndIncorrectOneLineRequest("sorry", INCORRECT_REQUEST_MESSAGE, "777 cats on the table",
-              INCORRECT_REQUEST_MESSAGE);
-      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "21.2. second of hour",
-              SORRY_BUT + "21.2. second of hour" + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE);
-      commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "5 pln inn uah",
-              INCORRECT_REQUEST_MESSAGE);
-   }
-
-   /**
-    * Tests, that bot reaction for interruption conversion on second step by some command is correct
-    */
-   @Test
-   void interruptConvertOnSecondStepTest() {
-      //correct currency
-      interruptConvertOnSecondStep("uah", START, START_MESSAGE);
-      interruptConvertOnSecondStep("Rub", STOP, STOP_MESSAGE);
-      interruptConvertOnSecondStep("EUR", CONVERT, FIRST_CONVERT_MESSAGE);
-
-      //unsupported currency
-      interruptConvertOnSecondStep("tmm", START, START_MESSAGE);
-      interruptConvertOnSecondStep("zwd", STOP, STOP_MESSAGE);
-      interruptConvertOnSecondStep("xua", CONVERT, FIRST_CONVERT_MESSAGE);
-
-      //interrupt by one line request
-      interruptConvertOnSecondStepByOneLine("pln", "10 BGN in EUR");
-      interruptConvertOnSecondStepByOneLine("XXX", "10 INR in PHP");
-      interruptConvertOnSecondStepByOneLine("Cop", "10 Uah in Cad");
-
-   }
-
-   /**
-    * Tests, that bot reaction for interruption conversion on third step by some command is correct
-    */
-   @Test
-   void interruptConvertOnThirdStepTest() {
-      //it is possible, if both currency is valid
-      //both correct currency
-      interruptConvertOnThirdStep("Pln", "Eur", START, START_MESSAGE);
-      interruptConvertOnThirdStep("BgN", "TRy", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("All", "PHP", CONVERT, FIRST_CONVERT_MESSAGE);
-
-      //first correct, second unsupported
-      interruptConvertOnThirdStep("Cad", "iep", START, START_MESSAGE);
-      interruptConvertOnThirdStep("CZk", "xbb", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("IQD", "NLG", CONVERT, FIRST_CONVERT_MESSAGE);
-
-      //first unsupported, second correct
-      interruptConvertOnThirdStep("Mtl", "bif", START, START_MESSAGE);
-      interruptConvertOnThirdStep("Xbb", "cop", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("Mgf", "Ars", CONVERT, FIRST_CONVERT_MESSAGE);
-
-      //both unsupported
-      interruptConvertOnThirdStep("Usn", "byb", START, START_MESSAGE);
-      interruptConvertOnThirdStep("Fim", "Trl", STOP, STOP_MESSAGE);
-      interruptConvertOnThirdStep("CHW", "USS", CONVERT, FIRST_CONVERT_MESSAGE);
-
-   }
-
-   @Test
-   void wrongFirstCurrencyTest() {
-      wrongFirstCurrency("gryvna");
-      wrongFirstCurrency("dollars");
-      wrongFirstCurrency("hello");
-      wrongFirstCurrency("u s d");
-      wrongFirstCurrency("plm");
-   }
-
-
-   @Test
-   void wrongSecondCurrencyTest() {
-      wrongSecondCurrency("uah", "why");
-      wrongSecondCurrency("Rub", "dollars");
-      wrongSecondCurrency("XBC", "u sd");
-      wrongSecondCurrency("Rur", "euro");
-      wrongSecondCurrency("Usd", "sdu");
-   }
 
    /**
     * Tests, that bot reaction for command after all steps of conversion is correct
@@ -823,6 +434,136 @@ public class BotServiceTest {
    }
 
    /**
+    * Tests, that bot reaction for two consecutive commands is correct
+    */
+   @Test
+   void twoCommandsTest() {
+
+      twoCommands(START, START_MESSAGE, START, START_MESSAGE);
+      twoCommands(START, START_MESSAGE, STOP, STOP_MESSAGE);
+      twoCommands(START, START_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
+
+      commandAndWord(START, START_MESSAGE, "start");
+      commandAndWord(START, START_MESSAGE, "stop");
+      commandAndWord(START, START_MESSAGE, "convert");
+      commandAndWord(START, START_MESSAGE, "word");
+      commandAndWord(START, START_MESSAGE, "10 euro convert to rub");
+
+      twoCommands(STOP, STOP_MESSAGE, START, START_MESSAGE);
+      twoCommands(STOP, STOP_MESSAGE, STOP, STOP_MESSAGE);
+      twoCommands(STOP, STOP_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
+
+      commandAndWord(STOP, STOP_MESSAGE, "start");
+      commandAndWord(STOP, STOP_MESSAGE, "stop");
+      commandAndWord(STOP, STOP_MESSAGE, "convert");
+      commandAndWord(STOP, STOP_MESSAGE, "hello");
+      commandAndWord(STOP, STOP_MESSAGE, "500 dollars convert to euro");
+
+      wordAndCommand("start", START, START_MESSAGE);
+      wordAndCommand("hello", STOP, STOP_MESSAGE);
+
+      twoCommands(CONVERT, FIRST_CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
+      twoCommands(CONVERT, FIRST_CONVERT_MESSAGE, START, START_MESSAGE);
+      twoCommands(CONVERT, FIRST_CONVERT_MESSAGE, STOP, STOP_MESSAGE);
+      //if after '/convert' we type not command word, then we go to next conversion step. See wrongCurrencyTest
+
+      //if line conversion before another command
+      oneLineRequestAndCommand("18 usd to pln", START, START_MESSAGE);
+      oneLineRequestAndCommand("400 IRR in EUR", CONVERT, FIRST_CONVERT_MESSAGE);
+      oneLineRequestAndCommand("12,3 jpy to irr", STOP, STOP_MESSAGE);
+      oneLineRequestAndCommand("65.5 rub in php", "thanks", INCORRECT_REQUEST_MESSAGE);
+      oneLineRequestAndCommand("511 brl to xcd", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      incorrectOneLineRequestAndCommand("-367 tzs in inr", SORRY_BUT + "-367" + IS_NOT_A_VALID_NUMBER
+              + CONVERT_MESSAGE, START, START_MESSAGE);
+      incorrectOneLineRequestAndCommand("hundred rub to xxx", SORRY_BUT + "hundred" + IS_NOT_A_VALID_NUMBER
+              + CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
+      incorrectOneLineRequestAndCommand("13$ usd in rur", SORRY_BUT + "13$" + IS_NOT_A_VALID_NUMBER
+              + CONVERT_MESSAGE, STOP, STOP_MESSAGE);
+      incorrectOneLineRequestAndCommand("15..7 irr to php", SORRY_BUT + "15..7" + IS_NOT_A_VALID_NUMBER
+              + CONVERT_MESSAGE, "hello", INCORRECT_REQUEST_MESSAGE);
+      incorrectOneLineRequestAndCommand("0.01. xof in xfo", SORRY_BUT + "0.01." + IS_NOT_A_VALID_NUMBER
+              + CONVERT_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      incorrectOneLineRequestAndCommand("44 xbb to xcd", "❗Sorry. Currency not supported: XBB\n" + CONVERT_MESSAGE,
+              START, START_MESSAGE);
+      incorrectOneLineRequestAndCommand("105.7 usd in uss", "❗Sorry. Currency not supported: USS\n" + CONVERT_MESSAGE,
+              CONVERT, FIRST_CONVERT_MESSAGE);
+      incorrectOneLineRequestAndCommand("58721 uah to gwp", "❗Sorry. Currency not supported: GWP\n" + CONVERT_MESSAGE,
+              STOP, STOP_MESSAGE);
+      incorrectOneLineRequestAndCommand("65,3 iep in usn", "❗Sorry. Currency not supported: IEP\n" + CONVERT_MESSAGE,
+              "convert", INCORRECT_REQUEST_MESSAGE);
+      incorrectOneLineRequestAndCommand("711 jpy to xxx", "❗Sorry. Currency not supported: XXX\n" + CONVERT_MESSAGE,
+              WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      incorrectOneLineRequestAndCommand("16 flowers in uah", SORRY_BUT + "FLOWERS" +
+              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, START, START_MESSAGE);
+      incorrectOneLineRequestAndCommand("101.1 rub to dollars", SORRY_BUT + "DOLLARS" +
+              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
+      incorrectOneLineRequestAndCommand("7,7 letter in book", SORRY_BUT + "LETTER" +
+              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, STOP, STOP_MESSAGE);
+      incorrectOneLineRequestAndCommand("568 kitten to afn", SORRY_BUT + "KITTEN" +
+              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, "hi", INCORRECT_REQUEST_MESSAGE);
+      incorrectOneLineRequestAndCommand("9,9 rain in cloud", SORRY_BUT + "RAIN" +
+              IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      incorrectOneLineRequestAndCommand("12 uah convertTo usd", INCORRECT_REQUEST_MESSAGE, START, START_MESSAGE);
+      incorrectOneLineRequestAndCommand("-213 irr from uer", INCORRECT_REQUEST_MESSAGE, STOP, STOP_MESSAGE);
+      incorrectOneLineRequestAndCommand("0.001 likes on profile", INCORRECT_REQUEST_MESSAGE, "moon", INCORRECT_REQUEST_MESSAGE);
+      incorrectOneLineRequestAndCommand("78,9 bob of inr", INCORRECT_REQUEST_MESSAGE, WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      incorrectOneLineRequestAndCommand("100 php of java", INCORRECT_REQUEST_MESSAGE, CONVERT, FIRST_CONVERT_MESSAGE);
+
+
+      //if line conversion after another command
+      commandAndOneLineRequest(START, START_MESSAGE, "8,8 INR to BYN");
+      commandAndOneLineRequest(STOP, STOP_MESSAGE, "32 usd in uah");
+      commandAndOneLineRequest("say something", INCORRECT_REQUEST_MESSAGE, "80.6 pln in inr");
+      commandAndOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "140.01 rub to rub");
+
+      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "-678 afn in usd", SORRY_BUT +
+              "-678" + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "177.. xxx to xxx", SORRY_BUT +
+              "177.." + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "one uss in lkr", SORRY_BUT +
+              "one" + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest("conversion", INCORRECT_REQUEST_MESSAGE, "67h uah to omr",
+              SORRY_BUT + "67h" + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "0,.1 brl in pln",
+              SORRY_BUT + "0,.1" + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE);
+
+      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "37 Xua to Clp", "❗Sorry. Currency not supported: XUA\n"
+              + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "32,3 PLN in XBC", "❗Sorry. Currency not supported: XBC\n"
+              + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "3000 Gbp to Xbb", "❗Sorry. Currency not supported: XBB\n"
+              + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest("lucky", INCORRECT_REQUEST_MESSAGE, "209.9 rub in XFO",
+              "❗Sorry. Currency not supported: XFO\n" + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "459,2 uah to uss",
+              "❗Sorry. Currency not supported: USS\n" + CONVERT_MESSAGE);
+
+      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "56 ladies to eur", SORRY_BUT +
+              "LADIES" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "18 computers in office", SORRY_BUT +
+              "COMPUTERS" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "21 uah to euro",
+              SORRY_BUT + "EURO" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest("try", INCORRECT_REQUEST_MESSAGE, "888 flats in money",
+              SORRY_BUT + "FLATS" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "4,3 rows to text",
+              SORRY_BUT + "ROWS" + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE);
+
+      commandAndIncorrectOneLineRequest(START, START_MESSAGE, "16 rup fo 13 ua", INCORRECT_REQUEST_MESSAGE);
+      commandAndIncorrectOneLineRequest(STOP, STOP_MESSAGE, "68721 mro convert in uah", INCORRECT_REQUEST_MESSAGE);
+      commandAndIncorrectOneLineRequest("sorry", INCORRECT_REQUEST_MESSAGE, "777 cats on the table",
+              INCORRECT_REQUEST_MESSAGE);
+      commandAndIncorrectOneLineRequest(CONVERT, FIRST_CONVERT_MESSAGE, "21.2. second of hour",
+              SORRY_BUT + "21.2. second of hour" + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE);
+      commandAndIncorrectOneLineRequest(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE, "5 pln inn uah",
+              INCORRECT_REQUEST_MESSAGE);
+   }
+
+   /**
     * Tests, that bot's reaction for few /convert command is equal to expected
     */
    @Test
@@ -838,6 +579,276 @@ public class BotServiceTest {
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       rightScript("rub", "EUR", "4");
+   }
+
+   /**
+    * Tests, that bot reaction for interruption conversion on second step by some command is correct
+    */
+   @Test
+   void interruptConvertOnSecondStepTest() {
+      //correct currency
+      interruptConvertOnSecondStep("uah", START, START_MESSAGE);
+      interruptConvertOnSecondStep("Rub", STOP, STOP_MESSAGE);
+      interruptConvertOnSecondStep("EUR", CONVERT, FIRST_CONVERT_MESSAGE);
+
+      //unsupported currency
+      interruptConvertOnSecondStep("tmm", START, START_MESSAGE);
+      interruptConvertOnSecondStep("zwd", STOP, STOP_MESSAGE);
+      interruptConvertOnSecondStep("xua", CONVERT, FIRST_CONVERT_MESSAGE);
+
+      //interrupt by one line request
+      interruptConvertOnSecondStepByOneLine("pln", "10 BGN in EUR");
+      interruptConvertOnSecondStepByOneLine("XXX", "10 INR in PHP");
+      interruptConvertOnSecondStepByOneLine("Cop", "10 Uah in Cad");
+
+   }
+
+   /**
+    * Tests, that bot reaction for interruption conversion on third step by some command is correct
+    */
+   @Test
+   void interruptConvertOnThirdStepTest() {
+      //it is possible, if both currency is valid
+      //both correct currency
+      interruptConvertOnThirdStep("Pln", "Eur", START, START_MESSAGE);
+      interruptConvertOnThirdStep("BgN", "TRy", STOP, STOP_MESSAGE);
+      interruptConvertOnThirdStep("All", "PHP", CONVERT, FIRST_CONVERT_MESSAGE);
+      interruptConvertOnThirdStep("PKR", "AUD", "10 CLP to CLP", "\uD83D\uDCB010 CLP is 10 CLP");
+
+      //first correct, second unsupported
+      interruptConvertOnThirdStep("Cad", "iep", START, START_MESSAGE);
+      interruptConvertOnThirdStep("CZk", "xbb", STOP, STOP_MESSAGE);
+      interruptConvertOnThirdStep("IQD", "NLG", CONVERT, FIRST_CONVERT_MESSAGE);
+      interruptConvertOnThirdStep("HKD", "RUR", "0 nok in huf", "\uD83D\uDCB00 NOK is 0 HUF");
+
+      //first unsupported, second correct
+      interruptConvertOnThirdStep("Mtl", "bif", START, START_MESSAGE);
+      interruptConvertOnThirdStep("Xbb", "cop", STOP, STOP_MESSAGE);
+      interruptConvertOnThirdStep("Mgf", "Ars", CONVERT, FIRST_CONVERT_MESSAGE);
+      interruptConvertOnThirdStep("XBC", "KPW", "3,4 TRY to TRY", "\uD83D\uDCB03,4 TRY is 3.4 TRY");
+
+      //both unsupported
+      interruptConvertOnThirdStep("Usn", "byb", START, START_MESSAGE);
+      interruptConvertOnThirdStep("Fim", "Trl", STOP, STOP_MESSAGE);
+      interruptConvertOnThirdStep("CHW", "USS", CONVERT, FIRST_CONVERT_MESSAGE);
+      interruptConvertOnThirdStep("Xbb", "Rol", "0 Sek in Jpy", "\uD83D\uDCB00 SEK is 0 JPY");
+
+   }
+
+   /**
+    * Tests, that bot's response to incorrect content is correct, no matter what time it was sent
+    */
+   @Test
+   void unreadableContent() {
+      //wrong content
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      //wrong content after command
+      assertCommand(START, START_MESSAGE);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      assertCommand(STOP, STOP_MESSAGE);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      //wrong content after second conversion step
+      interruptConvertOnSecondStep("usd", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnSecondStep("xxx", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      //wrong content after third conversion step
+      interruptConvertOnThirdStep("pln", "uah", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("cad", "uss", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      interruptConvertOnThirdStep("sit", "eur", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+      interruptConvertOnThirdStep("trl", "xbb", WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+
+      //wrong content after conversion
+      rightScript("EUR", "Usd", "30.6");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongAmount("Myr", "KhR", "-67");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      withUnsupportedCurrency("PLN", "ITL", "0.1", true);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongAmount("Gel", "ITL", "0.11,");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      wrongSecondCurrency("uah", "rubli");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      withUnsupportedCurrency("xts", "DOP", "301", false);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongAmount("cou", "ern", "-17");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      withUnsupportedCurrency("xts", "csd", "804", false);
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      withWrongAmount("mtl", "USS", "-10000");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      wrongSecondCurrency("xxx", "val");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+      wrongFirstCurrency("russian");
+      assertCommand(WRONG_CONTENT, UNREADABLE_CONTENT_MESSAGE);
+
+   }
+
+
+   /**
+    * Tests, that one line request works correctly
+    */
+   @Test
+   void oneLineRequestWithMistakesTest() {
+      //wrong amount
+      oneLineRequestWithWrongAmount("-7 Dkk to Jpy");
+      oneLineRequestWithWrongAmount("13p bob in mzn");
+
+      //second currency is unsupported
+      oneLineRequestWithWrongCurrency("17,9 byr to xxx", true, true);
+      oneLineRequestWithWrongCurrency("10000 pln in adp", true, true);
+
+      //second currency is unsupported and wrong amount
+      oneLineRequestWithWrongAmount("-125 eur to fim");
+      oneLineRequestWithWrongAmount("one xcd in che");
+
+      //second currency is wrong
+      oneLineRequestWithWrongCurrency("16.5 pln to dollars", true, false);
+      oneLineRequestWithWrongCurrency("3 uah in apple", true, false);
+
+      //second currency and amount are wrong
+      oneLineRequestWithWrongCurrency("-82 mro to credit", true, false);
+      oneLineRequestWithWrongCurrency("a lkr in me", true, false);
+
+      //wrong word between currencies
+      assertCommand("17 php from eur", INCORRECT_REQUEST_MESSAGE);
+
+      //wrong word between currencies and wrong amount
+      assertCommand("2.3. txr is xcd", INCORRECT_REQUEST_MESSAGE);
+
+      //wrong word between currencies and unsupported second currency
+      assertCommand("18 jpy 1 php", INCORRECT_REQUEST_MESSAGE);
+
+      //wrong word between currencies, unsupported second currency and wrong amount
+      assertCommand("0..0 tzs ta luf", INCORRECT_REQUEST_MESSAGE);
+
+      //wrong word between currencies and wrong second currency
+      assertCommand("1 eur for cat", INCORRECT_REQUEST_MESSAGE);
+
+      //word between currencies, second currency and amount are wrong
+      assertCommand("m. zmw tto you", INCORRECT_REQUEST_MESSAGE);
+
+      //first currency is unsupported
+      oneLineRequestWithWrongCurrency("34 XBB to RUB", false, true);
+      oneLineRequestWithWrongCurrency("52.9 Xfo in Usd", false, true);
+
+      //first currency is unsupported and wrong amount
+      oneLineRequestWithWrongAmount("seven IEP to INR");
+      oneLineRequestWithWrongAmount("-16 uss in zmw");
+
+      //both currencies are unsupported
+      oneLineRequestWithWrongCurrency("0,5 xua to rur", false, true);
+      oneLineRequestWithWrongCurrency("2 adp in luf", false, true);
+
+      //both currencies are unsupported and wrong amount
+      oneLineRequestWithWrongAmount("37m gwp to uss");
+      oneLineRequestWithWrongAmount("2$ usn in xbb");
+
+      //first currency is unsupported, second is wrong
+      oneLineRequestWithWrongCurrency("64 rur to $", true, false);
+      oneLineRequestWithWrongCurrency("7.0 xfo in xxfo", true, false);
+
+      //first currency is unsupported, second is wrong and wrong amount
+      oneLineRequestWithWrongCurrency("78.. IEP to PLAN", true, false);
+      oneLineRequestWithWrongCurrency("56..0. CHE in Ukraine", true, false);
+
+      //first currency is unsupported, wrong word between currencies
+      assertCommand("21,1 PTE but usd", INCORRECT_REQUEST_MESSAGE);
+
+      //first currency is unsupported, wrong word between currencies, wrong amount
+      assertCommand("-300 uss inn rub", INCORRECT_REQUEST_MESSAGE);
+
+      //both currencies are unsupported, wrong word between currencies
+      assertCommand("54 Rur are Xua", INCORRECT_REQUEST_MESSAGE);
+
+      //both currencies are unsupported, wrong word between currencies, wrong amount
+      assertCommand("from xbb 77 iep", INCORRECT_REQUEST_MESSAGE);
+
+      //first currency is unsupported, wrong word between currencies, wrong second currency
+      assertCommand("87.7 Xxx s currency", INCORRECT_REQUEST_MESSAGE);
+
+      //first currency is unsupported, wrong word between currencies, wrong second currency, wrong amount
+      assertCommand("-15..5 Che cv convert", INCORRECT_REQUEST_MESSAGE);
+
+      //first currency is wrong
+      oneLineRequestWithWrongCurrency("16 bird to RUB", false, false);
+      oneLineRequestWithWrongCurrency("90000,6 man in Usd", false, false);
+
+      //first currency is wrong and wrong amount
+      oneLineRequestWithWrongCurrency("two people to PLN", false, false);
+      oneLineRequestWithWrongCurrency("-2 ticket in Mro", false, false);
+
+      //first currency is wrong, second is unsupported
+      oneLineRequestWithWrongCurrency("64 rur to $", true, false);
+      oneLineRequestWithWrongCurrency("7.0 xfo in xxfo", true, false);
+
+      //first currency is wrong, second is unsupported and wrong amount
+      oneLineRequestWithWrongCurrency("78.. IEP to PLAN", true, false);
+      oneLineRequestWithWrongCurrency("56..0. CHE in Ukraine", true, false);
+
+      //both currencies are wrong
+      oneLineRequestWithWrongCurrency("107 butterfly to flower", false, false);
+      oneLineRequestWithWrongCurrency("66 leaf in tree", false, false);
+
+      //both currencies are wrong and wrong amount
+      oneLineRequestWithWrongCurrency("4.. bear to wolf", false, false);
+      oneLineRequestWithWrongCurrency("89- thing in money", false, false);
+
+      //first currency is wrong, wrong word between currencies
+      assertCommand("43 parrots into lkr", INCORRECT_REQUEST_MESSAGE);
+
+      //first currency is wrong, wrong word between currencies, wrong amount
+      assertCommand("03.03.12 sunny and usd", INCORRECT_REQUEST_MESSAGE);
+
+      //first currency is wrong, second is unsupported, wrong word between currencies
+      assertCommand("73,9 pieces with xxx", INCORRECT_REQUEST_MESSAGE);
+
+      //first currency is wrong, second is unsupported , wrong word between currencies, wrong amount
+      assertCommand("-12 kilos of pte", INCORRECT_REQUEST_MESSAGE);
+
+      //both currencies are wrong, wrong word between currencies
+      assertCommand("823.75 percent of 45", INCORRECT_REQUEST_MESSAGE);
+
+      //all is wrong
+      assertCommand("one letter for you", INCORRECT_REQUEST_MESSAGE);
+
+   }
+
+
+   @Test
+   void wrongFirstCurrencyTest() {
+      wrongFirstCurrency("gryvna");
+      wrongFirstCurrency("dollars");
+      wrongFirstCurrency("hello");
+      wrongFirstCurrency("u s d");
+      wrongFirstCurrency("plm");
+   }
+
+
+   @Test
+   void wrongSecondCurrencyTest() {
+      wrongSecondCurrency("uah", "why");
+      wrongSecondCurrency("Rub", "dollars");
+      wrongSecondCurrency("XBC", "u sd");
+      wrongSecondCurrency("Rur", "euro");
+      wrongSecondCurrency("Usd", "sdu");
    }
 
 
@@ -1147,7 +1158,7 @@ public class BotServiceTest {
    private void oneLineRequestWithWrongAmount(String request) {
       String[] words = request.split("\\s+");
       String amount = words[0];
-      assertCommand(request, SORRY_BUT + amount + IS_NOT_A_VALID_NUMBER);
+      assertCommand(request, SORRY_BUT + amount + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE);
    }
 
    /**

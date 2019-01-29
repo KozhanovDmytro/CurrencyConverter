@@ -45,11 +45,11 @@ public class BotService {
    /**
     * End of message about incorrect currency
     */
-   private static final String IS_NOT_A_VALID_CURRENCY = "\" is not a valid currency.\n\n";
+   private static final String IS_NOT_A_VALID_CURRENCY = "\" is not a valid currency.";
    /**
     * End of message about incorrect amount
     */
-   private static final String IS_NOT_A_VALID_NUMBER = "\" is not a valid number.\n\n";
+   private static final String IS_NOT_A_VALID_NUMBER = "\" is not a valid number.";
 
    /**
     * Dialog with user
@@ -64,13 +64,14 @@ public class BotService {
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
-           "➡️with using /convert command or\n\n➡️type me a request by single line " +
-           "(Example: 10 USD in UAH)";
+   private static final String CONVERT_MESSAGE = "\nYou can make a new currency conversion:\n\n" +
+           "➡️ using /convert command\nor\n➡️ single line command " +
+           "(E. g. : 10 USD in UAH)";
    /**
     * Greeting message to user
     */
-   private static final String START_MESSAGE = "\uD83D\uDC4B Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
+   private static final String START_MESSAGE = "\uD83D\uDC4B Hello! I can help you to convert currencies."
+           + CONVERT_MESSAGE + "\n\nSo, how can I help you?";
    /**
     * Stop message to the user
     */
@@ -92,7 +93,7 @@ public class BotService {
    /**
     * Bot's response for /convert command
     */
-   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (example: USD)";
+   private static final String FIRST_CONVERT_MESSAGE = "Please, type in the currency to convert from (E. g. : USD)";
    /**
     * Start of bot's response after entering first currency
     */
@@ -100,7 +101,7 @@ public class BotService {
    /**
     * End of bot's response after entering first currency
     */
-   private static final String SECOND_CONVERT_MESSAGE_2 = " to? (example: EUR)";
+   private static final String SECOND_CONVERT_MESSAGE_2 = " to? (E. g. : EUR)";
    /**
     * Bot's response after entering second currency
     */
@@ -212,21 +213,20 @@ public class BotService {
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE;
             convertStep = 1;
-
          }
+
       } else if (convertStep == 2) {
          secondCurrency = BotValidator.toUpperCase(command);
 
          if (isValidCurrency(secondCurrency)) {
             message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
             convertStep = 3;
-
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_CURRENCY +
                     SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
             convertStep = 2;
-
          }
+
       } else if (convertStep == 3) {
 
          if (isValidAmount(command)) {
@@ -236,8 +236,8 @@ public class BotService {
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_NUMBER +
                     THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
-
          }
+
       } else {
          message = INCORRECT_REQUEST_MESSAGE;
          convertStep = 0;
@@ -275,7 +275,7 @@ public class BotService {
                message = convertValue(amount);
 
             } else {
-               message = SORRY_BUT + amount + IS_NOT_A_VALID_NUMBER;
+               message = SORRY_BUT + amount + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE;
             }
          } else {
             message = SORRY_BUT + secondCurrency + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE;

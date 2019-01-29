@@ -31,30 +31,31 @@ public class BotControllerTest {
    /**
     * Start command
     */
-   private static final String message1Text = "/start";
+   private static final String start = "/start";
    /**
     * Stop command
     */
-   private static final String message2Text = "/stop";
+   private static final String stop = "/stop";
    /**
     * Convert command
     */
-   private static final String message3Text = "/convert";
+   private static final String convert = "/convert";
    /**
     * Some non-command word
     */
-   private static final String message4Text = "hello";
+   private static final String hello = "hello";
 
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   private static final String CONVERT_MESSAGE = " You can make a new currency conversion:\n\n" +
-           "➡️with using /convert command or\n\n➡️type me a request by single line " +
-           "(Example: 10 USD in UAH)";
+   private static final String CONVERT_MESSAGE = "\nYou can make a new currency conversion:\n\n" +
+           "➡️ using /convert command\nor\n➡️ single line command " +
+           "(E. g.: 10 USD in UAH)";
    /**
     * Bot's response for start command
     */
-   private static final String startMessage = "\uD83D\uDC4B Hello! I can help you to convert currencies." + CONVERT_MESSAGE;
+   private static final String startMessage = "\uD83D\uDC4B Hello! I can help you to convert currencies."
+           + CONVERT_MESSAGE + "\n\nSo, how can I help you?";
 
    /**
     * Bot's response for stop command
@@ -63,7 +64,7 @@ public class BotControllerTest {
    /**
     * Bot's response for convert command
     */
-   private static final String firstConvertMessage = "Please, type in the currency to convert from (example: USD)";
+   private static final String firstConvertMessage = "Please, type in the currency to convert from (E. g. : USD)";
    /**
     * Bot's response for non-command word
     */
@@ -155,6 +156,24 @@ public class BotControllerTest {
    }
 
 
+
+   /**
+    * Tests, that if user has all information about himself and his message contains specified text, and if method
+    * {@link BotController#onUpdateReceived(Update)} is called, then methods {@link Update#getMessage()} and
+    * {@link BotService#processCommand(String, User)} is called with specified parameters
+    */
+   @Test
+   void onUpdateReceivedTest0() {
+      //update1 from user1
+      setMessageBehavior("473982.78 usd to usd", true);
+
+      //user with all information
+      createUser(378219, "jane", "brown", "cloudy");
+
+      verifyController("473982.78 usd to usd", "\uD83D\uDCB0 473982.78 usd is 473982.78 usd");
+   }
+
+
    /**
     * Tests, that if user has all information about himself and his message contains specified text, and if method
     * {@link BotController#onUpdateReceived(Update)} is called, then methods {@link Update#getMessage()} and
@@ -163,12 +182,12 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest1() {
       //update1 from user1
-      setMessageBehavior(message1Text, true);
+      setMessageBehavior(start, true);
 
       //user with all information
       createUser(145, "ludvig", "fourteenth", "fox");
 
-      verifyController(message1Text, startMessage);
+      verifyController(start, startMessage);
    }
 
    /**
@@ -179,12 +198,12 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest2() {
       //update2 from user2
-      setMessageBehavior(message2Text, true);
+      setMessageBehavior(stop, true);
 
       //user without last name
       createUser(1289, "Laban", null, "fox");
 
-      verifyController(message2Text, stopMessage);
+      verifyController(stop, stopMessage);
    }
 
    /**
@@ -195,12 +214,12 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest3() {
       //update3 from user3
-      setMessageBehavior(message3Text, true);
+      setMessageBehavior(convert, true);
 
       //user without username
       createUser(1111, "dad", "Larsson", null);
 
-      verifyController(message3Text, firstConvertMessage);
+      verifyController(convert, firstConvertMessage);
    }
 
    /**
@@ -211,12 +230,12 @@ public class BotControllerTest {
    @Test
    void onUpdateReceivedTest4() {
       //update4 from user4
-      setMessageBehavior(message4Text, true);
+      setMessageBehavior(hello, true);
 
       //user without last name and username
       createUser(74, "squirrel", null, null);
 
-      verifyController(message4Text, wrongMessage);
+      verifyController(hello, wrongMessage);
    }
 
    /**
