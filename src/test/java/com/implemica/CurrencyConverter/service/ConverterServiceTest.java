@@ -164,8 +164,8 @@ public class ConverterServiceTest {
 
       BigDecimal result = BigDecimal.ONE;
 
-      BigDecimal from = new BigDecimal(1.0);
-      BigDecimal to = new BigDecimal(0.7);
+      BigDecimal from = new BigDecimal(0.7);
+      BigDecimal to = new BigDecimal(1);
 
       BigDecimal coefficient = new BigDecimal(1000000000);
 
