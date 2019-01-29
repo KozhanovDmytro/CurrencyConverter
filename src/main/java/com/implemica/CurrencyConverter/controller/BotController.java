@@ -77,6 +77,11 @@ public class BotController extends TelegramLongPollingBot {
    private static Map<User, Long> listOfChats = State.listOfChats;
 
    /**
+    * Stores users states
+    */
+   private static Map<Integer, State> usersStates = State.statesOfUsers;
+
+   /**
     * Creates new telegram bot's controller
     *
     * @param bot stores bot's logic
@@ -125,12 +130,13 @@ public class BotController extends TelegramLongPollingBot {
       String response = bot.processCommand(command, user);
       sendMessage(message, response);
 
-      if (command.equals("/convert") || response.endsWith("USD)") || response.endsWith("EUR)")) {
+      int userId = user.getUserId();
+      if (getStep(userId) == 1 || getStep(userId) == 2) {
          SendMessage s = new SendMessage().setChatId(chatId).setText("You can choose popular currencies: ");
          createKeyboard(s);
       }
+
       listOfChats.put(user, chatId);
-      
    }
 
    /**
@@ -269,6 +275,17 @@ public class BotController extends TelegramLongPollingBot {
          }
       }
       return user;
+   }
+
+   /**
+    * Finds User by their key and gets their conversion step
+    *
+    * @param id users id
+    * @return step of conversion for given user
+    */
+   private int getStep(int id) {
+      State state = usersStates.get(id);
+      return state.getConvertStep();
    }
 }
 
