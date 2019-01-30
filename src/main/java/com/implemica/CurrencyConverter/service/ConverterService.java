@@ -19,10 +19,9 @@ import javax.money.convert.MonetaryConversions;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * The class for conversion currency.
@@ -47,6 +46,7 @@ import java.util.List;
 @Service
 public final class ConverterService {
 
+   public static final String DATE_FORMAT_FOR_FLOAT_RATES_API = "E, d MMM yyyy HH:mm:ss Z";
    /** Logger. */
    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -327,7 +327,11 @@ public final class ConverterService {
 
       JSONObject desiredCurrency = object.getJSONObject(currencyTo.toLowerCase());
 
-      checkLatestInfoForFloatRatesAPI(desiredCurrency);
+      try {
+         checkLatestInfoForFloatRatesAPI(desiredCurrency);
+      } catch (ParseException e) {
+         logger.error(e.getMessage());
+      }
 
       double one = object.getJSONObject(currencyTo.toLowerCase())
               .getDouble("rate");
@@ -365,8 +369,9 @@ public final class ConverterService {
     * @param object received data with date.
     * @throws CurrencyConverterException if data is old.
     */
-   private void checkLatestInfoForFloatRatesAPI(JSONObject object) throws CurrencyConverterException {
-      Date update = new Date(object.getString("date"));
+   private void checkLatestInfoForFloatRatesAPI(JSONObject object) throws CurrencyConverterException, ParseException {
+      SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_FOR_FLOAT_RATES_API, Locale.ENGLISH);
+      Date update = sdf.parse(object.getString("date"));
       Date today = new Date();
 
       if (today.getTime() - update.getTime() > TWO_WEEKS) {
