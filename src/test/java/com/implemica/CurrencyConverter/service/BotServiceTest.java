@@ -35,6 +35,10 @@ public class BotServiceTest {
    private BotService testBotService;
 
    /**
+    * Money sign for result message
+    */
+   private static final String MONEY_SIGN = "\uD83D\uDCB0";
+   /**
     * Test user instance
     */
    private User testUser = new User(12, "testUser");
@@ -58,8 +62,8 @@ public class BotServiceTest {
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   private static final String CONVERT_MESSAGE = "\nYou can make a new currency conversion:\n\n" +
-           "➡️ using /convert command\nor\n➡️ single line command " +
+   private static final String CONVERT_MESSAGE = "\nYou can make a new currency conversion: \n\n" +
+           "➡️ using /convert command \nor\n➡️ single line command " +
            "(E. g. : 10 USD in UAH)";
    /**
     * Greeting message to user
@@ -121,9 +125,17 @@ public class BotServiceTest {
    /**
     * Array of available currencies that can be converted between themselves by {@link ConverterService}.
     */
-   private static String[] existingCurrency = new String[]{"AUD", "GBP", "HUF", "DKK", "EUR",
-           "KZT", "IDR", "CAD", "CNY", "MYR", "MXN", "NZD", "NOK", "PKR", "PLN", "RUB", "SGD",
-           "USD", "TWD", "THB", "TRY", "PHP", "CZK", "CLP", "SEK", "CHF", "JPY", "UAH", "KWD"};
+   private static String[] existingCurrency = new String[]{"UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "BRL",
+           "RUB", "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD",
+           "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
+           "GTQ", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO", "AOA", "XAF",
+           "BOB", "KZT", "LSL", "TMT", "HRK", "BGN", "OMR", "MYR", "VUV", "KES", "XCD", "ARS", "GBP", "SDG", "MUR",
+           "VND", "MNT", "GMD", "BSD", "HKD", "GIP", "PGK", "KGS", "LYD", "CAD", "BWP", "IDR", "LRD", "JPY", "NAD",
+           "MVR", "ISK", "PAB", "AMD", "BHD", "NOK", "SRD", "IRR", "GYD", "TWD", "ZMW", "XOF", "MWK", "KMF", "KRW",
+           "TZS", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS", "NGN", "SBD", "LKR",
+           "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC", "SGD", "PYG", "JOD", "AFN",
+           "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "UYU",
+           "MZN", "BTN", "ETH"};
 
    /**
     * Format for amount of currency
@@ -210,7 +222,157 @@ public class BotServiceTest {
       oneLineRequest("9021,2 php in irr");
       oneLineRequest("3821 irr to clp");
       oneLineRequest("321 omr in tzs");
+
    }
+
+   /**
+    * Tests, that rounding is correct
+    */
+   @Test
+   void roundingTest() {
+      //small values
+      checkRounding("jpy", "0.000000001", "0");
+      checkRounding("Zmw", "0.00000001", "0");
+      checkRounding("XcD", "0.0000001", "0");
+      checkRounding("lkR", "0.000001", "0");
+      checkRounding("MRo", "0.00001", "0");
+      checkRounding("bob", "0.0001", "0");
+      checkRounding("CAD", "0.001", "0");
+      checkRounding("eur", "0.004", "0");
+      checkRounding("Uah", "0.0049", "0");
+      checkRounding("INr", "0.005", "0.01");
+      checkRounding("BgN", "0.009", "0.01");
+      checkRounding("THB", "0.01", "0.01");
+      checkRounding("tRY", "0.0149", "0.01");
+      checkRounding("tWd", "0.015", "0.02");
+      checkRounding("phP", "0.019", "0.02");
+      checkRounding("Huf", "0.094", "0.09");
+      checkRounding("RUb", "0.095", "0.1");
+      checkRounding("PLN", "0.099", "0.1");
+      checkRounding("sgd", "0.991", "0.99");
+      checkRounding("InR", "0.9949", "0.99");
+      checkRounding("dKK", "0.995", "1");
+      checkRounding("sEk", "0.999", "1");
+      checkRounding("Jpy", "9.9949", "9.99");
+      checkRounding("noK", "9.995", "10");
+      checkRounding("MYR", "9.999", "10");
+
+
+      checkRounding("BRL", "7,000000001", "7");
+      checkRounding("Clp", "7,00000001", "7");
+      checkRounding("iQd", "7,0000001", "7");
+      checkRounding("omR", "7,000001", "7");
+      checkRounding("AFn", "7,00001", "7");
+      checkRounding("xOF", "7,0001", "7");
+      checkRounding("ils", "7,001", "7");
+      checkRounding("Gbp", "7,004", "7");
+      checkRounding("bRl", "7,0049", "7");
+      checkRounding("huF", "7,005", "7.01");
+      checkRounding("HKd", "7,009", "7.01");
+      checkRounding("UAH", "7,01", "7.01");
+      checkRounding("DkK", "7,0149", "7.01");
+      checkRounding("eUR", "7,015", "7.02");
+      checkRounding("IDR", "7,019", "7.02");
+      checkRounding("aud", "7,094", "7.09");
+      checkRounding("Kpw", "7,095", "7.1");
+      checkRounding("mXn", "7,099", "7.1");
+      checkRounding("nzD", "7,991", "7.99");
+      checkRounding("NOk", "7,9949", "7.99");
+      checkRounding("PkR", "7,995", "8");
+      checkRounding("pLN", "7,999", "8");
+      checkRounding("TWD", "39,9949", "39.99");
+      checkRounding("thb", "39,995", "40");
+      checkRounding("CHf", "39,999", "40");
+
+
+      //big values
+      checkRounding("uah", "78566666666666666666666690.000000001","78566666666666666666666690");
+      checkRounding("Iqd", "78566666666666666666666690.00000001", "78566666666666666666666690");
+      checkRounding("mZn", "78566666666666666666666690.0000001", "78566666666666666666666690");
+      checkRounding("clP", "78566666666666666666666690.000001", "78566666666666666666666690");
+      checkRounding("OMr", "78566666666666666666666690.00001", "78566666666666666666666690");
+      checkRounding("IrR", "78566666666666666666666690.0001", "78566666666666666666666690");
+      checkRounding("bOB", "78566666666666666666666690.001", "78566666666666666666666690");
+      checkRounding("BYR", "78566666666666666666666690.004", "78566666666666666666666690");
+      checkRounding("lkr", "78566666666666666666666690.0049", "78566666666666666666666690");
+      checkRounding("Tzs", "78566666666666666666666690.005", "78566666666666666666666690.01");
+      checkRounding("mRo", "78566666666666666666666690.009", "78566666666666666666666690.01");
+      checkRounding("xcD", "78566666666666666666666690.01", "78566666666666666666666690.01");
+      checkRounding("PHp", "78566666666666666666666690.0149", "78566666666666666666666690.01");
+      checkRounding("AfN", "78566666666666666666666690.015", "78566666666666666666666690.02");
+      checkRounding("bRL", "78566666666666666666666690.019", "78566666666666666666666690.02");
+      checkRounding("INR", "78566666666666666666666690.094", "78566666666666666666666690.09");
+      checkRounding("zmw", "78566666666666666666666690.095", "78566666666666666666666690.1");
+      checkRounding("Xof", "78566666666666666666666690.099", "78566666666666666666666690.1");
+      checkRounding("pLn", "78566666666666666666666690.991", "78566666666666666666666690.99");
+      checkRounding("rUb", "78566666666666666666666690.9949", "78566666666666666666666690.99");
+      checkRounding("trY", "78566666666666666666666690.995", "78566666666666666666666691");
+      checkRounding("BTN", "78566666666666666666666690.999", "78566666666666666666666691");
+      checkRounding("ChF", "5697432893257285276192932147919832,9949", "5697432893257285276192932147919832.99");
+      checkRounding("hKD", "5697432893257285276192932147919832,995", "5697432893257285276192932147919833");
+      checkRounding("KWD", "5697432893257285276192932147919832,999", "5697432893257285276192932147919833");
+      
+      
+      checkRounding("CVE", "9999999999999999999999999,000000001","9999999999999999999999999");
+      checkRounding("Awg", "9999999999999999999999999,00000001", "9999999999999999999999999");
+      checkRounding("gEl", "9999999999999999999999999,0000001", "9999999999999999999999999");
+      checkRounding("alL", "9999999999999999999999999,000001", "9999999999999999999999999");
+      checkRounding("JMd", "9999999999999999999999999,00001", "9999999999999999999999999");
+      checkRounding("BaM", "9999999999999999999999999,0001", "9999999999999999999999999");
+      checkRounding("sYP", "9999999999999999999999999,001", "9999999999999999999999999");
+      checkRounding("sll", "9999999999999999999999999,004", "9999999999999999999999999");
+      checkRounding("Bbd", "9999999999999999999999999,0049", "9999999999999999999999999");
+      checkRounding("Tzs", "9999999999999999999999999,005", "9999999999999999999999999.01");
+      checkRounding("LYD", "9999999999999999999999999,009", "9999999999999999999999999.01");
+      checkRounding("NgN", "9999999999999999999999999,01", "9999999999999999999999999.01");
+      checkRounding("uYu", "9999999999999999999999999,0149", "9999999999999999999999999.01");
+      checkRounding("ETh", "9999999999999999999999999,015", "9999999999999999999999999.02");
+      checkRounding("bTN", "9999999999999999999999999,019", "9999999999999999999999999.02");
+      checkRounding("jpY", "9999999999999999999999999,094", "9999999999999999999999999.09");
+      checkRounding("KYd", "9999999999999999999999999,095", "9999999999999999999999999.1");
+      checkRounding("hkd", "9999999999999999999999999,099", "9999999999999999999999999.1");
+      checkRounding("chF", "9999999999999999999999999,991", "9999999999999999999999999.99");
+      checkRounding("USD", "9999999999999999999999999,9949", "9999999999999999999999999.99");
+      checkRounding("bgn", "9999999999999999999999999,995", "10000000000000000000000000");
+      checkRounding("ruB", "9999999999999999999999999,999", "10000000000000000000000000");
+      checkRounding("BHD", "7892767232313213989321748321974,9949", "7892767232313213989321748321974.99");
+      checkRounding("aud", "7892767232313213989321748321974,995", "7892767232313213989321748321975");
+      checkRounding("xOf", "7892767232313213989321748321974,999", "7892767232313213989321748321975");
+   }
+
+   /**
+    * Tests, that result of conversion stable currencies lies between given borders
+    */
+   @Test
+   void stableCurrencyWithAmountTest() {
+      checkStableCurrencyWithAmount("gbp", "eur", "1000000000", "1", "1.2");
+      checkStableCurrencyWithAmount("eur", "gbp", "0.078", "0.7", "1");
+
+      checkStableCurrencyWithAmount("Gbp", "Usd", "1.0008", "1", "1.5");
+      checkStableCurrencyWithAmount("Usd", "Gbp", "55555555555", "0.6", "1");
+
+      checkStableCurrencyWithAmount("GBp", "CAd", "3627163921.13213", "1.5", "2");
+      checkStableCurrencyWithAmount("CAd", "GBp", "728131321321321.2131", "0.3", "0.7");
+
+      checkStableCurrencyWithAmount("GBP", "JPY", "0.001", "130", "160");
+      checkStableCurrencyWithAmount("JPY", "GBP", "37281983.3213", "0.004", "0.009");
+
+
+
+      checkStableCurrencyWithAmount("aud", "eur", "75000000000", "0.5", "0.8");
+      checkStableCurrencyWithAmount("eur", "aud", "2.0004", "1.3", "1.8");
+
+      checkStableCurrencyWithAmount("AUd", "Usd", "9877777777.873201", "0.5", "0.8");
+      checkStableCurrencyWithAmount("Usd", "AUd", "1.093210", "1.3", "1.6");
+
+      checkStableCurrencyWithAmount("Aud", "Hkd", "1432291043.2", "5.3", "5.9");
+      checkStableCurrencyWithAmount("Hkd", "Aud", "1.00382910", "0.1", "0.3");
+
+      checkStableCurrencyWithAmount("AUD", "JPY", "0.00356", "73", "84");
+      checkStableCurrencyWithAmount("JPY", "AUD", "787652319.8392", "0.009", "0.02");
+   }
+
+
 
    /**
     * Tests, that result of conversion stable currencies lies between given borders
@@ -1171,7 +1333,7 @@ public class BotServiceTest {
       String botsResponse = testBotService.processCommand(request, testUser);
 
       String[] words = request.split("\\s+");
-      String start = "\uD83D\uDCB0" + words[0] + " " + words[1].toUpperCase() + " is ";
+      String start = MONEY_SIGN + words[0] + " " + words[1].toUpperCase() + " is ";
 
       assertTrue(botsResponse.startsWith(start));
       assertTrue(botsResponse.endsWith(words[3].toUpperCase()));
@@ -1204,7 +1366,7 @@ public class BotServiceTest {
       firstCurrency = firstCurrency.trim().toUpperCase();
       secondCurrency = secondCurrency.trim().toUpperCase();
 
-      String start = "\uD83D\uDCB0" + amount + " " + firstCurrency + " is ";
+      String start = MONEY_SIGN + amount + " " + firstCurrency + " is ";
 
       String botsResponse = testBotService.processCommand(amount, testUser);
 
@@ -1250,19 +1412,19 @@ public class BotServiceTest {
     * @param currency currency, which has to be checked
     */
    private void rightScriptWithIdenticalCurrency(String currency) {
-      DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
+      BigDecimal number = BigDecimal.valueOf(RANDOM.nextFloat() * 1000);
+      String amount = number.toPlainString();
+
       DecimalFormatSymbols symbols = new DecimalFormatSymbols();
       symbols.setDecimalSeparator('.');
       DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
-
-      Float number = RANDOM.nextFloat() * 1000;
-      String amount = Float.toString(number);
+      DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
       String result = DECIMAL_FORMATTER.format(number);
 
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       assertCommand(currency, SECOND_CONVERT_MESSAGE_1 + currency + SECOND_CONVERT_MESSAGE_2);
       assertCommand(currency, THIRD_CONVERT_MESSAGE + currency + " to " + currency);
-      assertCommand(amount, "\uD83D\uDCB0" + amount + " " + currency + " is " + result + " " + currency);
+      assertCommand(amount, MONEY_SIGN + amount + " " + currency + " is " + result + " " + currency);
    }
 
    /**
@@ -1272,12 +1434,10 @@ public class BotServiceTest {
     * @param secondCurrency the currency to convert to
     */
    private void zeroAmount(String firstCurrency, String secondCurrency) {
-      String zero = "0";
-
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
       assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2);
       assertCommand(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency);
-      assertCommand(zero, "\uD83D\uDCB0" + zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
+      assertCommand("0", MONEY_SIGN + "0 " + firstCurrency + " is 0 " + secondCurrency);
    }
 
    /**
@@ -1289,8 +1449,8 @@ public class BotServiceTest {
       String[] words = {" in ", " to "};
       int n = RANDOM.nextInt(2);
 
-      Float number = RANDOM.nextFloat() * 1000;
-      String amount = Float.toString(number);
+      BigDecimal number = BigDecimal.valueOf(RANDOM.nextFloat() * 1000);
+      String amount = number.toPlainString();
 
       DecimalFormatSymbols symbols = new DecimalFormatSymbols();
       symbols.setDecimalSeparator('.');
@@ -1300,7 +1460,7 @@ public class BotServiceTest {
 
       String request = amount + " " + currency + words[n] + currency;
 
-      assertCommand(request, "\uD83D\uDCB0" + amount + " " + currency + " is " + result + " " + currency);
+      assertCommand(request, MONEY_SIGN + amount + " " + currency + " is " + result + " " + currency);
    }
 
    /**
@@ -1313,11 +1473,23 @@ public class BotServiceTest {
       String[] words = {" in ", " to "};
       int n = RANDOM.nextInt(2);
 
-      String zero = "0";
+      String request = "0 " + firstCurrency + words[n] + secondCurrency;
 
-      String request = zero + " " + firstCurrency + words[n] + secondCurrency;
+      assertCommand(request, MONEY_SIGN + "0 " + firstCurrency + " is " + "0 " + secondCurrency);
+   }
 
-      assertCommand(request, "\uD83D\uDCB0" + zero + " " + firstCurrency + " is " + zero + " " + secondCurrency);
+   /**
+    * Checks, that result of conversion lies between given borders. Amount is equal 1.
+    *
+    * @param firstCurrency  the currency to convert from
+    * @param secondCurrency the currency to convert to
+    * @param amount         given amount to convert
+    * @param leftBorder     left border of the interval
+    * @param rightBorder    right border of the interval
+    */
+   private void checkStableCurrencyWithAmount(String firstCurrency, String secondCurrency, String amount, String leftBorder, String rightBorder) {
+      String value = getValue(testBotService.processCommand(amount + " " + firstCurrency + " to " + secondCurrency, testUser));
+      checkIntervalWithValues(amount, value, leftBorder, rightBorder);
    }
 
    /**
@@ -1349,6 +1521,25 @@ public class BotServiceTest {
     * @param leftBorder  left border of the interval
     * @param rightBorder right border of the interval
     */
+   private void checkIntervalWithValues(String amount, String value, String leftBorder, String rightBorder) {
+
+      BigDecimal v = new BigDecimal(value);
+      BigDecimal a = new BigDecimal(amount);
+      BigDecimal left = new BigDecimal(leftBorder).multiply(a);
+      BigDecimal right = new BigDecimal(rightBorder).multiply(a);
+
+      assertTrue(v.compareTo(left) >= 0 && v.compareTo(right) <= 0);
+
+   }
+
+
+   /**
+    * Checks, that given value lies between left border and right border
+    *
+    * @param value       given number
+    * @param leftBorder  left border of the interval
+    * @param rightBorder right border of the interval
+    */
    private void checkInterval(String value, String leftBorder, String rightBorder) {
 
       BigDecimal v = new BigDecimal(value);
@@ -1356,5 +1547,18 @@ public class BotServiceTest {
       BigDecimal right = new BigDecimal(rightBorder);
 
       assertTrue(v.compareTo(left) >= 0 && v.compareTo(right) <= 0);
+   }
+
+   /**
+    * Checks, that rounded amount of given currency is equal to expected
+    *
+    * @param currency self-convertible currency
+    *                 "
+    */
+   private void checkRounding(String currency, String value, String roundingValue) {
+      currency = currency.trim().toUpperCase();
+      String request = value + " " + currency + " in " + currency;
+      String response = MONEY_SIGN + value + " " + currency + " is " + roundingValue + " " + currency;
+      assertCommand(request, response);
    }
 }
