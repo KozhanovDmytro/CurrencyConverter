@@ -29,8 +29,9 @@ telegram.botToken       =BOT_TOKEN
 admin.login             =ADMIN_LOGIN
 admin.password          =ADMIN_PASSWORD
 ```
-The server port required to start the Tomcat server on the local host. The bot name and its token must be obtained from [BotFather](https://telegram.me/BotFather). Admin's data required to access the admin page.
-
+ The server port required to start the Tomcat server on the local host. The bot name and its token must be obtained from [BotFather](https://telegram.me/BotFather). Admin's data required to access the admin page.
+ 
+After these steps you are ready to create the **.war** file and deploy it to the Tomcat server.
 
 
 ## Disigned by
