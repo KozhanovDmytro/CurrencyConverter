@@ -5,6 +5,14 @@
 - The application allows to display the entire **list of user requests** and track it in real time. These features are available for viewing on a simple **admin page**.
 - The application supports **145 currencies** and some cryptocurrencies.
 
+## APIs used for conversion
+The application uses 5 APIs for currency conversion :
+  1. bank-ua.com
+  2. floatrates.com
+  3. javamoney.org
+  4. free.currencyconverterapi.com
+  5. currencylayer.com
+
 ## Installation
 
 Before installing the application, make sure that the `application.properties` file exists in the path: 
