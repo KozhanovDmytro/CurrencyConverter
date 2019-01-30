@@ -35,7 +35,7 @@ public class ConverterServiceTest {
    private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
 
    /** Array of available currencies that can be converted between themselves by {@link ConverterService}. */
-   private static String[] existingCurrency = new String[] {"UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "BRL",
+   private static String[] existingCurrency = new String[] { "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "BRL",
            "RUB", "BAM", "SZL", "GNF", "NZD", "SYP", "MKD", "BZD", "KWD", "SLL", "ETB", "BYN", "AZN", "XPF", "BBD",
            "CDF", "RWF", "SOS", "BDT", "ILS", "EGP", "IQD", "RON", "COP", "SEK", "MMK", "SAR", "DJF", "HTG", "PKR",
            "GTQ", "PHP", "TOP", "TND", "VEF", "PEN", "CVE", "NIO", "HUF", "SCR", "THB", "FJD", "MRO", "AOA", "XAF",
@@ -45,7 +45,7 @@ public class ConverterServiceTest {
            "TZS", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS", "NGN", "SBD", "LKR",
            "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC", "SGD", "PYG", "JOD", "AFN",
            "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "UYU",
-           "MZN"};
+           "MZN", "BTC", "ETH" };
 
    /** Array of unsupported currencies which cannot be converted.  */
    private static String[] unsupportedCurrency = new String[]{"GWP", "SKK", "SIT", "MZM", "IEP", "NLG", "ZWN", "GHC",

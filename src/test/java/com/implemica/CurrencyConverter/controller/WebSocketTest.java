@@ -24,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,9 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * The goal of this test is create webSocket follower - {@link },
- * call {@link BotService#processCommand(String, User)} method, it have to send
- * instance of {@link Dialog} to webSocket followers and catch it in {@link }
+ * Class tests
  *
  * @author Dmytro K.
  * @author Daria S.
@@ -67,7 +66,7 @@ public class WebSocketTest {
            "testUserName");
 
    /** Date formatter for check date format. */
-   private DateFormat df = BotService.SIMPLE_DATE_FORMAT;
+   private DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
    /** Main entry point for server-side Spring MVC test support. */
    @Autowired private MockMvc mockMvc;

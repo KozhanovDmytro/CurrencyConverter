@@ -63,8 +63,8 @@ public final class ConverterService {
       converters.add(this::convertByFreeCurrencyConverterApiCom);    // has a limit - 100  requests per hour
       converters.add(this::convertByCurrencyLayerCom);               // has a limit - 1000 requests per month
 
-      converters.add(this::convertByJavaMoney);                      // unlimited, so slow
       converters.add(this::convertByBankUaCom);                      // unlimited, converts through UAH
+//      converters.add(this::convertByJavaMoney);                      // unlimited, so slow
    }
 
    /**
@@ -323,11 +323,13 @@ public final class ConverterService {
 
       JSONObject object = getJsonObjectByURL(new URL(url));
 
-      String desiredCurrency = usersRequest.getCurrencyTo().getCurrencyCode();
+      String currencyTo = usersRequest.getCurrencyTo().getCurrencyCode();
 
-      checkLatestInfo(object.getJSONObject(desiredCurrency.toLowerCase()));
+      JSONObject desiredCurrency = object.getJSONObject(currencyTo.toLowerCase());
 
-      double one = object.getJSONObject(desiredCurrency.toLowerCase())
+      checkLatestInfoForFloatRatesAPI(desiredCurrency);
+
+      double one = object.getJSONObject(currencyTo.toLowerCase())
               .getDouble("rate");
 
       writeToLog(API_NAME_FLOATRATES_COM, usersRequest);
@@ -355,9 +357,16 @@ public final class ConverterService {
       return usersRequest.getValue().multiply(new BigDecimal(one));
    }
 
-   private void checkLatestInfo(JSONObject object) throws CurrencyConverterException {
+   /**
+    * The function checks the data received from the API, which contain
+    * the date when the currencies were updated. If the data is old or
+    * SimpleDateFormat is outdated, the function throws an exception.
+    *
+    * @param object received data with date.
+    * @throws CurrencyConverterException if data is old.
+    */
+   private void checkLatestInfoForFloatRatesAPI(JSONObject object) throws CurrencyConverterException {
       Date update = new Date(object.getString("date"));
-
       Date today = new Date();
 
       if (today.getTime() - update.getTime() > TWO_WEEKS) {
