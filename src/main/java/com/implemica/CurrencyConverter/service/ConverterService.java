@@ -58,13 +58,13 @@ public final class ConverterService {
     * order will be convert currency.
     */
    {
-      converters.add(this::convertByBankUaCom);                      // unlimited
       converters.add(this::convertByFloatRatesCom);                  // unlimited
 
       converters.add(this::convertByFreeCurrencyConverterApiCom);    // has a limit - 100  requests per hour
       converters.add(this::convertByCurrencyLayerCom);               // has a limit - 1000 requests per month
 
-//      converters.add(this::convertByJavaMoney);                      // unlimited, so slow
+      converters.add(this::convertByJavaMoney);                      // unlimited, so slow
+      converters.add(this::convertByBankUaCom);                      // unlimited, converts through UAH
    }
 
    /**

@@ -237,7 +237,6 @@ public class ConverterServiceTest {
     * Tests that result of conversion will be close to zero.
     *
     * @param currency code of currency
-    * @return result of conversion.
     * @throws CurrencyConverterException problem with conversion.
     * @throws UnknownHostException troubles with internet connection.
     */
