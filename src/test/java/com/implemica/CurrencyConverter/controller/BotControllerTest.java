@@ -119,6 +119,11 @@ public class BotControllerTest {
    private static Map<User, Long> listOfChats = State.listOfChats;
 
    /**
+    * Stores all statesOfUsers, which use bot and their last command
+    */
+   private static Map<Integer, State> statesOfUsers = State.statesOfUsers;
+
+   /**
     * A dummy implementation for Telegram User class
     */
    @Mock
@@ -154,7 +159,6 @@ public class BotControllerTest {
       assertEquals(BOT_NAME, controller.getBotUsername());
       assertEquals(BOT_TOKEN, controller.getBotToken());
    }
-
 
 
    /**
@@ -331,6 +335,7 @@ public class BotControllerTest {
       when(telegramUser.getFirstName()).thenReturn(name);
       when(telegramUser.getLastName()).thenReturn(lastName);
       when(telegramUser.getUserName()).thenReturn(userName);
+      statesOfUsers.put(id, new State("", "", 0));
    }
 
    /**
@@ -371,16 +376,17 @@ public class BotControllerTest {
     * and {@link BotService#processCommand(String, User)} were called with specified parameters.
     *
     * @param messageText message from User
-    * @param chatId id of chat
-    * @param userId user's id
-    * @param firstName user's first name
-    * @param lastName user's last name
-    * @param userName user's username
+    * @param chatId      id of chat
+    * @param userId      user's id
+    * @param firstName   user's first name
+    * @param lastName    user's last name
+    * @param userName    user's username
     */
    private void verifyControllerWithKeyboard(String messageText, long chatId, int userId, String firstName, String lastName, String userName) {
       createBot(chatId);
       User user = new User(userId, firstName, lastName, userName);
       listOfChats.put(user, chatId);
+      statesOfUsers.put(userId, new State("", "", 0));
 
       doReturn(BotControllerTest.wrongMessage).when(botService).processCommand(messageText, user);
 
