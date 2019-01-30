@@ -61,8 +61,8 @@ public class BotValidator {
     * Parses given number to Float value
     *
     * @param value value, which has to be converted to Float value
-    * @throws ParseException if value is not a number
     * @return Float number of given String
+    * @throws ParseException if value is not a number
     */
    public static BigDecimal parseNumber(String value) throws ParseException {
       Matcher matcher = isPositiveNumber.matcher(value);
@@ -79,11 +79,7 @@ public class BotValidator {
          separator = POINT;
       }
 
-      DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-      symbols.setDecimalSeparator(separator);
-
-      DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
-      DECIMAL_FORMATTER.setParseBigDecimal(true);
+      setFormatter(separator, false);
 
       return (BigDecimal) DECIMAL_FORMATTER.parse(value);
    }
@@ -95,13 +91,28 @@ public class BotValidator {
     * @return the String of given number
     */
    public static String formatNumber(BigDecimal number) {
-      DecimalFormatSymbols s = new DecimalFormatSymbols();
-
-      s.setDecimalSeparator(POINT);
-
-      DECIMAL_FORMATTER.setDecimalFormatSymbols(s);
-      DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
+      setFormatter(POINT, true);
 
       return DECIMAL_FORMATTER.format(number);
+   }
+
+   /**
+    * Sets parameters for decimal formatter
+    *
+    * @param separator    the character used for decimal sign
+    * @param needRounding true, if rounding is needed
+    */
+   private static void setFormatter(char separator, boolean needRounding) {
+      DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+      symbols.setDecimalSeparator(separator);
+
+      DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
+
+      if (needRounding) {
+         DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
+
+      } else {
+         DECIMAL_FORMATTER.setParseBigDecimal(true);
+      }
    }
 }

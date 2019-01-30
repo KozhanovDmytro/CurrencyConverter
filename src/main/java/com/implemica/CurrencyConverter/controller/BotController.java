@@ -131,7 +131,9 @@ public class BotController extends TelegramLongPollingBot {
       sendMessage(message, response);
 
       int userId = user.getUserId();
-      if (getStep(userId) == 1 || getStep(userId) == 2) {
+      int step = getStep(userId);
+
+      if (step == 1 || step == 2) {
          SendMessage s = new SendMessage().setChatId(chatId).setText("You can choose popular currencies: ");
          createKeyboard(s);
       }
@@ -213,13 +215,14 @@ public class BotController extends TelegramLongPollingBot {
     * @return new User
     */
    User getInformationAboutUser(Message message) {
-      org.telegram.telegrambots.meta.api.objects.User botUser = message.getFrom();
-      int userId = botUser.getId();
-      User user;
-      String userFirstName = botUser.getFirstName();
-      String userLastName = botUser.getLastName();
-      String userName = botUser.getUserName();
+      org.telegram.telegrambots.meta.api.objects.User telegramUser = message.getFrom();
 
+      int userId = telegramUser.getId();
+      String userFirstName = telegramUser.getFirstName();
+      String userLastName = telegramUser.getLastName();
+      String userName = telegramUser.getUserName();
+
+      User user;
       if (userName == null || userLastName == null) {
          user = new User(userId, userFirstName);
          if (userName != null) {

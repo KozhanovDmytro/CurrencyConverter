@@ -142,6 +142,10 @@ public class BotService {
    private int convertStep = 0;
 
    /**
+    * Count of words in one line request
+    */
+   private static final int WORDS_COUNT = 4;
+   /**
     * Logger for this class
     */
    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
@@ -332,8 +336,15 @@ public class BotService {
     */
    private boolean isOneLineRequest(String line) {
       String[] request = line.split("\\s+");
+
       int length = request.length;
-      return length == 4 && (request[2].equalsIgnoreCase("to") || request[2].equalsIgnoreCase("in"));
+
+      String word = "";
+      if(length == WORDS_COUNT){
+         word = request[2];
+      }
+
+      return length == WORDS_COUNT && (word.equalsIgnoreCase("to") || word.equalsIgnoreCase("in"));
    }
 
    /**
@@ -360,7 +371,7 @@ public class BotService {
 
       } catch (IOException e) {
          logger.error(e.getMessage() + " is not responding.");
-         message = "❗Sorry. Server is not responding." + CONVERT_MESSAGE;
+         message = "❗Sorry. Server is not responding. Try again later.";
       }
       return message;
    }
