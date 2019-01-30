@@ -53,6 +53,10 @@ public class BotService {
     * End of message about incorrect amount
     */
    private static final String IS_NOT_A_VALID_NUMBER = "\" is not a valid number.";
+   /**
+    * Money sign for result message
+    */
+   private static final String MONEY_SIGN = "\uD83D\uDCB0";
 
    /**
     * Dialog with user
@@ -67,8 +71,8 @@ public class BotService {
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   private static final String CONVERT_MESSAGE = "\nYou can make a new currency conversion:\n\n" +
-           "➡️ using /convert command\nor\n➡️ single line command " +
+   private static final String CONVERT_MESSAGE = "\nYou can make a new currency conversion: \n\n" +
+           "➡️ using /convert command \nor\n➡️ single line command " +
            "(E. g. : 10 USD in UAH)";
    /**
     * Greeting message to user
@@ -316,7 +320,7 @@ public class BotService {
          UsersRequest usersRequest = new UsersRequest(usersCurrency, desiredCurrency, parseNumber(value));
 
          BigDecimal convertedValue = converterService.convert(usersRequest);
-         message = "\uD83D\uDCB0" + value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
+         message = MONEY_SIGN + value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
 
       } catch (CurrencyConverterException e) {
          message = "❗Sorry. " + e.getMessage() + "\n" + CONVERT_MESSAGE;
@@ -326,7 +330,7 @@ public class BotService {
 
       } catch (IOException e) {
          logger.error(e.getMessage() + " is not responding.");
-         message = SORRY_BUT + "Server is not responding." + CONVERT_MESSAGE;
+         message = "❗Sorry. Server is not responding." + CONVERT_MESSAGE;
       }
       return message;
    }

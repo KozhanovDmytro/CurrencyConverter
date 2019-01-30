@@ -26,9 +26,9 @@ public class DialogDaoImplTest {
    /**
     * Message to the user with the suggestion of a new conversion
     */
-   private static final String CONVERT_MESSAGE = "\nYou can make a new currency conversion:\n\n" +
-           "➡️ using /convert command\nor\n➡️ single line command " +
-           "(E. g.: 10 USD in UAH)";
+   private static final String CONVERT_MESSAGE = "\nYou can make a new currency conversion: \n\n" +
+           "➡️ using /convert command \nor\n➡️ single line command " +
+           "(E. g. : 10 USD in UAH)";
    /**
     * Greeting message to user
     */

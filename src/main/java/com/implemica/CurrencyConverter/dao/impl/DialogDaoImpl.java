@@ -118,6 +118,7 @@ public class DialogDaoImpl implements DialogDao {
          fileReader.close();
          reader.close();
       } catch (IOException ex) {
+         logger.error("File not exists");
          result = new ArrayList<>();
       }
       return result;
