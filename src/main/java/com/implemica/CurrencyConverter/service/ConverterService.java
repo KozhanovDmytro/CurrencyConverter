@@ -46,7 +46,6 @@ import java.util.*;
 @Service
 public final class ConverterService {
 
-   public static final String DATE_FORMAT_FOR_FLOAT_RATES_API = "E, d MMM yyyy HH:mm:ss Z";
    /** Logger. */
    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -401,4 +400,6 @@ public final class ConverterService {
    private static final String MESSAGE_UNSUPPORTED_CURRENCY = "One or two currencies not supported.";
 
    private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
+
+   private static final String DATE_FORMAT_FOR_FLOAT_RATES_API = "E, d MMM yyyy HH:mm:ss Z";
 }
