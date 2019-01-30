@@ -137,6 +137,11 @@ public class BotService {
    private String secondCurrency = "";
 
    /**
+    * Step of conversion
+    */
+   private int convertStep = 0;
+
+   /**
     * Logger for this class
     */
    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
@@ -151,6 +156,9 @@ public class BotService {
     */
    private final ConverterService converterService;
 
+   /**
+    * Date format for writing to file
+    */
    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
    /**
@@ -175,17 +183,9 @@ public class BotService {
     * @return bot's response to user
     */
    public String processCommand(String command, User user) {
-      State state;
+      int userId = user.getUserId();
 
-      if (states.containsKey(user.getUserId())) {
-         state = states.get(user.getUserId());
-      } else {
-         state = new State("", "", 0);
-      }
-
-      firstCurrency = state.getFirstCurrency();
-      secondCurrency = state.getSecondCurrency();
-      int convertStep = state.getConvertStep();
+      getState(userId);
 
       String message;
 
@@ -219,7 +219,6 @@ public class BotService {
 
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE;
-            convertStep = 1;
          }
 
       } else if (convertStep == 2) {
@@ -231,7 +230,6 @@ public class BotService {
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_CURRENCY +
                     SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
-            convertStep = 2;
          }
 
       } else if (convertStep == 3) {
@@ -250,15 +248,48 @@ public class BotService {
          convertStep = 0;
       }
 
-      state = new State(firstCurrency, secondCurrency, convertStep);
-      states.put(user.getUserId(), state);
+      writeData(user, command, message);
+      return message;
+   }
+
+
+   /**
+    * Writes changes in users states to map and to .csv file
+    *
+    * @param user     user, which sent message
+    * @param request  request from user
+    * @param response response from bot
+    */
+   private void writeData(User user, String request, String response) {
+      int userId = user.getUserId();
+      State state = new State(firstCurrency, secondCurrency, convertStep);
+      states.put(userId, state);
 
       Date dateNow = new Date();
 
-      Dialog dialog = new Dialog(dateNow, user, command, message);
+      Dialog dialog = new Dialog(dateNow, user, request, response);
       dialogDao.write(dialog);
       sendToWebSocketFollowers(dialog);
-      return message;
+   }
+
+   /**
+    * Gets state of conversion for given user
+    *
+    * @param userId id of given user
+    */
+   private void getState(int userId) {
+      State state;
+
+      if (states.containsKey(userId)) {
+         state = states.get(userId);
+
+      } else {
+         state = new State("", "", 0);
+      }
+
+      firstCurrency = state.getFirstCurrency();
+      secondCurrency = state.getSecondCurrency();
+      convertStep = state.getConvertStep();
    }
 
    /**
@@ -311,7 +342,6 @@ public class BotService {
     * @param value amount of first currency
     * @return message to user with result of conversion from first currency to second currency
     */
-
    private String convertValue(String value) {
       String message;
       try {
@@ -357,7 +387,7 @@ public class BotService {
       try {
          java.util.Currency.getInstance(usersCurrency);
       } catch (IllegalArgumentException ex) {
-         return Currency.getAvailableCurrencyCodes().contains(usersCurrency.toUpperCase());
+         return Currency.getAvailableCurrencyCodes().contains(usersCurrency);
       }
       return true;
    }
