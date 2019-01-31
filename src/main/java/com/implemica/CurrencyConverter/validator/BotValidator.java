@@ -65,23 +65,31 @@ public class BotValidator {
     * @throws ParseException if value is not a number
     */
    public static BigDecimal parseNumber(String value) throws ParseException {
-      Matcher matcher = isPositiveNumber.matcher(value);
-      if (!matcher.matches()) {
-         throw new ParseException("Invalid number: " + value, 0);
+      if (isValidNumber(value)) {
+         Matcher matcher = hasComma.matcher(value);
+         char separator;
+
+         if (matcher.matches()) {
+            separator = COMMA;
+         } else {
+            separator = POINT;
+         }
+
+         setFormatter(separator, false);
       }
-
-      matcher = hasComma.matcher(value);
-      char separator;
-
-      if (matcher.matches()) {
-         separator = COMMA;
-      } else {
-         separator = POINT;
-      }
-
-      setFormatter(separator, false);
 
       return (BigDecimal) DECIMAL_FORMATTER.parse(value);
+   }
+
+   /**
+    * Checks, that given value is positive number
+    *
+    * @param value String, which has to be checked
+    * @return true, if value is positive number, false - otherwise.
+    */
+   public static boolean isValidNumber(String value) {
+      Matcher matcher = isPositiveNumber.matcher(value);
+      return matcher.matches();
    }
 
    /**

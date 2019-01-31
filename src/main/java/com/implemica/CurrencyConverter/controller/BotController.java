@@ -1,5 +1,6 @@
 package com.implemica.CurrencyConverter.controller;
 
+import com.implemica.CurrencyConverter.model.ConvertStep;
 import com.implemica.CurrencyConverter.model.State;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.model.UsersRequest;
@@ -21,6 +22,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.*;
 
+import static com.implemica.CurrencyConverter.model.ConvertStep.*;
 import static java.lang.Math.toIntExact;
 
 
@@ -54,7 +56,7 @@ public class BotController extends TelegramLongPollingBot {
    /**
     * Unique string, which uses for identification messages, which has non-text content.
     */
-   private static final String UNIQUE = BotService.UNIQUE;
+   private static final String UNIQUE = BotService.WRONG_CONTENT;
 
    /**
     * Logic of bot, how it processes user's input.
@@ -93,7 +95,7 @@ public class BotController extends TelegramLongPollingBot {
    }
 
    /**
-    * Gets statesOfUsers input and processes it. Writes conversation to .csv file.
+    * Gets statesOfUsers input and processes it. Writes conversation to storage
     *
     * @param update represents an incoming update from Telegram
     */
@@ -131,9 +133,9 @@ public class BotController extends TelegramLongPollingBot {
       sendMessage(message, response);
 
       int userId = user.getUserId();
-      int step = getStep(userId);
+      ConvertStep step = getStep(userId);
 
-      if (step == 1 || step == 2) {
+      if (step.equals(FIRST) || step.equals(SECOND)) {
          SendMessage s = new SendMessage().setChatId(chatId).setText("You can choose popular currencies: ");
          createKeyboard(s);
       }
@@ -250,7 +252,7 @@ public class BotController extends TelegramLongPollingBot {
 
       row.add(new InlineKeyboardButton().setText("USD").setCallbackData("USD"));
       row.add(new InlineKeyboardButton().setText("EUR").setCallbackData("EUR"));
-      row.add(new InlineKeyboardButton().setText("RUB").setCallbackData("RUB"));
+      row.add(new InlineKeyboardButton().setText("BTC").setCallbackData("BTC"));
       row.add(new InlineKeyboardButton().setText("UAH").setCallbackData("UAH"));
       buttons.add(row);
 
@@ -286,7 +288,7 @@ public class BotController extends TelegramLongPollingBot {
     * @param id users id
     * @return step of conversion for given user
     */
-   private int getStep(int id) {
+   private ConvertStep getStep(int id) {
       State state = usersStates.get(id);
       return state.getConvertStep();
    }

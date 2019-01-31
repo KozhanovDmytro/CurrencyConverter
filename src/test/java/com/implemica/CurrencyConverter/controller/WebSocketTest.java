@@ -169,7 +169,7 @@ public class WebSocketTest {
       integrationTest("repeat last");
 
       //shows, that user sent non-text message
-      integrationTest(BotService.UNIQUE);
+      integrationTest(BotService.WRONG_CONTENT);
    }
 
    /**

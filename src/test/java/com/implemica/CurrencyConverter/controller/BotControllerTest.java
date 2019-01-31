@@ -1,5 +1,6 @@
 package com.implemica.CurrencyConverter.controller;
 
+import com.implemica.CurrencyConverter.model.ConvertStep;
 import com.implemica.CurrencyConverter.model.State;
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.service.BotService;
@@ -253,7 +254,7 @@ public class BotControllerTest {
       setMessageBehavior(null, false);
 
       createUser(38210, "tutta", "carlson", "chicken");
-      verifyController(BotService.UNIQUE, wrongContentMessage);
+      verifyController(BotService.WRONG_CONTENT, wrongContentMessage);
    }
 
    /**
@@ -335,7 +336,7 @@ public class BotControllerTest {
       when(telegramUser.getFirstName()).thenReturn(name);
       when(telegramUser.getLastName()).thenReturn(lastName);
       when(telegramUser.getUserName()).thenReturn(userName);
-      statesOfUsers.put(id, new State("", "", 0));
+      statesOfUsers.put(id, new State("", "", ConvertStep.ZERO));
    }
 
    /**
@@ -386,7 +387,7 @@ public class BotControllerTest {
       createBot(chatId);
       User user = new User(userId, firstName, lastName, userName);
       listOfChats.put(user, chatId);
-      statesOfUsers.put(userId, new State("", "", 0));
+      statesOfUsers.put(userId, new State("", "", ConvertStep.ZERO));
 
       doReturn(BotControllerTest.wrongMessage).when(botService).processCommand(messageText, user);
 
@@ -395,6 +396,4 @@ public class BotControllerTest {
       verify(update).getCallbackQuery();
       verify(botService).processCommand(messageText, user);
    }
-
-
 }

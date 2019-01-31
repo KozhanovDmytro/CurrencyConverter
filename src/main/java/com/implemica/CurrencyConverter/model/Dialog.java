@@ -1,7 +1,6 @@
 package com.implemica.CurrencyConverter.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.implemica.CurrencyConverter.service.BotService;
 import lombok.Getter;
 
@@ -20,22 +19,32 @@ import java.util.Date;
 @Getter
 public class Dialog implements Serializable {
 
-   /** User's message to bot. */
+   public static final String PATTERN_FOR_LINE = "%s;%s;%s;%s;%s;%s;%s;\n";
+   /**
+    * User's message to bot.
+    */
    private String usersRequest;
 
-   /** Bot's reaction for user's message. */
+   /**
+    * Bot's reaction for user's message.
+    */
    private String botsResponse;
 
-   /** Represents a Telegram user. */
+   /**
+    * Represents a Telegram user.
+    */
    private User user;
 
-   /** Date and time of dialog. */
+   /**
+    * Date and time of dialog.
+    */
    @JsonFormat(pattern = "dd.MM.yyyy HH:mm:ss", timezone = "GMT+2")
    private Date date;
 
-   /** Date format. */
-   @JsonIgnore
-   private SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
+   /**
+    * Date format.
+    */
+   private static SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
 
    /**
     * Creates new simple Dialog
@@ -62,29 +71,13 @@ public class Dialog implements Serializable {
 
    /**
     * Line of all information of one request to bot from one user
+    *
     * @return array with information about date, User, user's request to bot and bot's response to user
     */
-   public String[] toCsv() {
-      botsResponse = botsResponse.replaceAll("\n","");
-      return new String[]{df.format(date), Integer.toString(user.getUserId()), user.getUserFirstName(), user.getUserLastName()
-              , user.getUserName(), usersRequest, botsResponse};
+   public String toLine() {
+      botsResponse = botsResponse.replaceAll("\n", "");
+      return String.format(PATTERN_FOR_LINE, df.format(date), user.getUserId(), user.getUserFirstName(),
+              user.getUserLastName(), user.getUserName(), usersRequest, botsResponse);
    }
 
-   /**
-    * Compares this object to the specified object.
-    *
-    * @return true if the objects are the same; false otherwise.
-    */
-   @Override
-   public boolean equals(Object dialog) {
-      if (this == dialog) {
-         return true;
-      }
-      if (dialog instanceof Dialog) {
-         return this.date.equals(((Dialog) dialog).date) && this.user.equals(((Dialog) dialog).user) &&
-                 this.usersRequest.equals(((Dialog) dialog).usersRequest) &&
-                 this.botsResponse.equals(((Dialog) dialog).botsResponse);
-      }
-      return false;
-   }
 }

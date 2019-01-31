@@ -136,17 +136,17 @@ public class DialogDaoImplTest {
       List<Dialog> list = tr.getAll();
       assertEquals(11 + size, list.size());
 
-      assertEquals(tr10, list.get(size));
-      assertEquals(tr11, list.get(1 + size));
-      assertEquals(tr12, list.get(2 + size));
-      assertEquals(tr13, list.get(3 + size));
-      assertEquals(tr14, list.get(4 + size));
-      assertEquals(tr20, list.get(5 + size));
-      assertEquals(tr21, list.get(6 + size));
-      assertEquals(tr22, list.get(7 + size));
-      assertEquals(tr23, list.get(8 + size));
-      assertEquals(tr24, list.get(9 + size));
-      assertEquals(tr25, list.get(10 + size));
+      assertTrue(areDialogsEqual(tr10, list.get(size)));
+      assertTrue(areDialogsEqual(tr11, list.get(1 + size)));
+      assertTrue(areDialogsEqual(tr12, list.get(2 + size)));
+      assertTrue(areDialogsEqual(tr13, list.get(3 + size)));
+      assertTrue(areDialogsEqual(tr14, list.get(4 + size)));
+      assertTrue(areDialogsEqual(tr20, list.get(5 + size)));
+      assertTrue(areDialogsEqual(tr21, list.get(6 + size)));
+      assertTrue(areDialogsEqual(tr22, list.get(7 + size)));
+      assertTrue(areDialogsEqual(tr23, list.get(8 + size)));
+      assertTrue(areDialogsEqual(tr24, list.get(9 + size)));
+      assertTrue(areDialogsEqual(tr25, list.get(10 + size)));
 
    }
 
@@ -185,18 +185,19 @@ public class DialogDaoImplTest {
 
       List<Dialog> list = tr.getByDate(date);
       assertEquals(size + 6, list.size());
-      assertEquals(tr10, list.get(size));
-      assertEquals(tr11, list.get(1 + size));
-      assertEquals(tr12, list.get(2 + size));
-      assertEquals(tr13, list.get(3 + size));
-      assertEquals(tr20, list.get(4 + size));
-      assertEquals(tr21, list.get(5 + size));
+      assertTrue(areDialogsEqual(tr10, list.get(size)));
+      assertTrue(areDialogsEqual(tr11, list.get(1 + size)));
+      assertTrue(areDialogsEqual(tr12, list.get(2 + size)));
+      assertTrue(areDialogsEqual(tr13, list.get(3 + size)));
+      assertTrue(areDialogsEqual(tr20, list.get(4 + size)));
+      assertTrue(areDialogsEqual(tr21, list.get(5 + size)));
 
 
    }
 
    /**
     * Writes data to file
+    *
     * @param dialog one line of data, which has to be wrote
     */
    private void writeToFile(Dialog dialog) {
@@ -205,13 +206,14 @@ public class DialogDaoImplTest {
 
    /**
     * Creates dialog, which has to be written
-    * @param date date and time of user's request
-    * @param userId user's id
+    *
+    * @param date          date and time of user's request
+    * @param userId        user's id
     * @param userFirstName user's first name
-    * @param userLastName user's last name
-    * @param userName user's username
-    * @param usersRequest user's request to bot
-    * @param botsResponse bot's response to user's request
+    * @param userLastName  user's last name
+    * @param userName      user's username
+    * @param usersRequest  user's request to bot
+    * @param botsResponse  bot's response to user's request
     * @return dialog, which contains information about last given user's request and bot's response
     * @throws ParseException if date format is incorrect
     */
@@ -230,5 +232,31 @@ public class DialogDaoImplTest {
          return;
       }
       assertTrue(tempFile.delete());
+   }
+
+   /**
+    * Compares two dialogs.
+    *
+    * @return true if the dialogs are the same; false otherwise.
+    */
+   private boolean areDialogsEqual(Dialog dialog1, Dialog dialog2) {
+      return dialog1.getDate().equals(dialog2.getDate()) &&
+              areUsersEqual(dialog1.getUser(), dialog2.getUser()) &&
+              dialog1.getUsersRequest().equals(dialog2.getUsersRequest()) &&
+              dialog1.getBotsResponse().equals(dialog2.getBotsResponse());
+   }
+
+
+   /**
+    * Compares two users.
+    *
+    * @return true if the objects are the same; false otherwise.
+    */
+   private boolean areUsersEqual(User user1, User user2) {
+      return user1.getUserId() == user2.getUserId() &&
+              user1.getUserFirstName().equals(user2.getUserFirstName()) &&
+              user1.getUserLastName().equals(user2.getUserLastName()) &&
+              user1.getUserName().equals(user2.getUserName());
+
    }
 }

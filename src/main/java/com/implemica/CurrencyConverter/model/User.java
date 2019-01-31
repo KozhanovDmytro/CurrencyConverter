@@ -71,20 +71,4 @@ public class User implements Serializable {
       return userId + " " + userFirstName + " " + userLastName + " " + userName;
    }
 
-   /**
-    * Compares this object to the specified object.
-    *
-    * @return true if the objects are the same; false otherwise.
-    */
-   @Override
-   public boolean equals(Object us) {
-      if (this == us) {
-         return true;
-      }
-      if (us instanceof User) {
-         return this.userId == ((User) us).userId && this.userFirstName.equals(((User) us).userFirstName)
-                 && this.userLastName.equals(((User) us).userLastName) && this.userName.equals(((User) us).userName);
-      }
-      return false;
-   }
 }

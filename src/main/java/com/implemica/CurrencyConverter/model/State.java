@@ -13,6 +13,17 @@ import java.util.Map;
  */
 @Data
 public class State {
+
+   /**
+    * Stores all statesOfUsers, which use bot and their last command
+    */
+   public static Map<Integer, State> statesOfUsers = new HashMap<>();
+
+   /**
+    * Stores user connection with his chat
+    */
+   public static Map<User, Long> listOfChats = new HashMap<>();
+
    /**
     * Stores firstCurrency, which was entered by user
     */
@@ -24,7 +35,7 @@ public class State {
    /**
     * Stores step of conversion
     */
-   private int convertStep;
+   private ConvertStep convertStep;
 
    /**
     * Creates a state of dialog
@@ -33,20 +44,9 @@ public class State {
     * @param secondCurrency state of {@link com.implemica.CurrencyConverter.service.BotService#secondCurrency}
     * @param convertStep    state of {@link com.implemica.CurrencyConverter.service.BotService#convertStep}
     */
-   public State(String firstCurrency, String secondCurrency, int convertStep) {
+   public State(String firstCurrency, String secondCurrency, ConvertStep convertStep) {
       this.firstCurrency = firstCurrency;
       this.secondCurrency = secondCurrency;
       this.convertStep = convertStep;
    }
-
-
-   /**
-    * Stores all statesOfUsers, which use bot and their last command
-    */
-   public static Map<Integer, State> statesOfUsers = new HashMap<>();
-
-   /**
-    * Stores user connection with his chat
-    */
-   public static Map<User, Long> listOfChats = new HashMap<>();
 }

@@ -2,10 +2,7 @@ package com.implemica.CurrencyConverter.service;
 
 
 import com.implemica.CurrencyConverter.dao.DialogDao;
-import com.implemica.CurrencyConverter.model.Dialog;
-import com.implemica.CurrencyConverter.model.State;
-import com.implemica.CurrencyConverter.model.User;
-import com.implemica.CurrencyConverter.model.UsersRequest;
+import com.implemica.CurrencyConverter.model.*;
 import com.implemica.CurrencyConverter.validator.BotValidator;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.knowm.xchange.currency.Currency;
@@ -23,6 +20,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.implemica.CurrencyConverter.model.ConvertStep.*;
 import static com.implemica.CurrencyConverter.validator.BotValidator.formatNumber;
 import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber;
 
@@ -39,7 +37,7 @@ public class BotService {
    /**
     * Unique string, which uses for messages, which has non text content.
     */
-   public static final String UNIQUE = UUID.randomUUID().toString();
+   public static final String WRONG_CONTENT = UUID.randomUUID().toString();
 
    /**
     * Start of message for mistakes
@@ -139,7 +137,7 @@ public class BotService {
    /**
     * Step of conversion
     */
-   private int convertStep = 0;
+   private ConvertStep convertStep = ZERO;
 
    /**
     * Count of words in one line request
@@ -180,7 +178,7 @@ public class BotService {
    }
 
    /**
-    * Gets statesOfUsers input and processes it, writes conversation to .csv file and sends their to webSocket
+    * Gets statesOfUsers input and processes it, writes conversation to storage and sends their to webSocket
     *
     * @param command request from user
     * @param user    user, which sent message
@@ -189,58 +187,59 @@ public class BotService {
    public String processCommand(String command, User user) {
       int userId = user.getUserId();
 
-      getState(userId);
+      checkState(userId);
 
       String message;
 
-      if (command.equals(UNIQUE)) {
+      if (command.equals(WRONG_CONTENT)) {
          command = NOT_TEXT_CONTENT;
          message = INCORRECT_CONTENT_MESSAGE;
-         convertStep = 0;
+         convertStep = ZERO;
 
       } else if (isOneLineRequest(command)) {
          message = convertByLine(command);
-         convertStep = 0;
+         convertStep = ZERO;
 
       } else if (command.equals(START)) {
          message = START_MESSAGE;
-         convertStep = 0;
+         convertStep = ZERO;
 
       } else if (command.equals(STOP)) {
          message = STOP_MESSAGE;
-         convertStep = 0;
+         convertStep = ZERO;
 
       } else if (command.equals(CONVERT)) {
          message = FIRST_CONVERT_MESSAGE;
-         convertStep = 1;
+         convertStep = FIRST;
 
-      } else if (convertStep == 1) {
+      } else if (convertStep.equals(FIRST)) {
          firstCurrency = BotValidator.toUpperCase(command);
 
          if (isValidCurrency(firstCurrency)) {
             message = SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
-            convertStep = 2;
+            convertStep = SECOND;
 
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_CURRENCY + FIRST_CONVERT_MESSAGE;
          }
 
-      } else if (convertStep == 2) {
+      } else if (convertStep.equals(SECOND)) {
          secondCurrency = BotValidator.toUpperCase(command);
 
          if (isValidCurrency(secondCurrency)) {
             message = THIRD_CONVERT_MESSAGE + firstCurrency + " to " + secondCurrency;
-            convertStep = 3;
+            convertStep = THIRD;
+
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_CURRENCY +
                     SECOND_CONVERT_MESSAGE_1 + firstCurrency + SECOND_CONVERT_MESSAGE_2;
          }
 
-      } else if (convertStep == 3) {
+      } else if (convertStep.equals(THIRD)) {
 
          if (isValidAmount(command)) {
             message = convertValue(command);
-            convertStep = 0;
+            convertStep = ZERO;
 
          } else {
             message = SORRY_BUT + command + IS_NOT_A_VALID_NUMBER +
@@ -249,7 +248,7 @@ public class BotService {
 
       } else {
          message = INCORRECT_REQUEST_MESSAGE;
-         convertStep = 0;
+         convertStep = ZERO;
       }
 
       writeData(user, command, message);
@@ -258,7 +257,7 @@ public class BotService {
 
 
    /**
-    * Writes changes in users states to map and to .csv file
+    * Writes changes in users states to map and to storage
     *
     * @param user     user, which sent message
     * @param request  request from user
@@ -281,19 +280,22 @@ public class BotService {
     *
     * @param userId id of given user
     */
-   private void getState(int userId) {
-      State state;
-
+   private void checkState(int userId) {
       if (states.containsKey(userId)) {
-         state = states.get(userId);
+
+         State state = states.get(userId);
+
+         firstCurrency = state.getFirstCurrency();
+         secondCurrency = state.getSecondCurrency();
+         convertStep = state.getConvertStep();
 
       } else {
-         state = new State("", "", 0);
+
+         firstCurrency = "";
+         secondCurrency = "";
+         convertStep = ZERO;
       }
 
-      firstCurrency = state.getFirstCurrency();
-      secondCurrency = state.getSecondCurrency();
-      convertStep = state.getConvertStep();
    }
 
    /**
@@ -304,9 +306,10 @@ public class BotService {
     */
    private String convertByLine(String line) {
       String[] request = line.split("\\s+");
-      String message;
+      String message = "";
       firstCurrency = BotValidator.toUpperCase(request[1]);
 
+      String wrongValueMessage = "";
       if (isValidCurrency(firstCurrency)) {
          secondCurrency = BotValidator.toUpperCase(request[3]);
 
@@ -317,16 +320,21 @@ public class BotService {
                message = convertValue(amount);
 
             } else {
-               message = SORRY_BUT + amount + IS_NOT_A_VALID_NUMBER + CONVERT_MESSAGE;
+               wrongValueMessage = amount + IS_NOT_A_VALID_NUMBER;
             }
          } else {
-            message = SORRY_BUT + secondCurrency + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE;
+            wrongValueMessage = secondCurrency + IS_NOT_A_VALID_CURRENCY;
          }
       } else {
-         message = SORRY_BUT + firstCurrency + IS_NOT_A_VALID_CURRENCY + CONVERT_MESSAGE;
+         wrongValueMessage = firstCurrency + IS_NOT_A_VALID_CURRENCY;
+      }
+      if (!wrongValueMessage.isEmpty()) {
+         message = String.format("%s%s%s", SORRY_BUT, wrongValueMessage, CONVERT_MESSAGE);
       }
       return message;
    }
+
+  
 
    /**
     * Checks, that user's input may be one line request or not
@@ -340,7 +348,7 @@ public class BotService {
       int length = request.length;
 
       String word = "";
-      if(length == WORDS_COUNT){
+      if (length == WORDS_COUNT) {
          word = request[2];
       }
 
@@ -371,7 +379,7 @@ public class BotService {
 
       } catch (IOException e) {
          logger.error(e.getMessage() + " is not responding.");
-         message = "❗Sorry. Server is not responding. Try again later.";
+         message = "❗Sorry, but server is not responding. Please, try again later.";
       }
       return message;
    }
@@ -410,11 +418,6 @@ public class BotService {
     * @return true, if amount is positive number or zero, false - otherwise.
     */
    private boolean isValidAmount(String amount) {
-      try {
-         parseNumber(amount);
-      } catch (ParseException e) {
-         return false;
-      }
-      return true;
+      return BotValidator.isValidNumber(amount);
    }
 }
