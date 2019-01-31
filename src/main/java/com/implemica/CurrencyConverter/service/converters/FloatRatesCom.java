@@ -35,7 +35,8 @@ public class FloatRatesCom implements ConverterAPI {
    /** Two weeks in milliseconds. */
    private static final long TWO_WEEKS = DateUtils.MILLIS_PER_DAY * 14;
 
-   @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws CurrencyConverterException, IOException {
+   @Override
+   public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws CurrencyConverterException, IOException {
       String url = String.format(URL_FLOAT_RATES_COM, from);
 
       JSONObject object = getJsonObjectByURL(new URL(url));

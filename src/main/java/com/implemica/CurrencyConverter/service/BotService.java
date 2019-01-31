@@ -27,7 +27,6 @@ import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber
  * This class contains Bot's logic
  *
  * @author Daria S.
- * @author Dmytro K.
  * @version 08.01.19 14:32
  */
 @Service

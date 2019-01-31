@@ -20,7 +20,8 @@ public class FreeCurrencyConverterApiCom implements ConverterAPI {
    /** URL for connection to API. */
    private static final String URL_FREE_CURRENCY_CONVERTER_API_COM = "http://free.currencyconverterapi.com/api/v5/convert?q=%s_%s&compact=y";
 
-   @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws IOException {
+   @Override
+   public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws IOException {
       URL url = buildURL(URL_FREE_CURRENCY_CONVERTER_API_COM, from, to);
 
       JSONObject object = getJsonObjectByURL(url);

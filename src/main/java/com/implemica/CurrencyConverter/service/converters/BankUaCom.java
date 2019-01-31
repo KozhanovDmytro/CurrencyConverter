@@ -17,7 +17,8 @@ public class BankUaCom implements ConverterAPI {
    /** Api name. */
    private static final String API_NAME_BANK_UA_COM = "bank-ua.com";
 
-   @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws CurrencyConverterException {
+   @Override
+   public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws CurrencyConverterException {
       com.tunyk.currencyconverter.api.Currency usersCurrency = getCurrencyByUtilCurrency(from);
       com.tunyk.currencyconverter.api.Currency desiredCurrency = getCurrencyByUtilCurrency(to);
 

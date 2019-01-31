@@ -20,7 +20,8 @@ public class CurrencyLayerCom implements ConverterAPI {
    /** URL for connection to API. */
    private static final String URL_CURRENCY_LAYER_COM = "http://apilayer.net/api/live?access_key=f91895130d9f009b167cd5299cdd923c&source=%s&currencies=%s&format=1";
 
-   @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws IOException {
+   @Override
+   public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws IOException {
       URL url = buildURL(URL_CURRENCY_LAYER_COM, from, to);
 
       JSONObject object = getJsonObjectByURL(url);

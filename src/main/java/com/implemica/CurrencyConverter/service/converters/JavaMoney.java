@@ -18,7 +18,8 @@ public class JavaMoney implements ConverterAPI {
    /** API name. */
    private static final String API_NAME_JAVA_MONEY = "Java money api";
 
-   @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) {
+   @Override
+   public BigDecimal convert(Currency from, Currency to, BigDecimal value) {
       MonetaryAmount userMoney = Monetary.getDefaultAmountFactory()
               .setCurrency(from.getCurrencyCode())
               .setNumber(1.0f).create();
