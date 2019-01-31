@@ -99,7 +99,7 @@ public class DialogDaoImpl implements DialogDao {
          }
 
       } catch (IOException e) {
-         logger.error("File does not exists: " + data);
+         logger.error(e.getMessage());
       }
       return result;
    }
@@ -159,7 +159,7 @@ public class DialogDaoImpl implements DialogDao {
          date = df.parse(string);
 
       } catch (ParseException e) {
-         logger.error("Given string can not be parsed as a date: " + string);
+         logger.error(e.getMessage() + string);
       }
 
       return date;
