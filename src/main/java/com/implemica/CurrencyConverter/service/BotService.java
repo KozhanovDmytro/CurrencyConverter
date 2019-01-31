@@ -2,13 +2,9 @@ package com.implemica.CurrencyConverter.service;
 
 
 import com.implemica.CurrencyConverter.dao.DialogDao;
-import com.implemica.CurrencyConverter.model.Dialog;
-import com.implemica.CurrencyConverter.model.State;
-import com.implemica.CurrencyConverter.model.User;
-import com.implemica.CurrencyConverter.model.UsersRequest;
+import com.implemica.CurrencyConverter.model.*;
 import com.implemica.CurrencyConverter.validator.BotValidator;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
-import org.knowm.xchange.currency.Currency;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,7 +269,7 @@ public class BotService {
 
       Dialog dialog = new Dialog(dateNow, user, request, response);
       dialogDao.write(dialog);
-      sendToWebSocketFollowers(dialog);
+      sendToWebSocket(dialog);
    }
 
    /**
@@ -383,7 +379,7 @@ public class BotService {
     * @param dialog dialog
     * @author Dmytro K.
     */
-   private void sendToWebSocketFollowers(Dialog dialog) {
+   private void sendToWebSocket(Dialog dialog) {
       template.convertAndSend("/listen/bot", dialog);
       logger.info("send to web socket followers. ");
    }
@@ -396,9 +392,9 @@ public class BotService {
     */
    private boolean isValidCurrency(String usersCurrency) {
       try {
-         java.util.Currency.getInstance(usersCurrency);
+         Currency.getInstance(usersCurrency);
       } catch (IllegalArgumentException ex) {
-         return Currency.getAvailableCurrencyCodes().contains(usersCurrency);
+         return false;
       }
       return true;
    }
