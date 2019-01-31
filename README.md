@@ -12,6 +12,23 @@ The application uses 5 APIs for currency conversion :
   3. javamoney.org
   4. free.currencyconverterapi.com
   5. currencylayer.com
+  
+## Including popular currencies
+
+| Country | Symbol | Currency |
+|:-------:|:----------:|:--------:|
+|United States of America|USD|US Dollar|
+|European Union|EUR|European Currency Unit|
+|United Kingdom|GBP|Pound Sterling|
+|Japan|JPY|Yen|
+|China|CNY|Yuan Renminbi|
+
+and some cryptocurrencies
+
+| Name | Symbol |
+|------|:------:|
+| Bitcoin | BTC |
+| Ethereum | ETH |
 
 ## Installation
 
