@@ -2,7 +2,6 @@ package com.implemica.CurrencyConverter.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.knowm.xchange.currency.Currency;
 
 import java.math.BigDecimal;
 
