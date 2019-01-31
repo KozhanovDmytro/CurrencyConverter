@@ -26,6 +26,9 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class ConverterServiceTest {
 
+   /* constants */
+   private final String USD = "USD";
+
    /** Service, which uses for conversion. */
    private static ConverterService converterService = new ConverterService();
 
@@ -343,7 +346,5 @@ public class ConverterServiceTest {
       executor.awaitTermination(maxSeconds, TimeUnit.SECONDS);
    }
 
-   /* constants */
 
-   private final String USD = "USD";
 }
