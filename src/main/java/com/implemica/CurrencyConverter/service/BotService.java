@@ -269,7 +269,7 @@ public class BotService {
 
       Dialog dialog = new Dialog(dateNow, user, request, response);
       dialogDao.write(dialog);
-      sendToWebSocketFollowers(dialog);
+      sendToWebSocket(dialog);
    }
 
    /**
@@ -379,7 +379,7 @@ public class BotService {
     * @param dialog dialog
     * @author Dmytro K.
     */
-   private void sendToWebSocketFollowers(Dialog dialog) {
+   private void sendToWebSocket(Dialog dialog) {
       template.convertAndSend("/listen/bot", dialog);
       logger.info("send to web socket followers. ");
    }

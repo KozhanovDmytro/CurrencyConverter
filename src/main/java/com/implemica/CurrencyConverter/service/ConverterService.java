@@ -60,8 +60,6 @@ public final class ConverterService {
 //      converters.add(new JavaMoney());                      // unlimited, so slow
    }
 
-
-
    /**
     * Function converts  currency from {@link UsersRequest#currencyFrom} to
     * {@link UsersRequest#currencyTo}.
@@ -73,21 +71,23 @@ public final class ConverterService {
     * APIs  could  not  convert  the  currency,  the  function  throws an
     * exception.
     *
-    * @param usersRequest contains currencies and value for conversion.
+    * @param from currency to convert from
+    * @param to currency for conversion to
+    * @param value value for conversion.
     * @return converted value.
     * @throws CurrencyConverterException if currency does not support.
     * @throws UnknownHostException if there is no internet connection.
     */
-   public BigDecimal convert(UsersRequest usersRequest) throws CurrencyConverterException, UnknownHostException {
-      if(isIdenticalCurrencies(usersRequest)) {
-         return usersRequest.getValue();
+   public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws CurrencyConverterException, UnknownHostException {
+      if(from == to) {
+         return value;
       }
 
-      if(isUsersRequestIsZero(usersRequest)) {
+      if(isValueZero(value)) {
          return BigDecimal.ZERO;
       }
 
-      if(!checkConnection()) {
+      if(!isInternetConnectionExist()) {
          logger.error(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
          throw new UnknownHostException(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
       }
@@ -97,7 +97,7 @@ public final class ConverterService {
 
       for (ConverterAPI option : converters) {
          try {
-            result = option.convert(usersRequest);
+            result = option.convert(from, to, value);
             break;
          } catch (Exception e) {
             exceptions.add(e);
@@ -107,17 +107,12 @@ public final class ConverterService {
       return analyzeResult(exceptions, result);
    }
 
-   public BigDecimal convert(Currency currencyFrom, Currency currencyTo, BigDecimal value) throws CurrencyConverterException, UnknownHostException {
-      return null;
+   private boolean isValueZero(BigDecimal value) {
+      return value.compareTo(BigDecimal.ZERO) == 0;
    }
 
-   private boolean isUsersRequestIsZero(UsersRequest usersRequest) {
-      return usersRequest.getValue().compareTo(BigDecimal.ZERO) == 0;
-   }
-
-   private boolean isIdenticalCurrencies(UsersRequest usersRequest) {
-      return usersRequest.getCurrencyFrom().getCurrencyCode()
-              .equals(usersRequest.getCurrencyTo().getCurrencyCode());
+   public BigDecimal convert(UsersRequest usersRequest) throws CurrencyConverterException, UnknownHostException {
+      return convert(usersRequest.getCurrencyFrom(), usersRequest.getCurrencyTo(), usersRequest.getValue());
    }
 
    /**
@@ -125,7 +120,7 @@ public final class ConverterService {
     *
     * @return if site google.com is reachable or not.
     */
-   private boolean checkConnection() {
+   private boolean isInternetConnectionExist() {
       boolean result;
 
       try {

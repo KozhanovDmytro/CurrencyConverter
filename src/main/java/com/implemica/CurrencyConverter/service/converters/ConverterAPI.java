@@ -1,5 +1,6 @@
 package com.implemica.CurrencyConverter.service.converters;
 
+import com.implemica.CurrencyConverter.model.Currency;
 import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.json.JSONObject;
@@ -8,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,23 +21,27 @@ public interface ConverterAPI {
 
    Logger logger = LoggerFactory.getLogger("ConverterAPI");
 
+   String STRING_FORMAT_FOR_LOGS = "converted by %s: %s -> %s value: %s";
+
    /**
     * Contains the function which can convert currency
     * by {@link UsersRequest}
     *
-    * @param usersRequest contains currencies and value for conversion.
+    * @param from currency to convert from
+    * @param to currency for conversion to
+    * @param value value for conversion.
     * @return converted value.
     * @throws CurrencyConverterException if currency does not support.
     * @throws IOException if there is no internet connection.
     */
-   BigDecimal convert(UsersRequest usersRequest) throws Exception;
+   BigDecimal convert(Currency from, Currency to, BigDecimal value) throws Exception;
 
-   default void writeToLog(String api, UsersRequest usersRequest) {
-      logger.info("converted by " + api + ": " + usersRequest);
+   default void writeToLog(String api, Currency from, Currency to, BigDecimal value) {
+      logger.info(String.format(STRING_FORMAT_FOR_LOGS, api, from, to, value));
    }
 
-   default BigDecimal convertByOne(UsersRequest usersRequest, Float one) {
-      return usersRequest.getValue().multiply(new BigDecimal(one));
+   default BigDecimal convertByOne(BigDecimal value, Float one) {
+      return value.multiply(new BigDecimal(one));
    }
 
    /**
@@ -46,22 +52,28 @@ public interface ConverterAPI {
     * @throws IOException if an I/O exception occurs.
     */
    default JSONObject getJsonObjectByURL(URL url) throws IOException {
-      JSONTokener tokener = new JSONTokener(url.openStream());
+      InputStream inputStream = url.openStream();
 
-      return new JSONObject(tokener);
+      JSONTokener tokener = new JSONTokener(inputStream);
+
+      JSONObject result = new JSONObject(tokener);
+
+      inputStream.close();
+      return result;
    }
 
    /**
     * Function for build URL.
     *
     * @param path url as string
-    * @param usersRequest contains currencies and value for conversion.
+    * @param from currency to convert from
+    * @param to currency for conversion to
     * @return An instance of URL.
     * @throws MalformedURLException if no protocol is specified, or an
     *               unknown protocol is found.
     */
-   default URL buildURL(String path, UsersRequest usersRequest) throws MalformedURLException {
-      String url = String.format(path, usersRequest.getCurrencyFrom(), usersRequest.getCurrencyTo());
+   default URL buildURL(String path, Currency from, Currency to) throws MalformedURLException {
+      String url = String.format(path, from, to);
       return new URL(url);
    }
 }

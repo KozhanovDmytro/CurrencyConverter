@@ -1,6 +1,6 @@
 package com.implemica.CurrencyConverter.service.converters;
 
-import com.implemica.CurrencyConverter.model.UsersRequest;
+import com.implemica.CurrencyConverter.model.Currency;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -16,19 +16,20 @@ public class CurrencyLayerCom implements ConverterAPI {
    /**
     * Function connects to currencylayer.com, gets json and parse it.
     *
-    * @param usersRequest contains currencies and value for conversion.
+    * @param from currency to convert from
+    * @param to currency for conversion to
+    * @param value value for conversion.
     * @throws IOException if didn't parse a json
     * @return result of conversion.
     */
-   @Override public BigDecimal convert(UsersRequest usersRequest) throws Exception {
-      URL url = buildURL(URL_CURRENCY_LAYER_COM, usersRequest);
+   @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws IOException {
+      URL url = buildURL(URL_CURRENCY_LAYER_COM, from, to);
 
       JSONObject object = getJsonObjectByURL(url);
 
-      double one = object.getJSONObject("quotes")
-              .getDouble(usersRequest.getCurrencyFrom() + "" + usersRequest.getCurrencyTo());
+      double one = object.getJSONObject("quotes").getDouble(from + "" + to);
 
-      writeToLog(API_NAME_CURRENCYLAYER_COM, usersRequest);
-      return convertByOne(usersRequest, (float) one);
+      writeToLog(API_NAME_CURRENCYLAYER_COM, from, to, value);
+      return convertByOne(value, (float) one);
    }
 }

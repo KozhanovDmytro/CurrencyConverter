@@ -1,12 +1,10 @@
 package com.implemica.CurrencyConverter.service.converters;
 
-import com.implemica.CurrencyConverter.model.UsersRequest;
+import com.implemica.CurrencyConverter.model.Currency;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 public class FreeCurrencyConverterApiCom implements ConverterAPI {
@@ -17,20 +15,21 @@ public class FreeCurrencyConverterApiCom implements ConverterAPI {
    /**
     * Function connects to free.currencyapi.com, gets json and parse it.
     *
-    * @param usersRequest contains currencies and value for conversion.
+    * @param from currency to convert from
+    * @param to currency for conversion to
+    * @param value value for conversion.
     * @throws IOException if didn't parse a json
     * @return result of conversion.
     */
-   @Override public BigDecimal convert(UsersRequest usersRequest) throws Exception {
-      URL url = buildURL(URL_FREE_CURRENCY_CONVERTER_API_COM, usersRequest);
+   @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws IOException {
+      URL url = buildURL(URL_FREE_CURRENCY_CONVERTER_API_COM, from, to);
 
       JSONObject object = getJsonObjectByURL(url);
 
-      double one = object.getJSONObject(usersRequest.getCurrencyFrom() + "_" + usersRequest.getCurrencyTo())
-              .getDouble("val");
+      double one = object.getJSONObject(from + "_" + to).getDouble("val");
 
-      writeToLog(API_NAME_FREE_CURRENCYAPI_COM, usersRequest);
-      return convertByOne(usersRequest, (float) one);
+      writeToLog(API_NAME_FREE_CURRENCYAPI_COM, from, to, value);
+      return convertByOne(value, (float) one);
    }
 
 

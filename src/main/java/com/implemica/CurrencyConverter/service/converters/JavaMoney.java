@@ -1,6 +1,6 @@
 package com.implemica.CurrencyConverter.service.converters;
 
-import com.implemica.CurrencyConverter.model.UsersRequest;
+import com.implemica.CurrencyConverter.model.Currency;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
@@ -16,19 +16,21 @@ public class JavaMoney implements ConverterAPI {
     * Converts by java money api.
     *
     * @return result of conversion.
-    * @param usersRequest contains currencies and value for conversion.
+    * @param from currency to convert from
+    * @param to currency for conversion to
+    * @param value value for conversion.
     */
-   @Override public BigDecimal convert(UsersRequest usersRequest) throws Exception {
+   @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) {
       MonetaryAmount userMoney = Monetary.getDefaultAmountFactory()
-              .setCurrency(usersRequest.getCurrencyFrom().getCurrencyCode())
+              .setCurrency(from.getCurrencyCode())
               .setNumber(1.0f).create();
 
-      CurrencyConversion conversion = MonetaryConversions.getConversion(usersRequest.getCurrencyTo().getCurrencyCode());
+      CurrencyConversion conversion = MonetaryConversions.getConversion(to.getCurrencyCode());
       MonetaryAmount converted = userMoney.with(conversion);
 
       Float one = converted.getNumber().floatValue();
 
-      writeToLog(API_NAME_JAVA_MONEY, usersRequest);
-      return convertByOne(usersRequest, one);
+      writeToLog(API_NAME_JAVA_MONEY, from, to, value);
+      return convertByOne(value, one);
    }
 }

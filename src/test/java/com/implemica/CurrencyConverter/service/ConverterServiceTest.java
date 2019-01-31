@@ -1,10 +1,11 @@
 package com.implemica.CurrencyConverter.service;
 
+import com.implemica.CurrencyConverter.model.Currency;
 import com.implemica.CurrencyConverter.model.UsersRequest;
+import com.implemica.CurrencyConverter.service.converters.*;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.knowm.xchange.currency.Currency;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -33,6 +34,13 @@ public class ConverterServiceTest {
 
    /** Text of exception, if currency not supported. */
    private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
+
+   private static final BankUaCom convertByBankUaCom = new BankUaCom();
+   private static final CurrencyLayerCom convertByCurrencyLayerCom = new CurrencyLayerCom();
+   private static final FloatRatesCom convertByFloatRatesCom = new FloatRatesCom();
+   private static final FreeCurrencyConverterApiCom convertByFreeCurrencyConverterApiCom = new FreeCurrencyConverterApiCom();
+   private static final JavaMoney convertByJavaMoney = new JavaMoney();
+
 
    /** Array of available currencies that can be converted between themselves by {@link ConverterService}. */
    private static String[] existingCurrency = new String[] { "UAH", "AWG", "GEL", "ALL", "ZAR", "BND", "JMD", "BRL",
@@ -170,13 +178,11 @@ public class ConverterServiceTest {
       BigDecimal coefficient = new BigDecimal(1000000000);
 
       for (int i = 0; i < 10; i++) {
-         UsersRequest usersRequest = new UsersRequest(eur, usd, result);
-
-         BigDecimal resultByBankUa = converterService.convertByBankUaCom(usersRequest);
-         BigDecimal resultByJavaMoney = converterService.convertByJavaMoney(usersRequest);
-         BigDecimal resultByCurrencyLayer = converterService.convertByCurrencyLayerCom(usersRequest);
-         BigDecimal resultByFloatRatesCom = converterService.convertByFloatRatesCom(usersRequest);
-         BigDecimal resultByFreeCurrencyConverterApiCom = converterService.convertByFreeCurrencyConverterApiCom(usersRequest);
+         BigDecimal resultByBankUa = convertByBankUaCom.convert(eur, usd, result);
+         BigDecimal resultByJavaMoney = convertByJavaMoney.convert(eur, usd, result);
+         BigDecimal resultByCurrencyLayer = convertByCurrencyLayerCom.convert(eur, usd, result);
+         BigDecimal resultByFloatRatesCom = convertByFloatRatesCom.convert(eur, usd, result);
+         BigDecimal resultByFreeCurrencyConverterApiCom = convertByFreeCurrencyConverterApiCom.convert(eur, usd, result);
 
          checkRange(resultByBankUa, from, to);
          checkRange(resultByJavaMoney, from, to);
