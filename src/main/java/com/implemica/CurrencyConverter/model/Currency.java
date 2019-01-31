@@ -350,8 +350,4 @@ public enum Currency {
       return name();
    }
 
-   public static void main(String[] args) {
-
-   }
-
 }
