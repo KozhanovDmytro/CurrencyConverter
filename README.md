@@ -12,29 +12,34 @@ The application uses 5 APIs for currency conversion :
   3. javamoney.org
   4. free.currencyconverterapi.com
   5. currencylayer.com
+  
+## Including popular currencies
+
+| Country | Symbol | Currency |
+|:-------:|:----------:|:--------:|
+|United States of America|USD|US Dollar|
+|European Union|EUR|European Currency Unit|
+|United Kingdom|GBP|Pound Sterling|
+|Japan|JPY|Yen|
+|China|CNY|Yuan Renminbi|
+
+and some cryptocurrencies
+
+| Name | Symbol |
+|------|:------:|
+| Bitcoin | BTC |
+| Ethereum | ETH |
 
 ## Installation
 
-Before installing the application, make sure that the `application.properties` file exists in the path: 
-```
-/src/main/resources
-```
-and has next properties (after `=` must be your values): 
-```
-server.port             =8080
+First of all make sure that the `application.properties` file exists in the path `/src/main/resources` and has some properties. 
 
-telegram.botName        =BOT_NAME
-telegram.botToken       =BOT_TOKEN
-
-admin.login             =ADMIN_LOGIN
-admin.password          =ADMIN_PASSWORD
-```
- The server port required to start the Tomcat server on the local host. The bot name and its token must be obtained from [BotFather](https://telegram.me/BotFather). Admin's data required to access the admin page.
+The bot name and its token must be obtained from [BotFather](https://telegram.me/BotFather). Admin's data required to access the admin page.
  
-After these steps you are ready to create the **.war** file and deploy it to the Tomcat server.
+Create the **.war** file via `Maven install` and deploy it.
 
 
-## Disigned by
+## Designed by
 
 [![N|Solid](https://implemica.com/img/logo.png)](https://implemica.com) 
 

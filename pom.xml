@@ -98,12 +98,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- crypto -->
-        <dependency>
-            <groupId>org.knowm.xchange</groupId>
-            <artifactId>xchange-core</artifactId>
-            <version>4.3.14</version>
-        </dependency>
 
         <!-- Testing -->
         <dependency>

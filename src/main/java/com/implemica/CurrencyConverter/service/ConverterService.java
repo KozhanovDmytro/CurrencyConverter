@@ -1,27 +1,23 @@
 package com.implemica.CurrencyConverter.service;
 
+import com.implemica.CurrencyConverter.model.Currency;
 import com.implemica.CurrencyConverter.model.UsersRequest;
-import com.tunyk.currencyconverter.BankUaCom;
-import com.tunyk.currencyconverter.api.Currency;
-import com.tunyk.currencyconverter.api.CurrencyConverter;
+import com.implemica.CurrencyConverter.service.converters.*;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
-import com.tunyk.currencyconverter.api.CurrencyNotSupportedException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.money.Monetary;
-import javax.money.MonetaryAmount;
-import javax.money.convert.CurrencyConversion;
-import javax.money.convert.MonetaryConversions;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The class for conversion currency.
@@ -35,8 +31,6 @@ import java.util.*;
  *
  *
  * @see UsersRequest
- * @see Currency
- * @see CurrencyConverter
  * @see URL
  * @see JSONObject
  *
@@ -50,36 +44,20 @@ public final class ConverterService {
    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
 
    /** The list stores links to functions which make conversion. */
-   private List<ConverterAPI> converters = new ArrayList<>();
+   private static List<ConverterAPI> converters = new ArrayList<>();
 
    /*
     * Initialization scope for converters. Note! In this
     * order will be convert currency.
     */
-   {
-      converters.add(this::convertByFloatRatesCom);                  // unlimited
+   static {
+      converters.add(new FloatRatesCom());                  // unlimited
 
-      converters.add(this::convertByFreeCurrencyConverterApiCom);    // has a limit - 100  requests per hour
-      converters.add(this::convertByCurrencyLayerCom);               // has a limit - 1000 requests per month
+      converters.add(new FreeCurrencyConverterApiCom());    // has a limit - 100  requests per hour
+      converters.add(new CurrencyLayerCom());               // has a limit - 1000 requests per month
 
-      converters.add(this::convertByBankUaCom);                      // unlimited, converts through UAH
-//      converters.add(this::convertByJavaMoney);                      // unlimited, so slow
-   }
-
-   /**
-    * An interface which supplies function of currency conversion.
-    */
-   private interface ConverterAPI {
-      /**
-       * Contains the function which can convert currency
-       * by {@link UsersRequest}
-       *
-       * @param usersRequest contains currencies and value for conversion.
-       * @return converted value.
-       * @throws CurrencyConverterException if currency does not support.
-       * @throws IOException if there is no internet connection.
-       */
-      BigDecimal convert(UsersRequest usersRequest) throws Exception;
+      converters.add(new BankUaCom());                      // unlimited, converts through UAH
+//      converters.add(new JavaMoney());                      // unlimited, so slow
    }
 
    /**
@@ -93,21 +71,23 @@ public final class ConverterService {
     * APIs  could  not  convert  the  currency,  the  function  throws an
     * exception.
     *
-    * @param usersRequest contains currencies and value for conversion.
+    * @param from currency to convert from
+    * @param to currency for conversion to
+    * @param value value for conversion.
     * @return converted value.
     * @throws CurrencyConverterException if currency does not support.
     * @throws UnknownHostException if there is no internet connection.
     */
-   public BigDecimal convert(UsersRequest usersRequest) throws CurrencyConverterException, UnknownHostException {
-      if(isIdenticalCurrencies(usersRequest)) {
-         return usersRequest.getValue();
+   public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws CurrencyConverterException, UnknownHostException {
+      if(from == to) {
+         return value;
       }
 
-      if(isUsersRequestIsZero(usersRequest)) {
+      if(isValueZero(value)) {
          return BigDecimal.ZERO;
       }
 
-      if(!checkConnection()) {
+      if(!isInternetConnectionExist()) {
          logger.error(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
          throw new UnknownHostException(MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION);
       }
@@ -117,7 +97,7 @@ public final class ConverterService {
 
       for (ConverterAPI option : converters) {
          try {
-            result = option.convert(usersRequest);
+            result = option.convert(from, to, value);
             break;
          } catch (Exception e) {
             exceptions.add(e);
@@ -127,23 +107,20 @@ public final class ConverterService {
       return analyzeResult(exceptions, result);
    }
 
-   private boolean isUsersRequestIsZero(UsersRequest usersRequest) {
-      return usersRequest.getValue().compareTo(BigDecimal.ZERO) == 0;
+   private boolean isValueZero(BigDecimal value) {
+      return value.compareTo(BigDecimal.ZERO) == 0;
    }
 
-   private boolean isIdenticalCurrencies(UsersRequest usersRequest) {
-      return usersRequest.getCurrencyFrom().getCurrencyCode()
-              .equals(usersRequest.getCurrencyTo().getCurrencyCode());
+   public BigDecimal convert(UsersRequest usersRequest) throws CurrencyConverterException, UnknownHostException {
+      return convert(usersRequest.getCurrencyFrom(), usersRequest.getCurrencyTo(), usersRequest.getValue());
    }
-
-
 
    /**
     * Function checks connection.
     *
     * @return if site google.com is reachable or not.
     */
-   private boolean checkConnection() {
+   private boolean isInternetConnectionExist() {
       boolean result;
 
       try {
@@ -208,191 +185,11 @@ public final class ConverterService {
       return e instanceof CurrencyConverterException && e.getMessage().contains(API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY);
    }
 
-   /**
-    * Converts by bank-ua.com API.
-    *
-    * @param usersRequest contains currencies and value for conversion.
-    * @throws CurrencyConverterException if currency does not support.
-    * @return result of conversion.
-    */
-   BigDecimal convertByBankUaCom(UsersRequest usersRequest) throws CurrencyConverterException {
-      Currency usersCurrency = getCurrencyByUtilCurrency(usersRequest.getCurrencyFrom());
-      Currency desiredCurrency = getCurrencyByUtilCurrency(usersRequest.getCurrencyTo());
-
-      CurrencyConverter currencyConverter = new BankUaCom(usersCurrency, desiredCurrency);
-
-      Float one = currencyConverter.convertCurrency(1.0f);
-
-      writeToLog(API_NAME_BANK_UA_COM, usersRequest);
-      return convertByOne(usersRequest, one);
-   }
-
-   /**
-    * Function converts {@link java.util.Currency} to {@link Currency}
-    *
-    * @param currency contains currencies and value for conversion.
-    * @return instance of {@link Currency}
-    * @throws CurrencyNotSupportedException if currency does not support.
-    */
-   private Currency getCurrencyByUtilCurrency(org.knowm.xchange.currency.Currency currency) throws CurrencyNotSupportedException {
-      return Currency.fromString(currency.getCurrencyCode());
-   }
-
-   /**
-    * Converts by java money api.
-    *
-    * @return result of conversion.
-    * @param usersRequest contains currencies and value for conversion.
-    */
-   BigDecimal convertByJavaMoney(UsersRequest usersRequest) {
-      MonetaryAmount userMoney = Monetary.getDefaultAmountFactory()
-              .setCurrency(usersRequest.getCurrencyFrom().getCurrencyCode())
-              .setNumber(1.0f).create();
-
-      CurrencyConversion conversion = MonetaryConversions.getConversion(usersRequest.getCurrencyTo().getCurrencyCode());
-      MonetaryAmount converted = userMoney.with(conversion);
-
-      Float one = converted.getNumber().floatValue();
-
-      writeToLog(API_NAME_JAVA_MONEY, usersRequest);
-      return convertByOne(usersRequest, one);
-   }
-
-   /**
-    * Function connects to free.currencyapi.com, gets json and parse it.
-    *
-    * @param usersRequest contains currencies and value for conversion.
-    * @throws IOException if didn't parse a json
-    * @return result of conversion.
-    */
-   BigDecimal convertByFreeCurrencyConverterApiCom(UsersRequest usersRequest) throws IOException {
-      URL url = buildURL(URL_FREE_CURRENCY_CONVERTER_API_COM, usersRequest);
-
-      JSONObject object = getJsonObjectByURL(url);
-
-      double one = object.getJSONObject(usersRequest.getCurrencyFrom() + "_" + usersRequest.getCurrencyTo())
-              .getDouble("val");
-
-      writeToLog(API_NAME_FREE_CURRENCYAPI_COM, usersRequest);
-      return convertByOne(usersRequest, (float) one);
-   }
-
-   /**
-    * Function connects to currencylayer.com, gets json and parse it.
-    *
-    * @param usersRequest contains currencies and value for conversion.
-    * @throws IOException if didn't parse a json
-    * @return result of conversion.
-    */
-   BigDecimal convertByCurrencyLayerCom(UsersRequest usersRequest) throws IOException {
-      URL url = buildURL(URL_CURRENCY_LAYER_COM, usersRequest);
-
-      JSONObject object = getJsonObjectByURL(url);
-
-      double one = object.getJSONObject("quotes")
-              .getDouble(usersRequest.getCurrencyFrom() + "" + usersRequest.getCurrencyTo());
-
-      writeToLog(API_NAME_CURRENCYLAYER_COM, usersRequest);
-      return convertByOne(usersRequest, (float) one);
-   }
-
-   /**
-    * Function for build URL.
-    *
-    * @param path url as string
-    * @param usersRequest contains currencies and value for conversion.
-    * @return An instance of URL.
-    * @throws MalformedURLException if no protocol is specified, or an
-    *               unknown protocol is found.
-    */
-   private URL buildURL(String path, UsersRequest usersRequest) throws MalformedURLException {
-      String url = String.format(path, usersRequest.getCurrencyFrom(), usersRequest.getCurrencyTo());
-      return new URL(url);
-   }
-
-   /**
-    * Function connects to floatrates.com, gets json and parse it.
-    *
-    * @param usersRequest contains currencies and value for conversion.
-    * @throws IOException if didn't parse a json
-    * @return result of conversion.
-    */
-   BigDecimal convertByFloatRatesCom(UsersRequest usersRequest) throws IOException, CurrencyConverterException {
-      String url = String.format(URL_FLOAT_RATES_COM, usersRequest.getCurrencyFrom());
-
-      JSONObject object = getJsonObjectByURL(new URL(url));
-
-      String currencyTo = usersRequest.getCurrencyTo().getCurrencyCode();
-
-      JSONObject desiredCurrency = object.getJSONObject(currencyTo.toLowerCase());
-
-      try {
-         checkLatestInfoForFloatRatesAPI(desiredCurrency);
-      } catch (ParseException e) {
-         logger.error(e.getMessage());
-      }
-
-      double one = object.getJSONObject(currencyTo.toLowerCase())
-              .getDouble("rate");
-
-      writeToLog(API_NAME_FLOATRATES_COM, usersRequest);
-      return convertByOne(usersRequest, (float) one);
-   }
-
-   /**
-    * Gets a json object by url.
-    *
-    * @param url address
-    * @return an instance of {@link JSONObject}
-    * @throws IOException if an I/O exception occurs.
-    */
-   private JSONObject getJsonObjectByURL(URL url) throws IOException {
-      JSONTokener tokener = new JSONTokener(url.openStream());
-
-      return new JSONObject(tokener);
-   }
-
-   private void writeToLog(String api, UsersRequest usersRequest) {
-      logger.info("converted by " + api + ": " + usersRequest);
-   }
-
-   private BigDecimal convertByOne(UsersRequest usersRequest, Float one) {
-      return usersRequest.getValue().multiply(new BigDecimal(one));
-   }
-
-   /**
-    * The function checks the data received from the API, which contain
-    * the date when the currencies were updated. If the data is old or
-    * SimpleDateFormat is outdated, the function throws an exception.
-    *
-    * @param object received data with date.
-    * @throws CurrencyConverterException if data is old.
-    */
-   private void checkLatestInfoForFloatRatesAPI(JSONObject object) throws CurrencyConverterException, ParseException {
-      SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_FOR_FLOAT_RATES_API, Locale.ENGLISH);
-      Date update = sdf.parse(object.getString("date"));
-      Date today = new Date();
-
-      if (today.getTime() - update.getTime() > TWO_WEEKS) {
-         throw new CurrencyConverterException("This info is old.");
-      }
-   }
-
    /* constants */
 
    private static final int TIMEOUT_FOR_CONNECTION = 3000;
-   private static final double TWO_WEEKS = 1.21e9;
 
-   private static final String URL_FREE_CURRENCY_CONVERTER_API_COM = "http://free.currencyconverterapi.com/api/v5/convert?q=%s_%s&compact=y";
-   private static final String URL_CURRENCY_LAYER_COM = "http://apilayer.net/api/live?access_key=f91895130d9f009b167cd5299cdd923c&source=%s&currencies=%s&format=1";
-   private static final String URL_FLOAT_RATES_COM = "http://www.floatrates.com/daily/%s.json";
    private static final String URL_GOOGLE_COM = "www.google.com";
-
-   private static final String API_NAME_BANK_UA_COM = "bank-ua.com";
-   private static final String API_NAME_JAVA_MONEY = "Java money api";
-   private static final String API_NAME_FREE_CURRENCYAPI_COM = "free.currencyapi.com";
-   private static final String API_NAME_CURRENCYLAYER_COM = "currencylayer.com";
-   private static final String API_NAME_FLOATRATES_COM = "floatrates.com";
 
    private static final String MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION = "Problem with internet connection.";
    private static final String MESSAGE_PROBLEM_WITH_SERVER = "Server did not respond. Try again.";
@@ -400,6 +197,4 @@ public final class ConverterService {
    private static final String MESSAGE_UNSUPPORTED_CURRENCY = "One or two currencies not supported.";
 
    private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
-
-   private static final String DATE_FORMAT_FOR_FLOAT_RATES_API = "E, d MMM yyyy HH:mm:ss Z";
 }
