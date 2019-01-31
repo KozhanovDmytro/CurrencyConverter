@@ -19,13 +19,14 @@ import java.net.URL;
  */
 public interface ConverterAPI {
 
+   /** Logger. */
    Logger logger = LoggerFactory.getLogger("ConverterAPI");
 
+   /** Format line in logs. */
    String STRING_FORMAT_FOR_LOGS = "converted by %s: %s -> %s value: %s";
 
    /**
-    * Contains the function which can convert currency
-    * by {@link UsersRequest}
+    * Function for convert currencies.
     *
     * @param from currency to convert from
     * @param to currency for conversion to
@@ -36,10 +37,21 @@ public interface ConverterAPI {
     */
    BigDecimal convert(Currency from, Currency to, BigDecimal value) throws Exception;
 
+   /**
+    * Function to white to log.
+    */
    default void writeToLog(String api, Currency from, Currency to, BigDecimal value) {
       logger.info(String.format(STRING_FORMAT_FOR_LOGS, api, from, to, value));
    }
 
+   /**
+    * The function multiplies the cost for 1 unit of the desired
+    * currency by the amount that the user wants to receive.
+    *
+    * @param value user's value
+    * @param one the cost for 1 unit of the desired currency
+    * @return result
+    */
    default BigDecimal convertByOne(BigDecimal value, Float one) {
       return value.multiply(new BigDecimal(one));
    }

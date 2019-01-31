@@ -8,18 +8,16 @@ import javax.money.convert.CurrencyConversion;
 import javax.money.convert.MonetaryConversions;
 import java.math.BigDecimal;
 
+/**
+ * Class for conversion currencies by Java money api.
+ *
+ * @author Dmytro K.
+ */
 public class JavaMoney implements ConverterAPI {
 
+   /** API name. */
    private static final String API_NAME_JAVA_MONEY = "Java money api";
 
-   /**
-    * Converts by java money api.
-    *
-    * @return result of conversion.
-    * @param from currency to convert from
-    * @param to currency for conversion to
-    * @param value value for conversion.
-    */
    @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) {
       MonetaryAmount userMoney = Monetary.getDefaultAmountFactory()
               .setCurrency(from.getCurrencyCode())

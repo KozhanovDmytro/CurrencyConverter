@@ -7,19 +7,16 @@ import com.tunyk.currencyconverter.api.CurrencyNotSupportedException;
 
 import java.math.BigDecimal;
 
+/**
+ * Class for conversion currencies by bank-ua.com
+ *
+ * @author Dmytro K.
+ */
 public class BankUaCom implements ConverterAPI {
 
+   /** Api name. */
    private static final String API_NAME_BANK_UA_COM = "bank-ua.com";
 
-   /**
-    * Converts by bank-ua.com API.
-    *
-    * @param from currency to convert from
-    * @param to currency for conversion to
-    * @param value value for conversion.
-    * @throws CurrencyConverterException if currency does not support.
-    * @return result of conversion.
-    */
    @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws CurrencyConverterException {
       com.tunyk.currencyconverter.api.Currency usersCurrency = getCurrencyByUtilCurrency(from);
       com.tunyk.currencyconverter.api.Currency desiredCurrency = getCurrencyByUtilCurrency(to);
@@ -42,5 +39,4 @@ public class BankUaCom implements ConverterAPI {
    private com.tunyk.currencyconverter.api.Currency getCurrencyByUtilCurrency(Currency currency) throws CurrencyNotSupportedException {
       return com.tunyk.currencyconverter.api.Currency.fromString(currency.getCurrencyCode());
    }
-
 }

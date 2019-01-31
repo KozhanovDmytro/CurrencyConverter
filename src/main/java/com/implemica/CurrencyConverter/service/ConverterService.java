@@ -46,6 +46,28 @@ public final class ConverterService {
    /** The list stores links to functions which make conversion. */
    private static List<ConverterAPI> converters = new ArrayList<>();
 
+   /* constants */
+   /** Time for connection to server in ms. */
+   private static final int TIMEOUT_FOR_CONNECTION = 3000;
+
+   /** Official site Google comp. */
+   private static final String URL_GOOGLE_COM = "www.google.com";
+
+   /** Message for problem with internet connection. */
+   private static final String MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION = "Problem with internet connection.";
+
+   /** Message for problem with server. */
+   private static final String MESSAGE_PROBLEM_WITH_SERVER = "Server did not respond. Try again.";
+
+   /** Message exception was thrown. */
+   private static final String MESSAGE_EXCEPTION_WAS_THROWN = "exception was thrown: ";
+
+   /** Message unsupported currency. */
+   private static final String MESSAGE_UNSUPPORTED_CURRENCY = "One or two currencies not supported.";
+
+   /** Message which was received from server. */
+   private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
+
    /*
     * Initialization scope for converters. Note! In this
     * order will be convert currency.
@@ -78,7 +100,8 @@ public final class ConverterService {
     * @throws CurrencyConverterException if currency does not support.
     * @throws UnknownHostException if there is no internet connection.
     */
-   public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws CurrencyConverterException, UnknownHostException {
+   public BigDecimal convert(Currency from, Currency to, BigDecimal value)
+           throws CurrencyConverterException, UnknownHostException {
       if(from == to) {
          return value;
       }
@@ -111,12 +134,20 @@ public final class ConverterService {
       return value.compareTo(BigDecimal.ZERO) == 0;
    }
 
+   /**
+    * Overloaded function for special object.
+    *
+    * @param usersRequest an instance which contains currencies and value for conversion.
+    * @return converted value.
+    * @throws CurrencyConverterException if currency does not support.
+    * @throws UnknownHostException if there is no internet connection.
+    */
    public BigDecimal convert(UsersRequest usersRequest) throws CurrencyConverterException, UnknownHostException {
       return convert(usersRequest.getCurrencyFrom(), usersRequest.getCurrencyTo(), usersRequest.getValue());
    }
 
    /**
-    * Function checks connection.
+    * Function checks Internet connection.
     *
     * @return if site google.com is reachable or not.
     */
@@ -184,17 +215,4 @@ public final class ConverterService {
    private boolean isValidMessage(Exception e) {
       return e instanceof CurrencyConverterException && e.getMessage().contains(API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY);
    }
-
-   /* constants */
-
-   private static final int TIMEOUT_FOR_CONNECTION = 3000;
-
-   private static final String URL_GOOGLE_COM = "www.google.com";
-
-   private static final String MESSAGE_PROBLEM_WITH_INTERNET_CONNECTION = "Problem with internet connection.";
-   private static final String MESSAGE_PROBLEM_WITH_SERVER = "Server did not respond. Try again.";
-   private static final String MESSAGE_EXCEPTION_WAS_THROWN = "exception was thrown: ";
-   private static final String MESSAGE_UNSUPPORTED_CURRENCY = "One or two currencies not supported.";
-
-   private static final String API_MESSAGE_WITH_ONE_UNSUPPORTED_CURRENCY = "Currency not supported:";
 }

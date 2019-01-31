@@ -13,26 +13,28 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Class for conversion currencies by floatrates.com
+ *
+ * @author Dmytro K.
+ */
 public class FloatRatesCom implements ConverterAPI {
 
+   /** Date format needed for getting data from JSON object. */
    private SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_FOR_FLOAT_RATES_API, Locale.ENGLISH);
 
-   private static final String URL_FLOAT_RATES_COM = "http://www.floatrates.com/daily/%s.json";
+   /** API name. */
    private static final String API_NAME_FLOATRATES_COM = "floatrates.com";
+
+   /** URL for connection to API. */
+   private static final String URL_FLOAT_RATES_COM = "http://www.floatrates.com/daily/%s.json";
+
+   /** Date format in JSON object. */
    private static final String DATE_FORMAT_FOR_FLOAT_RATES_API = "E, d MMM yyyy HH:mm:ss Z";
 
+   /** Two weeks in milliseconds. */
    private static final long TWO_WEEKS = DateUtils.MILLIS_PER_DAY * 14;
 
-
-   /**
-    * Function connects to floatrates.com, gets json and parse it.
-    *
-    * @param from currency to convert from
-    * @param to currency for conversion to
-    * @param value value for conversion.
-    * @throws IOException if didn't parse a json
-    * @return result of conversion.
-    */
    @Override public BigDecimal convert(Currency from, Currency to, BigDecimal value) throws CurrencyConverterException, IOException {
       String url = String.format(URL_FLOAT_RATES_COM, from);
 
