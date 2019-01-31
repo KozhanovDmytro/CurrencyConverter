@@ -3,6 +3,7 @@ package com.implemica.CurrencyConverter.service;
 import com.implemica.CurrencyConverter.configuration.SpringConfiguration;
 import com.implemica.CurrencyConverter.configuration.WebSocketConfiguration;
 import com.implemica.CurrencyConverter.model.User;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This class tests BotService class
  *
  * @author Daria S.
- * @version 08.02.2019 14:32
+ * @version 31.01.2019 17:12
  */
 @SpringBootTest(classes = {BotService.class, ConverterService.class})
 @Import({SpringConfiguration.class, WebSocketConfiguration.class})
@@ -135,7 +136,7 @@ public class BotServiceTest {
            "TZS", "DKK", "HNL", "AUD", "MAD", "CRC", "MDL", "TRY", "LBP", "INR", "CLP", "GHS", "NGN", "SBD", "LKR",
            "BIF", "CHF", "DOP", "YER", "PLN", "TJS", "CZK", "MXN", "WST", "UGX", "SVC", "SGD", "PYG", "JOD", "AFN",
            "NPR", "ANG", "QAR", "USD", "ERN", "CUP", "MOP", "CNY", "TTD", "KHR", "DZD", "UZS", "EUR", "AED", "UYU",
-           "MZN", "BTN", "ETH"};
+           "MZN", "BTC", "ETH"};
 
    /**
     * Format for amount of currency
@@ -145,6 +146,15 @@ public class BotServiceTest {
     * For creating random numbers
     */
    private static final Random RANDOM = new Random();
+
+
+   @BeforeAll
+   static void createFormatter() {
+      DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+      symbols.setDecimalSeparator('.');
+      DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
+      DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
+   }
 
    /**
     * Tests, that bot's response to /start command is correct
@@ -210,6 +220,9 @@ public class BotServiceTest {
       rightScript(" inR", "eUr ", "811");
    }
 
+   /**
+    * Tests, that one line requests come back expected string with positive value and text
+    */
    @Test
    void oneLineTest() {
       oneLineRequest("10 usd to uah");
@@ -286,7 +299,7 @@ public class BotServiceTest {
 
 
       //big values
-      checkRounding("PHp", "78566666666666666666666690.000000001","78566666666666666666666690");
+      checkRounding("PHp", "78566666666666666666666690.000000001", "78566666666666666666666690");
       checkRounding("PHp", "78566666666666666666666690.00000001", "78566666666666666666666690");
       checkRounding("PHp", "78566666666666666666666690.0000001", "78566666666666666666666690");
       checkRounding("PHp", "78566666666666666666666690.000001", "78566666666666666666666690");
@@ -311,9 +324,9 @@ public class BotServiceTest {
       checkRounding("PHp", "5697432893257285276192932147919832,9949", "5697432893257285276192932147919832.99");
       checkRounding("PHp", "5697432893257285276192932147919832,995", "5697432893257285276192932147919833");
       checkRounding("PHp", "5697432893257285276192932147919832,999", "5697432893257285276192932147919833");
-      
-      
-      checkRounding("BHD", "9999999999999999999999999,000000001","9999999999999999999999999");
+
+
+      checkRounding("BHD", "9999999999999999999999999,000000001", "9999999999999999999999999");
       checkRounding("BHD", "9999999999999999999999999,00000001", "9999999999999999999999999");
       checkRounding("BHD", "9999999999999999999999999,0000001", "9999999999999999999999999");
       checkRounding("BHD", "9999999999999999999999999,000001", "9999999999999999999999999");
@@ -358,7 +371,6 @@ public class BotServiceTest {
       checkStableCurrencyWithAmount("JPY", "GBP", "37281983.3213", "0.004", "0.009");
 
 
-
       checkStableCurrencyWithAmount("aud", "eur", "75000000000", "0.5", "0.8");
       checkStableCurrencyWithAmount("eur", "aud", "2.0004", "1.3", "1.8");
 
@@ -371,7 +383,6 @@ public class BotServiceTest {
       checkStableCurrencyWithAmount("AUD", "JPY", "0.00356", "73", "84");
       checkStableCurrencyWithAmount("JPY", "AUD", "787652319.8392", "0.009", "0.02");
    }
-
 
 
    /**
@@ -776,25 +787,29 @@ public class BotServiceTest {
       interruptConvertOnThirdStep("Pln", "Eur", START, START_MESSAGE);
       interruptConvertOnThirdStep("BgN", "TRy", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("All", "PHP", CONVERT, FIRST_CONVERT_MESSAGE);
-      interruptConvertOnThirdStep("PKR", "AUD", "10 CLP to CLP", "\uD83D\uDCB010 CLP is 10 CLP");
+      interruptConvertOnThirdStep("PKR", "AUD", "10 CLP to CLP",
+              "\uD83D\uDCB010 CLP is 10 CLP");
 
       //first correct, second unsupported
       interruptConvertOnThirdStep("Cad", "iep", START, START_MESSAGE);
       interruptConvertOnThirdStep("CZk", "xbb", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("IQD", "NLG", CONVERT, FIRST_CONVERT_MESSAGE);
-      interruptConvertOnThirdStep("HKD", "RUR", "0 nok in huf", "\uD83D\uDCB00 NOK is 0 HUF");
+      interruptConvertOnThirdStep("HKD", "RUR", "0 nok in huf",
+              "\uD83D\uDCB00 NOK is 0 HUF");
 
       //first unsupported, second correct
       interruptConvertOnThirdStep("Mtl", "bif", START, START_MESSAGE);
       interruptConvertOnThirdStep("Xbb", "cop", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("Mgf", "Ars", CONVERT, FIRST_CONVERT_MESSAGE);
-      interruptConvertOnThirdStep("XBC", "KPW", "3,4 TRY to TRY", "\uD83D\uDCB03,4 TRY is 3.4 TRY");
+      interruptConvertOnThirdStep("XBC", "KPW", "3,4 TRY to TRY",
+              "\uD83D\uDCB03,4 TRY is 3.4 TRY");
 
       //both unsupported
       interruptConvertOnThirdStep("Usn", "byb", START, START_MESSAGE);
       interruptConvertOnThirdStep("Fim", "Trl", STOP, STOP_MESSAGE);
       interruptConvertOnThirdStep("CHW", "USS", CONVERT, FIRST_CONVERT_MESSAGE);
-      interruptConvertOnThirdStep("Xbb", "Rol", "0 Sek in Jpy", "\uD83D\uDCB00 SEK is 0 JPY");
+      interruptConvertOnThirdStep("Xbb", "Rol", "0 Sek in Jpy",
+              "\uD83D\uDCB00 SEK is 0 JPY");
 
    }
 
@@ -994,7 +1009,9 @@ public class BotServiceTest {
 
    }
 
-
+   /**
+    * Tests bot reaction for wrong first currency, after /convert command
+    */
    @Test
    void wrongFirstCurrencyTest() {
       wrongFirstCurrency("gryvna");
@@ -1004,7 +1021,9 @@ public class BotServiceTest {
       wrongFirstCurrency("plm");
    }
 
-
+   /**
+    * Tests bot reaction for wrong second currency, if first was correct
+    */
    @Test
    void wrongSecondCurrencyTest() {
       wrongSecondCurrency("uah", "why");
@@ -1088,7 +1107,8 @@ public class BotServiceTest {
     */
    private void interruptConvertOnSecondStepByOneLine(String firstCurrency, String request) {
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
-      assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency.toUpperCase().trim() + SECOND_CONVERT_MESSAGE_2);
+      assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency.toUpperCase().trim() +
+              SECOND_CONVERT_MESSAGE_2);
       oneLineRequest(request);
    }
 
@@ -1101,7 +1121,8 @@ public class BotServiceTest {
     */
    private void interruptConvertOnSecondStep(String firstCurrency, String command, String response) {
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
-      assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency.trim().toUpperCase() + SECOND_CONVERT_MESSAGE_2);
+      assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency.trim().toUpperCase() +
+              SECOND_CONVERT_MESSAGE_2);
       assertCommand(command, response);
    }
 
@@ -1212,7 +1233,8 @@ public class BotServiceTest {
     */
    private void script(String firstCurrency, String secondCurrency) {
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
-      assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency.trim().toUpperCase() + SECOND_CONVERT_MESSAGE_2);
+      assertCommand(firstCurrency, SECOND_CONVERT_MESSAGE_1 + firstCurrency.trim().toUpperCase() +
+              SECOND_CONVERT_MESSAGE_2);
       assertCommand(secondCurrency, THIRD_CONVERT_MESSAGE + firstCurrency.trim().toUpperCase() + " to "
               + secondCurrency.trim().toUpperCase());
    }
@@ -1415,10 +1437,6 @@ public class BotServiceTest {
       BigDecimal number = BigDecimal.valueOf(RANDOM.nextFloat() * 1000);
       String amount = number.toPlainString();
 
-      DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-      symbols.setDecimalSeparator('.');
-      DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
-      DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
       String result = DECIMAL_FORMATTER.format(number);
 
       assertCommand(CONVERT, FIRST_CONVERT_MESSAGE);
@@ -1452,10 +1470,6 @@ public class BotServiceTest {
       BigDecimal number = BigDecimal.valueOf(RANDOM.nextFloat() * 1000);
       String amount = number.toPlainString();
 
-      DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-      symbols.setDecimalSeparator('.');
-      DECIMAL_FORMATTER.setDecimalFormatSymbols(symbols);
-      DECIMAL_FORMATTER.setRoundingMode(RoundingMode.HALF_UP);
       String result = DECIMAL_FORMATTER.format(number);
 
       String request = amount + " " + currency + words[n] + currency;
@@ -1470,7 +1484,7 @@ public class BotServiceTest {
     * @param secondCurrency the currency to convert to
     */
    private void zeroAmountOneLine(String firstCurrency, String secondCurrency) {
-      String[] words = {" in ", " to "," In ", " To ", " iN ", " tO "," IN ", " TO "};
+      String[] words = {" in ", " to ", " In ", " To ", " iN ", " tO ", " IN ", " TO "};
       int n = RANDOM.nextInt(words.length);
 
       String request = "0 " + firstCurrency + words[n] + secondCurrency;
@@ -1487,8 +1501,10 @@ public class BotServiceTest {
     * @param leftBorder     left border of the interval
     * @param rightBorder    right border of the interval
     */
-   private void checkStableCurrencyWithAmount(String firstCurrency, String secondCurrency, String amount, String leftBorder, String rightBorder) {
-      String value = getValue(testBotService.processCommand(amount + " " + firstCurrency + " to " + secondCurrency, testUser));
+   private void checkStableCurrencyWithAmount(String firstCurrency, String secondCurrency, String amount,
+                                              String leftBorder, String rightBorder) {
+      String value = getValue(testBotService.processCommand(amount + " " + firstCurrency + " to "
+              + secondCurrency, testUser));
       checkIntervalWithValues(amount, value, leftBorder, rightBorder);
    }
 

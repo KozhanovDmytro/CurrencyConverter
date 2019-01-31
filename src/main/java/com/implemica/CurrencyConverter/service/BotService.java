@@ -27,7 +27,7 @@ import static com.implemica.CurrencyConverter.validator.BotValidator.parseNumber
  * This class contains Bot's logic
  *
  * @author Daria S.
- * @version 08.01.19 14:32
+ * @version 31.01.19 16:50
  */
 @Service
 public class BotService {
@@ -176,10 +176,10 @@ public class BotService {
    }
 
    /**
-    * Gets statesOfUsers input and processes it, writes conversation to storage and sends their to webSocket
+    * Gets Users input and processes it, writes conversation to storage and sends their to webSocket
     *
     * @param command request from user
-    * @param user    user, which sent message
+    * @param user    user, who sent message
     * @return bot's response to user
     */
    public String processCommand(String command, User user) {
@@ -274,7 +274,9 @@ public class BotService {
    }
 
    /**
-    * Gets state of conversion for given user
+    * Gets state of conversion for given user, namely the currency to convert to, the currency to convert from and
+    * step of conversion. If User already communicated with the bot, gets their state from {@link State#statesOfUsers},
+    * else sets state as initial. Defines firstCurrency, secondCurrency and convertStep depending on the gotten state.
     *
     * @param userId id of given user
     */
@@ -332,7 +334,6 @@ public class BotService {
       return message;
    }
 
-  
 
    /**
     * Checks, that user's input may be one line request or not

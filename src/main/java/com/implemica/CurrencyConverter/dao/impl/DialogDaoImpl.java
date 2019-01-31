@@ -19,11 +19,13 @@ import java.util.*;
  * This class writes and reads history of users conversations.
  *
  * @author Daria S.
- * @version 26.12.2018 18:24
+ * @version 31.01.2019 16:24
+ * @see DateUtils
+ * @see FileUtils
  */
 
 public class DialogDaoImpl implements DialogDao {
-   
+
    /**
     * Symbol between elements in the line
     */
@@ -46,7 +48,6 @@ public class DialogDaoImpl implements DialogDao {
     * Date format
     */
    private SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
-
 
    /**
     * Creates a new DialogDaoImpl instance for the DATA_CSV_FILE
@@ -73,6 +74,7 @@ public class DialogDaoImpl implements DialogDao {
    public void write(Dialog dialog) {
       try {
          FileUtils.writeStringToFile(data, dialog.toLine(), Charset.defaultCharset(), true);
+
       } catch (IOException e) {
          logger.error("The changes were not recorded", e);
       }
@@ -92,16 +94,26 @@ public class DialogDaoImpl implements DialogDao {
          lines = FileUtils.readLines(data, Charset.defaultCharset());
 
          for (String line : lines) {
-            String[] element = line.split(SEPARATOR);
-            User user = new User(Integer.parseInt(element[1]), element[2], element[3], element[4]);
-            Dialog dialog = new Dialog(getDate(element[0]), user, element[5], element[6]);
+            Dialog dialog = convertFromLineToDialog(line);
             result.add(dialog);
          }
-         
+
       } catch (IOException e) {
          logger.error("File does not exists: " + data);
       }
       return result;
+   }
+
+   /**
+    * Converts a String to a Dialog
+    *
+    * @param line String, which has to be converted to Dialog.
+    * @return new Dialog
+    */
+   private Dialog convertFromLineToDialog(String line) {
+      String[] element = line.split(SEPARATOR);
+      User user = new User(Integer.parseInt(element[1]), element[2], element[3], element[4]);
+      return new Dialog(getDate(element[0]), user, element[5], element[6]);
    }
 
    /**
@@ -145,9 +157,11 @@ public class DialogDaoImpl implements DialogDao {
 
       try {
          date = df.parse(string);
+
       } catch (ParseException e) {
          logger.error("Given string can not be parsed as a date: " + string);
       }
+
       return date;
    }
 }

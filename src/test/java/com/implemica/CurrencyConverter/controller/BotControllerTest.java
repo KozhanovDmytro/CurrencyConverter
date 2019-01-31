@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
  * This class tests BotController class
  *
  * @author Daria S.
- * @version 11.01.2019 17:48
+ * @version 31.01.2019 17:06
  */
 @ExtendWith(MockitoExtension.class)
 public class BotControllerTest {
@@ -100,7 +100,6 @@ public class BotControllerTest {
    @Mock
    private Update update;
 
-
    /**
     * A dummy implementation for Message class, message from telegram user
     */
@@ -112,7 +111,6 @@ public class BotControllerTest {
     */
    @Mock
    private CallbackQuery callbackQuery;
-
 
    /**
     * Stores users and id chats, where they communicate with bot
@@ -161,7 +159,6 @@ public class BotControllerTest {
       assertEquals(BOT_TOKEN, controller.getBotToken());
    }
 
-
    /**
     * Tests, that if user has all information about himself and his message contains specified text, and if method
     * {@link BotController#onUpdateReceived(Update)} is called, then methods {@link Update#getMessage()} and
@@ -169,7 +166,7 @@ public class BotControllerTest {
     */
    @Test
    void onUpdateReceivedTest0() {
-      //update1 from user1
+      //update from user
       setMessageBehavior("473982.78 usd to usd", true);
 
       //user with all information
@@ -186,7 +183,7 @@ public class BotControllerTest {
     */
    @Test
    void onUpdateReceivedTest1() {
-      //update1 from user1
+      //update from user
       setMessageBehavior(start, true);
 
       //user with all information
@@ -202,7 +199,7 @@ public class BotControllerTest {
     */
    @Test
    void onUpdateReceivedTest2() {
-      //update2 from user2
+      //update from user
       setMessageBehavior(stop, true);
 
       //user without last name
@@ -218,7 +215,7 @@ public class BotControllerTest {
     */
    @Test
    void onUpdateReceivedTest3() {
-      //update3 from user3
+      //update from user
       setMessageBehavior(convert, true);
 
       //user without username
@@ -234,7 +231,7 @@ public class BotControllerTest {
     */
    @Test
    void onUpdateReceivedTest4() {
-      //update4 from user4
+      //update from user
       setMessageBehavior(hello, true);
 
       //user without last name and username
@@ -250,7 +247,7 @@ public class BotControllerTest {
     */
    @Test
    void onUpdateReceivedTest5() {
-      //update5 from user5
+      //update from user
       setMessageBehavior(null, false);
 
       createUser(38210, "tutta", "carlson", "chicken");
@@ -262,6 +259,7 @@ public class BotControllerTest {
     */
    @Test
    void inlineKeyboardTest1() {
+      //user press the button
       setCallbackQueryBehavior("USD");
       verifyControllerWithKeyboard("USD", 124, 73281, "ann", null, null);
    }
@@ -289,8 +287,8 @@ public class BotControllerTest {
     */
    @Test
    void inlineKeyboardTest4() {
-      setCallbackQueryBehavior("RUB");
-      verifyControllerWithKeyboard("RUB", 89302, 588, "samanta", null, "sam");
+      setCallbackQueryBehavior("BTC");
+      verifyControllerWithKeyboard("BTC", 89302, 588, "samanta", null, "sam");
    }
 
    /**
@@ -303,9 +301,11 @@ public class BotControllerTest {
       when(update.hasMessage()).thenReturn(true);
       when(update.getMessage()).thenReturn(message);
       when(message.hasText()).thenReturn(hasText);
+
       if (hasText) {
          when(message.getText()).thenReturn(messageText);
       }
+
       when(message.getFrom()).thenReturn(telegramUser);
    }
 
@@ -336,6 +336,7 @@ public class BotControllerTest {
       when(telegramUser.getFirstName()).thenReturn(name);
       when(telegramUser.getLastName()).thenReturn(lastName);
       when(telegramUser.getUserName()).thenReturn(userName);
+
       statesOfUsers.put(id, new State("", "", ConvertStep.ZERO));
    }
 
@@ -386,6 +387,7 @@ public class BotControllerTest {
    private void verifyControllerWithKeyboard(String messageText, long chatId, int userId, String firstName, String lastName, String userName) {
       createBot(chatId);
       User user = new User(userId, firstName, lastName, userName);
+
       listOfChats.put(user, chatId);
       statesOfUsers.put(userId, new State("", "", ConvertStep.ZERO));
 

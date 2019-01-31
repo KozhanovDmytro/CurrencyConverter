@@ -108,18 +108,29 @@ public class DialogDaoImplTest {
    void writeAndReadTest() throws ParseException {
       int size = tr.getAll().size();
 
-      Dialog tr10 = createTransaction("27.12.2018 04:22:47", 13, "Vasiliy", "Ivanov", "", START, START_MESSAGE);
-      Dialog tr11 = createTransaction("27.12.2018 04:23:04", 13, "Vasiliy", "Ivanov", "", CONVERT, FIRST_CONVERT_MESSAGE);
-      Dialog tr12 = createTransaction("27.12.2018 04:23:35", 13, "Vasiliy", "Ivanov", "", "usd", SECOND_CONVERT_MESSAGE_1 + "USD" + SECOND_CONVERT_MESSAGE_2);
-      Dialog tr13 = createTransaction("27.12.2018 04:23:58", 13, "Vasiliy", "Ivanov", "", "uah", THIRD_CONVERT_MESSAGE + "USD to UAH");
-      Dialog tr14 = createTransaction("27.12.2018 04:24:15", 13, "Vasiliy", "Ivanov", "", "10", "274");
+      Dialog tr10 = createTransaction("27.12.2018 04:22:47", 13, "Vasiliy", "Ivanov",
+              "", START, START_MESSAGE);
+      Dialog tr11 = createTransaction("27.12.2018 04:23:04", 13, "Vasiliy", "Ivanov",
+              "", CONVERT, FIRST_CONVERT_MESSAGE);
+      Dialog tr12 = createTransaction("27.12.2018 04:23:35", 13, "Vasiliy", "Ivanov",
+              "", "usd", SECOND_CONVERT_MESSAGE_1 + "USD" + SECOND_CONVERT_MESSAGE_2);
+      Dialog tr13 = createTransaction("27.12.2018 04:23:58", 13, "Vasiliy", "Ivanov",
+              "", "uah", THIRD_CONVERT_MESSAGE + "USD to UAH");
+      Dialog tr14 = createTransaction("27.12.2018 04:24:15", 13, "Vasiliy", "Ivanov",
+              "", "10", "274");
 
-      Dialog tr20 = createTransaction("27.12.2018 12:24:47", 67, "Natalia", "Nikitina", "flower", START, START_MESSAGE);
-      Dialog tr21 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "hello", "Sorry, but I don't understand what does \"hello\" mean. " + CONVERT_MESSAGE);
-      Dialog tr22 = createTransaction("27.12.2018 12:26:56", 67, "Natalia", "Nikitina", "flower", CONVERT, FIRST_CONVERT_MESSAGE);
-      Dialog tr23 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
-      Dialog tr24 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina", "flower", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
-      Dialog tr25 = createTransaction("27.12.2018 12:26:34", 67, "Natalia", "Nikitina", "flower", STOP, STOP_MESSAGE);
+      Dialog tr20 = createTransaction("27.12.2018 12:24:47", 67, "Natalia", "Nikitina",
+              "flower", START, START_MESSAGE);
+      Dialog tr21 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina",
+              "flower", "hello", "Sorry, but I don't understand what does \"hello\" mean. " + CONVERT_MESSAGE);
+      Dialog tr22 = createTransaction("27.12.2018 12:26:56", 67, "Natalia", "Nikitina",
+              "flower", CONVERT, FIRST_CONVERT_MESSAGE);
+      Dialog tr23 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina",
+              "flower", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
+      Dialog tr24 = createTransaction("27.12.2018 12:26:01", 67, "Natalia", "Nikitina",
+              "flower", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
+      Dialog tr25 = createTransaction("27.12.2018 12:26:34", 67, "Natalia", "Nikitina",
+              "flower", STOP, STOP_MESSAGE);
 
       writeToFile(tr10);
       writeToFile(tr11);
@@ -160,17 +171,27 @@ public class DialogDaoImplTest {
       Date date = df.parse("25.12.2018 00:00:00");
       int size = tr.getByDate(date).size();
 
-      Dialog tr10 = createTransaction("25.12.2018 02:22:47", 547, "Fedor", "Makeeev", "", START, START_MESSAGE);
-      Dialog tr11 = createTransaction("25.12.2018 02:23:04", 547, "Fedor", "Makeeev", "", CONVERT, FIRST_CONVERT_MESSAGE);
-      Dialog tr12 = createTransaction("25.12.2018 02:23:35", 547, "Fedor", "Makeeev", "", "usd", SECOND_CONVERT_MESSAGE_1 + "USD" + SECOND_CONVERT_MESSAGE_2);
-      Dialog tr13 = createTransaction("25.12.2018 02:23:58", 547, "Fedor", "Makeeev", "", "uah", THIRD_CONVERT_MESSAGE + "USD to UAH");
-      Dialog tr14 = createTransaction("27.12.2018 02:24:15", 547, "Fedor", "Makeeev", "", "10", "274");
+      Dialog tr10 = createTransaction("25.12.2018 02:22:47", 547, "Fedor", "Makeeev",
+              "", START, START_MESSAGE);
+      Dialog tr11 = createTransaction("25.12.2018 02:23:04", 547, "Fedor", "Makeeev",
+              "", CONVERT, FIRST_CONVERT_MESSAGE);
+      Dialog tr12 = createTransaction("25.12.2018 02:23:35", 547, "Fedor", "Makeeev",
+              "", "usd", SECOND_CONVERT_MESSAGE_1 + "USD" + SECOND_CONVERT_MESSAGE_2);
+      Dialog tr13 = createTransaction("25.12.2018 02:23:58", 547, "Fedor", "Makeeev",
+              "", "uah", THIRD_CONVERT_MESSAGE + "USD to UAH");
+      Dialog tr14 = createTransaction("27.12.2018 02:24:15", 547, "Fedor", "Makeeev",
+              "", "10", "274");
 
-      Dialog tr20 = createTransaction("25.12.2018 12:24:47", 8888, "Alice", "Alice", "fairy", START, START_MESSAGE);
-      Dialog tr21 = createTransaction("25.12.2018 04:08:13", 1345, "JD", "", "jd", "hello", "Sorry, but I don't understand what does \"hello\" mean. " + CONVERT_MESSAGE);
-      Dialog tr22 = createTransaction("27.12.2018 05:26:56", 1345, "JD", "", "jd", CONVERT, FIRST_CONVERT_MESSAGE);
-      Dialog tr23 = createTransaction("27.12.2018 05:26:01", 1345, "JD", "", "jd", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
-      Dialog tr24 = createTransaction("27.12.2018 05:26:01", 1345, "JD", "", "jd", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
+      Dialog tr20 = createTransaction("25.12.2018 12:24:47", 8888, "Alice", "Alice",
+              "fairy", START, START_MESSAGE);
+      Dialog tr21 = createTransaction("25.12.2018 04:08:13", 1345, "JD", "",
+              "jd", "hello", "Sorry, but I don't understand what does \"hello\" mean. " + CONVERT_MESSAGE);
+      Dialog tr22 = createTransaction("27.12.2018 05:26:56", 1345, "JD", "",
+              "jd", CONVERT, FIRST_CONVERT_MESSAGE);
+      Dialog tr23 = createTransaction("27.12.2018 05:26:01", 1345, "JD", "",
+              "jd", "apple", SECOND_CONVERT_MESSAGE_1 + "APPLE" + SECOND_CONVERT_MESSAGE_2);
+      Dialog tr24 = createTransaction("27.12.2018 05:26:01", 1345, "JD", "",
+              "jd", "orange", THIRD_CONVERT_MESSAGE + "APPLE to ORANGE");
 
       writeToFile(tr10);
       writeToFile(tr11);
@@ -217,7 +238,8 @@ public class DialogDaoImplTest {
     * @return dialog, which contains information about last given user's request and bot's response
     * @throws ParseException if date format is incorrect
     */
-   private Dialog createTransaction(String date, int userId, String userFirstName, String userLastName, String userName, String usersRequest, String botsResponse) throws ParseException {
+   private Dialog createTransaction(String date, int userId, String userFirstName, String userLastName, String userName,
+                                    String usersRequest, String botsResponse) throws ParseException {
       Date parseDate = df.parse(date);
       User user = new User(userId, userFirstName, userLastName, userName);
       return new Dialog(parseDate, user, usersRequest, botsResponse);
@@ -237,7 +259,9 @@ public class DialogDaoImplTest {
    /**
     * Compares two dialogs.
     *
-    * @return true if the dialogs are the same; false otherwise.
+    * @param dialog1 first dialog
+    * @param dialog2 second dialog
+    * @return true if the dialogs are equal; false otherwise.
     */
    private boolean areDialogsEqual(Dialog dialog1, Dialog dialog2) {
       return dialog1.getDate().equals(dialog2.getDate()) &&
@@ -250,7 +274,9 @@ public class DialogDaoImplTest {
    /**
     * Compares two users.
     *
-    * @return true if the objects are the same; false otherwise.
+    * @param user1 first dialog
+    * @param user2 second dialog
+    * @return true if the objects are equal; false otherwise.
     */
    private boolean areUsersEqual(User user1, User user2) {
       return user1.getUserId() == user2.getUserId() &&

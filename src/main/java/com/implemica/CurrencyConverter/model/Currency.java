@@ -27,7 +27,7 @@ public enum Currency {
    LEND, ELF, STORJ, MOD, GWP, SKK, SIT, MZM, IEP, NLG, ZWN, GHC, MGF, ESP, ZWR, USN,
    TRL, XBD, CYP, LUF, SRG, XPT, ADP, TPE, COU, BEF, AFA, ROL, DEM, BOV, ATS, XUA, CHE,
    PTE, VEB, AYM, ZWD, USS, CSD, XTS, BYB, XFU, XSU, TMM, AZM, XFO, SDD, YUM, MTL, FIM,
-   CHW, XBA, XXX, UYI, XBC, GRD, XBB, BGL;
+   CHW, XBA, XXX, UYI, XBC, GRD, XBB, BGL, XAU;
 
    /**
     * Gets instance of {@link Currency} by code.

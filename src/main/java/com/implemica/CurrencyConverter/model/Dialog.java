@@ -14,12 +14,11 @@ import java.util.Date;
  *
  * @author Daria S.
  * @author Dmytro K.
- * @version 09.01.2019 14.48
+ * @version 31.01.2019 16.44
  */
 @Getter
 public class Dialog implements Serializable {
 
-   public static final String PATTERN_FOR_LINE = "%s;%s;%s;%s;%s;%s;%s;\n";
    /**
     * User's message to bot.
     */
@@ -47,6 +46,11 @@ public class Dialog implements Serializable {
    private static SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
 
    /**
+    * String format for writing to line
+    */
+   public static final String PATTERN_FOR_LINE = "%s;%s;%s;%s;%s;%s;%s;\n";
+
+   /**
     * Creates new simple Dialog
     */
    private Dialog() {
@@ -58,7 +62,7 @@ public class Dialog implements Serializable {
     * conversation.
     *
     * @param date         date and time of users request
-    * @param user         represents User, which refers to bot
+    * @param user         represents User, who refers to bot
     * @param usersRequest message, which was sent from user to bot
     * @param botsResponse message, which was sent from bot to user
     */
@@ -70,7 +74,7 @@ public class Dialog implements Serializable {
    }
 
    /**
-    * Line of all information of one request to bot from one user
+    * Creates line of all information of one request to bot from one user
     *
     * @return array with information about date, User, user's request to bot and bot's response to user
     */

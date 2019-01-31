@@ -27,10 +27,10 @@ import static java.lang.Math.toIntExact;
 
 
 /**
- * This class gets statesOfUsers input from telegram bot and processes it via Converter class
+ * This class gets Users input from telegram bot and processes it via Converter class
  *
  * @author Daria S.
- * @version 11.01.2019 17:48
+ * @version 31.01.2019 16:32
  * @see BotService
  * @see UsersRequest
  */
@@ -95,7 +95,7 @@ public class BotController extends TelegramLongPollingBot {
    }
 
    /**
-    * Gets statesOfUsers input and processes it. Writes conversation to storage
+    * Gets Users input and processes it. Writes conversation to storage
     *
     * @param update represents an incoming update from Telegram
     */
@@ -125,6 +125,7 @@ public class BotController extends TelegramLongPollingBot {
       }
 
       user = getInformationAboutUser(message);
+
       if (isBot) {
          user = chooseUser(user);
       }
@@ -147,16 +148,19 @@ public class BotController extends TelegramLongPollingBot {
     * Returns command to processing
     *
     * @param message incoming message
-    * @return String command
+    * @return String command, which has to be obtained by BotService
     */
    private String getCommand(Message message) {
       String command;
       chatId = message.getChatId();
+
       if (message.hasText()) {
          command = message.getText();
+
       } else {
          command = UNIQUE;
       }
+
       return command;
    }
 
@@ -185,8 +189,10 @@ public class BotController extends TelegramLongPollingBot {
    private void sendMessage(Message request, String response) {
       sendMessage.setText(response);
       sendMessage.setChatId(request.getChatId());
+
       try {
          execute(sendMessage);
+
       } catch (TelegramApiException e) {
          logger.error(e.getMessage());
       }
@@ -203,8 +209,10 @@ public class BotController extends TelegramLongPollingBot {
               .setChatId(chatId)
               .setMessageId(toIntExact(messageId))
               .setText(text);
+
       try {
          execute(new_message);
+
       } catch (TelegramApiException e) {
          logger.error(e.getMessage());
       }
@@ -267,9 +275,10 @@ public class BotController extends TelegramLongPollingBot {
    }
 
    /**
-    * Finds user, which talk to bot
+    * Finds user, who talk to bot
     *
     * @param user bot user
+    * @return the user who is in the same chat
     */
    private User chooseUser(User user) {
       Set<Map.Entry<User, Long>> entrySet = listOfChats.entrySet();
