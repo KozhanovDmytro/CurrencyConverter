@@ -249,7 +249,8 @@ public class BotService {
          convertStep = ZERO;
       }
 
-      writeData(user, command, message);
+      writeDataToStorage(user, command, message);
+      saveUserStates(user);
       return message;
    }
 
@@ -261,10 +262,7 @@ public class BotService {
     * @param request  request from user
     * @param response response from bot
     */
-   private void writeData(User user, String request, String response) {
-      int userId = user.getUserId();
-      State state = new State(firstCurrency, secondCurrency, convertStep);
-      states.put(userId, state);
+   private void writeDataToStorage(User user, String request, String response) {
 
       Date dateNow = new Date();
 
@@ -272,6 +270,18 @@ public class BotService {
       dialogDao.write(dialog);
       sendToWebSocket(dialog);
    }
+
+   /**
+    * Save user's state
+    *
+    * @param user user, which states has to be saved
+    */
+   private void saveUserStates(User user) {
+      int userId = user.getUserId();
+      State state = new State(firstCurrency, secondCurrency, convertStep);
+      states.put(userId, state);
+   }
+
 
    /**
     * Gets state of conversion for given user, namely the currency to convert to, the currency to convert from and

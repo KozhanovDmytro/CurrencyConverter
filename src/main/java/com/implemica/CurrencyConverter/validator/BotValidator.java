@@ -76,8 +76,9 @@ public class BotValidator {
          }
 
          setFormatter(separator, false);
+      } else {
+         throw new ParseException("Invalid number: " + value, 0);
       }
-
       return (BigDecimal) DECIMAL_FORMATTER.parse(value);
    }
 
