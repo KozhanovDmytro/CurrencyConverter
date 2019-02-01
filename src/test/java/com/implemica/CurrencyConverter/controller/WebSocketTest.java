@@ -90,7 +90,7 @@ public class WebSocketTest {
 
    @BeforeAll
    static void beforeAll() {
-      System.setProperty("webdriver.chrome.driver", "C:/Selenium/chromedriver.exe");
+      System.setProperty("webdriver.chrome.driver", "./_resources/selenium/chromedriver.exe");
 
       chromeDriver = new ChromeDriver();
    }
