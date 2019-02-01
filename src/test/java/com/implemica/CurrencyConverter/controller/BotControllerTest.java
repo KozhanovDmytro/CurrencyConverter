@@ -326,7 +326,7 @@ public class BotControllerTest {
    /**
     * Defines the return value when Telegram User methods of the mocked object is been called
     *
-    * @param id       statesOfUsers's id
+    * @param id       user's id
     * @param name     user's name
     * @param lastName user's last name
     * @param userName user's username

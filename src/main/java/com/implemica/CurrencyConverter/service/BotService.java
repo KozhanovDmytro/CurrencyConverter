@@ -339,7 +339,7 @@ public class BotService {
          wrongValueMessage = firstCurrency + IS_NOT_A_VALID_CURRENCY;
       }
       if (!wrongValueMessage.isEmpty()) {
-         message = String.format("%s%s%s", SORRY_BUT, wrongValueMessage, CONVERT_MESSAGE);
+         message = String.format(SORRY_BUT + "%s" + CONVERT_MESSAGE,  wrongValueMessage);
       }
       return message;
    }
