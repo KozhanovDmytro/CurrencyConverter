@@ -13,7 +13,7 @@ The application uses 5 APIs for currency conversion :
   4. free.currencyconverterapi.com
   5. currencylayer.com
   
-## Including popular currencies
+## Including popular and about 140 currencies
 
 | Country | Symbol | Currency |
 |:-------:|:----------:|:--------:|
@@ -36,7 +36,7 @@ First of all make sure that the `application.properties` file exists in the path
 
 The bot name and its token must be obtained from [BotFather](https://telegram.me/BotFather). Admin's data required to access the admin page.
  
-Create the **.war** file via `mvn install` and deploy it.
+Create the **.war** file via `mvn package` and deploy it.
 
 
 ## Designed by

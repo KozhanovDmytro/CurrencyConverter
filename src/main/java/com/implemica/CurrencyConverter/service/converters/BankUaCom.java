@@ -38,6 +38,6 @@ public class BankUaCom implements ConverterAPI {
     * @throws CurrencyNotSupportedException if currency does not support.
     */
    private com.tunyk.currencyconverter.api.Currency getCurrencyByUtilCurrency(Currency currency) throws CurrencyNotSupportedException {
-      return com.tunyk.currencyconverter.api.Currency.fromString(currency.getCurrencyCode());
+      return com.tunyk.currencyconverter.api.Currency.fromString(currency.name());
    }
 }

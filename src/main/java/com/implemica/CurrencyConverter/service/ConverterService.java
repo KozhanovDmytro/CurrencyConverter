@@ -1,7 +1,6 @@
 package com.implemica.CurrencyConverter.service;
 
 import com.implemica.CurrencyConverter.model.Currency;
-import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.implemica.CurrencyConverter.service.converters.*;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.json.JSONObject;
@@ -38,7 +37,7 @@ import java.util.List;
  * @version 10.01.2019 22:10
  */
 @Service
-public final class ConverterService {
+public class ConverterService {
 
    /** Logger. */
    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName());
@@ -132,18 +131,6 @@ public final class ConverterService {
 
    private boolean isValueZero(BigDecimal value) {
       return value.compareTo(BigDecimal.ZERO) == 0;
-   }
-
-   /**
-    * Overloaded function for special object.
-    *
-    * @param usersRequest an instance which contains currencies and value for conversion.
-    * @return converted value.
-    * @throws CurrencyConverterException if currency does not support.
-    * @throws UnknownHostException if there is no internet connection.
-    */
-   public BigDecimal convert(UsersRequest usersRequest) throws CurrencyConverterException, UnknownHostException {
-      return convert(usersRequest.getCurrencyFrom(), usersRequest.getCurrencyTo(), usersRequest.getValue());
    }
 
    /**

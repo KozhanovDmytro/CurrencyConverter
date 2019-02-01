@@ -3,7 +3,6 @@ package com.implemica.CurrencyConverter.controller;
 import com.implemica.CurrencyConverter.model.ConvertStep;
 import com.implemica.CurrencyConverter.model.State;
 import com.implemica.CurrencyConverter.model.User;
-import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.implemica.CurrencyConverter.service.BotService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,6 @@ import static java.lang.Math.toIntExact;
  * @author Daria S.
  * @version 31.01.2019 16:32
  * @see BotService
- * @see UsersRequest
  */
 @Component
 public class BotController extends TelegramLongPollingBot {

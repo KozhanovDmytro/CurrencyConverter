@@ -63,13 +63,14 @@ public interface ConverterAPI {
     * @throws IOException if an I/O exception occurs.
     */
    default JSONObject getJsonObjectByURL(URL url) throws IOException {
-      InputStream inputStream = url.openStream();
+      JSONObject result;
 
-      JSONTokener tokener = new JSONTokener(inputStream);
+      try (InputStream inputStream = url.openStream()) {
+         JSONTokener tokener = new JSONTokener(inputStream);
 
-      JSONObject result = new JSONObject(tokener);
+         result = new JSONObject(tokener);
+      }
 
-      inputStream.close();
       return result;
    }
 

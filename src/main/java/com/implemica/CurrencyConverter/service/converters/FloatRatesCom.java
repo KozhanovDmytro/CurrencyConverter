@@ -41,7 +41,7 @@ public class FloatRatesCom implements ConverterAPI {
 
       JSONObject object = getJsonObjectByURL(new URL(url));
 
-      String currencyTo = to.getCurrencyCode();
+      String currencyTo = to.name();
 
       JSONObject desiredCurrency = object.getJSONObject(currencyTo.toLowerCase());
 

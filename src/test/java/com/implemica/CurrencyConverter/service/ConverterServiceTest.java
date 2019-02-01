@@ -1,7 +1,6 @@
 package com.implemica.CurrencyConverter.service;
 
 import com.implemica.CurrencyConverter.model.Currency;
-import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.implemica.CurrencyConverter.service.converters.*;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.junit.jupiter.api.Disabled;
@@ -170,8 +169,8 @@ public class ConverterServiceTest {
     */
    @Test
    void bigRequestValuesTest() throws CurrencyConverterException, IOException {
-      Currency eur = Currency.getInstance("USD");
-      Currency usd = Currency.getInstance("EUR");
+      Currency eur = Currency.valueOf("USD");
+      Currency usd = Currency.valueOf("EUR");
 
       BigDecimal result = BigDecimal.ONE;
 
@@ -271,11 +270,7 @@ public class ConverterServiceTest {
    }
 
    private BigDecimal convert(String userCurrency, String desiredCurrency, BigDecimal usersValue) throws CurrencyConverterException, UnknownHostException {
-      UsersRequest usersRequest = new UsersRequest(Currency.getInstance(userCurrency),
-              Currency.getInstance(desiredCurrency),
-              usersValue);
-
-      return converterService.convert(usersRequest);
+      return converterService.convert(Currency.valueOf(userCurrency), Currency.valueOf(desiredCurrency), usersValue);
    }
 
 
@@ -314,11 +309,7 @@ public class ConverterServiceTest {
    }
 
    private void checkConvertForIdenticalCurrencies(String userCurrency, BigDecimal expectedValue) throws CurrencyConverterException, UnknownHostException {
-      UsersRequest usersRequest = new UsersRequest(Currency.getInstance(userCurrency),
-              Currency.getInstance(userCurrency),
-              expectedValue);
-
-      BigDecimal result = converterService.convert(usersRequest);
+     BigDecimal result = converterService.convert(Currency.valueOf(userCurrency), Currency.valueOf(userCurrency), expectedValue);
 
       assertEquals(expectedValue, result);
    }

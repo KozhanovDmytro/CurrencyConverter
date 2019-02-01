@@ -373,11 +373,11 @@ public class BotService {
    private String convertValue(String value) {
       String message;
       try {
-         Currency usersCurrency = Currency.getInstance(firstCurrency);
-         Currency desiredCurrency = Currency.getInstance(secondCurrency);
-         UsersRequest usersRequest = new UsersRequest(usersCurrency, desiredCurrency, parseNumber(value));
+         Currency usersCurrency = Currency.valueOf(firstCurrency);
+         Currency desiredCurrency = Currency.valueOf(secondCurrency);
+         BigDecimal number = parseNumber(value);
 
-         BigDecimal convertedValue = converterService.convert(usersRequest);
+         BigDecimal convertedValue = converterService.convert(usersCurrency, desiredCurrency, number);
          message = MONEY_SIGN + value + " " + firstCurrency + " is " + formatNumber(convertedValue) + " " + secondCurrency;
 
       } catch (CurrencyConverterException e) {
@@ -413,7 +413,7 @@ public class BotService {
     */
    private boolean isValidCurrency(String usersCurrency) {
       try {
-         Currency.getInstance(usersCurrency);
+         Currency.valueOf(usersCurrency);
       } catch (IllegalArgumentException ex) {
          return false;
       }

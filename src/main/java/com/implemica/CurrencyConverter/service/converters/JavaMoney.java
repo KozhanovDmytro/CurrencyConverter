@@ -21,10 +21,10 @@ public class JavaMoney implements ConverterAPI {
    @Override
    public BigDecimal convert(Currency from, Currency to, BigDecimal value) {
       MonetaryAmount userMoney = Monetary.getDefaultAmountFactory()
-              .setCurrency(from.getCurrencyCode())
+              .setCurrency(from.name())
               .setNumber(1.0f).create();
 
-      CurrencyConversion conversion = MonetaryConversions.getConversion(to.getCurrencyCode());
+      CurrencyConversion conversion = MonetaryConversions.getConversion(to.name());
       MonetaryAmount converted = userMoney.with(conversion);
 
       Float one = converted.getNumber().floatValue();

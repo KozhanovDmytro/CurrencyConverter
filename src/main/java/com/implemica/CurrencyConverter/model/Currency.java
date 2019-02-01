@@ -6,7 +6,6 @@ package com.implemica.CurrencyConverter.model;
  * @author Dmytro K.
  */
 public enum Currency {
-
    AED, AFN, ALL, AMD, ANC, ANG, AOA, ARN, ARS, AUD, AUR, AVT, AWG, AZN, BAM, BAT,
    BBD, BC, BCC, BCH, BCA, BLK, BDT, BGC, BGN, BHD, BIF, BMD, BND, BOB, BYN, BRL, ITL,
    BSD, BTC, BTG, XBT, BTN, BWP, BYR, BZD, CAD, CDF, CHF, CLF, CLP, CNC, CNY, COP, MXV,
@@ -28,22 +27,4 @@ public enum Currency {
    TRL, XBD, CYP, LUF, SRG, XPT, ADP, TPE, COU, BEF, AFA, ROL, DEM, BOV, ATS, XUA, CHE,
    PTE, VEB, AYM, ZWD, USS, CSD, XTS, BYB, XFU, XSU, TMM, AZM, XFO, SDD, YUM, MTL, FIM,
    CHW, XBA, XXX, UYI, XBC, GRD, XBB, BGL, XAU;
-
-   /**
-    * Gets instance of {@link Currency} by code.
-    * @param code code
-    * @return instance
-    * @throws IllegalArgumentException if currency does not exist.
-    */
-   public static Currency getInstance(String code) {
-      return Currency.valueOf(code);
-   }
-
-   /**
-    * Gets String representation of currency.
-    * @return code
-    */
-   public String getCurrencyCode() {
-      return name();
-   }
 }
