@@ -45,7 +45,7 @@ public class DialogDaoImpl implements DialogDao {
    private Logger logger = LoggerFactory.getLogger(DialogDao.class.getName());
 
    /**
-    * Date format
+    * Date format for writing to file
     */
    private SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
 
@@ -128,23 +128,13 @@ public class DialogDaoImpl implements DialogDao {
       ArrayList<Dialog> all = (ArrayList<Dialog>) getAll();
       ArrayList<Dialog> result = new ArrayList<>();
       for (Dialog t : all) {
-         if (isSameDate(t.getDate(), date)) {
+         if (DateUtils.isSameDay(t.getDate(), date)) {
             result.add(t);
          }
       }
       return result;
    }
 
-   /**
-    * Checks, that both date are same
-    *
-    * @param date1 first date to comparing
-    * @param date2 second date to comparing
-    * @return true, if date1 and date2 is same calendar day
-    */
-   private boolean isSameDate(Date date1, Date date2) {
-      return DateUtils.isSameDay(date1, date2);
-   }
 
    /**
     * Parses string to date

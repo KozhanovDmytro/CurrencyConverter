@@ -22,7 +22,6 @@ import static org.junit.Assert.assertTrue;
  * @author Daria S.
  */
 public class DialogDaoImplTest {
-
    /**
     * Message to the user with the suggestion of a new conversion
     */
@@ -78,7 +77,7 @@ public class DialogDaoImplTest {
     */
    private static DialogDaoImpl tr;
    /**
-    * Date format
+    * Date format for writing to file
     */
    private SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
 

@@ -41,7 +41,7 @@ public class Dialog implements Serializable {
    private Date date;
 
    /**
-    * Date format.
+    * Date format for writing to storage
     */
    private static SimpleDateFormat df = BotService.SIMPLE_DATE_FORMAT;
 
