@@ -70,6 +70,11 @@ public class BotService {
    private static final String CONVERT_MESSAGE = "\nYou can make a new currency conversion: \n\n" +
            "➡️ using /convert command \nor\n➡️ single line command " +
            "(E. g. : 10 USD in UAH)";
+
+   /**
+    * Patter for messages, which have information about incorrect values
+    */
+   private static final String ERROR_FORMAT = SORRY_BUT + "%s" + CONVERT_MESSAGE;
    /**
     * Greeting message to user
     */
@@ -339,7 +344,7 @@ public class BotService {
          wrongValueMessage = firstCurrency + IS_NOT_A_VALID_CURRENCY;
       }
       if (!wrongValueMessage.isEmpty()) {
-         message = String.format(SORRY_BUT + "%s" + CONVERT_MESSAGE,  wrongValueMessage);
+         message = String.format(ERROR_FORMAT, wrongValueMessage);
       }
       return message;
    }
