@@ -1,7 +1,6 @@
 package com.implemica.CurrencyConverter.service.converters;
 
 import com.implemica.CurrencyConverter.model.Currency;
-import com.implemica.CurrencyConverter.model.UsersRequest;
 import com.tunyk.currencyconverter.api.CurrencyConverterException;
 import org.json.JSONObject;
 import org.json.JSONTokener;

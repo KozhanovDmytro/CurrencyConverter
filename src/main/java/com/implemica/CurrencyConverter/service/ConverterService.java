@@ -74,12 +74,12 @@ public final class ConverterService {
     */
    static {
       converters.add(new FloatRatesCom());                  // unlimited
+      converters.add(new BankUaCom());                      // unlimited, converts through UAH
 
       converters.add(new FreeCurrencyConverterApiCom());    // has a limit - 100  requests per hour
       converters.add(new CurrencyLayerCom());               // has a limit - 1000 requests per month
 
-      converters.add(new BankUaCom());                      // unlimited, converts through UAH
-//      converters.add(new JavaMoney());                      // unlimited, so slow
+      converters.add(new JavaMoney());                      // unlimited, so slow
    }
 
    /**
