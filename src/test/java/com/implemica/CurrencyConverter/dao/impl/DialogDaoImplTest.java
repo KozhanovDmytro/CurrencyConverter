@@ -252,6 +252,7 @@ public class DialogDaoImplTest {
       if (tempFile == null) {
          return;
       }
+
       assertTrue(tempFile.delete());
    }
 
@@ -282,6 +283,9 @@ public class DialogDaoImplTest {
               user1.getUserFirstName().equals(user2.getUserFirstName()) &&
               user1.getUserLastName().equals(user2.getUserLastName()) &&
               user1.getUserName().equals(user2.getUserName());
+
+      tempFile.delete();
+      assertTrue(!tempFile.exists());
 
    }
 }

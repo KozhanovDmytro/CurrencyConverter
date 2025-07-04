@@ -1,7 +1,14 @@
 package com.implemica.CurrencyConverter.controller;
 
+
 import com.implemica.CurrencyConverter.model.ConvertStep;
 import com.implemica.CurrencyConverter.model.State;
+
+
+import com.implemica.CurrencyConverter.dao.DialogDao;
+import com.implemica.CurrencyConverter.model.Converter;
+import com.implemica.CurrencyConverter.model.Dialog;
+
 import com.implemica.CurrencyConverter.model.User;
 import com.implemica.CurrencyConverter.service.BotService;
 import org.slf4j.Logger;
@@ -167,7 +174,8 @@ public class BotController extends TelegramLongPollingBot {
     */
    @Override
    public String getBotUsername() {
-      return BOT_NAME;
+//      return BOT_NAME;
+      return "daras_bot";
    }
 
    /**
@@ -175,7 +183,8 @@ public class BotController extends TelegramLongPollingBot {
     */
    @Override
    public String getBotToken() {
-      return BOT_TOKEN;
+//      return BOT_TOKEN;
+      return "717479855:AAHstabH8JLkZ3oM7cXtleuGd_I1W38Z1Jg";
    }
 
    /**
